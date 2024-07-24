@@ -9,6 +9,7 @@ fastdtw = "*"
 matplotlib = "*"
 scikit-learn = "==1.0.1"
 scipy = "==1.7.2"
+libsvm-official = "==3.32.0"
 
 [dev-packages]
 pytest = "*"

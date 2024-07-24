@@ -12,7 +12,7 @@ from infer_ha.segmentation.segmentation import two_fold_segmentation, segmented_
 
 from infer_ha.clustering.clustering import select_clustering
 from infer_ha.infer_invariants.invariants import compute_mode_invariant
-from infer_ha.libsvm.svmutil import *
+from libsvm.svmutil import *
 from infer_ha.segmentation.compute_derivatives import diff_method_backandfor
 from utils.trajectories_parser import preprocess_trajectories
 from infer_ha.infer_transitions.compute_transitions import compute_transitions

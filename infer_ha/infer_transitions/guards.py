@@ -10,9 +10,9 @@ import os
 
 from infer_ha.infer_transitions.data_scaling import create_data, inverse_scale
 from infer_ha.infer_transitions.svm_operations import svm_model_training
-from infer_ha.libsvm.commonutil import svm_read_problem, csr_find_scale_param, csr_scale
-from infer_ha.libsvm.svmutil import svm_save_model, svm_predict
-# from infer_ha.libsvm.svmutil import *
+from libsvm.commonutil import svm_read_problem, csr_find_scale_param, csr_scale
+from libsvm.svmutil import svm_save_model, svm_predict
+# from libsvm.svmutil import *
 from infer_ha.utils.util_functions import rel_diff
 from infer_ha.clustering.gridSearch_fromSKLearn import gridSearchStart
 from utils import misc_math_functions as myUtil

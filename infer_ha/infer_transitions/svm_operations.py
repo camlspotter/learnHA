@@ -2,9 +2,9 @@
 This module performs operations related to SVM and HA's guard creation.
 
 """
-# from infer_ha.libsvm.svm import svm_problem, svm_parameter  # direct calling created wrong object on svm_problem()
-# from infer_ha.libsvm.svmutil import svm_train
-from infer_ha.libsvm.svmutil import *
+# from libsvm.svm import svm_problem, svm_parameter  # direct calling created wrong object on svm_problem()
+# from libsvm.svmutil import svm_train
+from libsvm.svmutil import *
 
 def svm_model_training(x, y, boundary_order, c_value_optimal, coef_optimal, gamma_value_optimal):
     """
