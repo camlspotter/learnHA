@@ -18,7 +18,6 @@ from infer_ha.utils.util_functions import matrowex
 from ..helpers.plotDebug import print_segmented_trajectories, print_P_modes
 from ..helpers import plotDebug as plotdebug
 
-
 def get_desired_ODE_coefficients(P_modes, A, b1, maximum_ode_prune_factor):
     """
     ODE inference.

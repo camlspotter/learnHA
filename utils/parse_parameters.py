@@ -261,7 +261,6 @@ def parse_trajectories(input_filename):
             y_list_per_trajectory.append(all_y_pts)
             seqCount += 1
 
-    file.close()
     # Note: the last trajectory to be added now
     y_array_per_trajectory = np.array(y_list_per_trajectory)  # convert list to array in time complexity O(n)
     y_list.append(y_array_per_trajectory)  # store the vector array into a list

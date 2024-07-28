@@ -1,4 +1,5 @@
 import os
+import utils.io
 import csv
 import matplotlib.pyplot as plt
 
@@ -503,9 +504,7 @@ def print_data_value(position, Y, dimension):
     return x_pts
 
 def output_derivatives(b1, b2, Y, size_of_input_variables):
-    if os.path.exists("outputs/amit_backward.txt"):
-        os.remove("outputs/amit_backward.txt")
-    file_out = open("outputs/amit_backward.txt","a")
+    file_out = utils.io.open_for_write("outputs/amit_backward.txt")
     file_out.write("b1 backward derivatives: \n")
     str1 = ""
     pos_value = 0
@@ -522,9 +521,7 @@ def output_derivatives(b1, b2, Y, size_of_input_variables):
         file_out.write(str1)
     file_out.close()
 
-    if os.path.exists("outputs/amit_forward.txt"):
-        os.remove("outputs/amit_forward.txt")
-    file_out2 = open("outputs/amit_forward.txt", "a")
+    file_out2 = utils.io.open_for_write("outputs/amit_forward.txt")
     file_out2.write("b2 forward derivatives: \n")
     pos_value = 0
     relDiff = 0.0
@@ -565,7 +562,7 @@ def analyse_output(segmentedTrajectories, b1, b2, Y, t_list, L_y, size_of_input_
     # varIndex = 2  # 0 and 1 are input-variable and 2 is the output variable for engine-timing
 
     # ##### writing to a csv file for debugging and analysing values #########
-    file_csv = open('segmentationFile.csv','w')
+    file_csv = utils.io.open_for_write('segmentationFile.csv')
     writer = csv.writer(file_csv)   # file pointer created
     rowValue = ["pos", "t_value", "x_"+str(varIndex) , "BDF_backward", "BDF_forward", "Seg-ID"]
     writer.writerow(rowValue)

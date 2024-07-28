@@ -8,7 +8,7 @@ from utils import generator as generate
 from infer_ha.model_printer.print_header import *
 from infer_ha.model_printer.print_location import *
 from infer_ha.model_printer.print_transition import *
-
+import utils.io
 
 def print_HA(P_modes, G, mode_inv, transitions, position, learning_parameters, outputfilename):
     """
@@ -89,16 +89,9 @@ def print_HA(P_modes, G, mode_inv, transitions, position, learning_parameters, o
     # print ("After calling P is ", P)
     # print("After calling G is ", G)
 
-
-    # outputfilename = '/home/somedir/Documents/python/logs';
-    # As file at outputfilename is deleted now, so we should check if file exists or not before deleting them
-    if os.path.exists(outputfilename):
-        os.remove(outputfilename)
-
-    f_out = open(outputfilename, "a")  # Opening file-id for writing output
-    print_header(f_out, num_mode, system_dim, transitions)
-    print_location(f_out, P_modes, G, mode_inv, Exp, position)
-    print_transition(f_out, transitions, system_dim, boundary_order)
-    f_out.close()
+    with utils.io.open_for_write(outputfilename) as f_out:
+        print_header(f_out, num_mode, system_dim, transitions)
+        print_location(f_out, P_modes, G, mode_inv, Exp, position)
+        print_transition(f_out, transitions, system_dim, boundary_order)
 
     return

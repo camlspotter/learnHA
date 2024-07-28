@@ -1,7 +1,7 @@
 import numpy as np
 import os
 from utils import misc_math_functions as myUtil
-
+import utils.io
 
 def create_data(output_filename, srcData, destData, L_y, Y):
     """
@@ -21,40 +21,34 @@ def create_data(output_filename, srcData, destData, L_y, Y):
     x_p = []
     x_n = []
 
-    # output_filename = "outputs/data_scale"  # This file is also used for SVM scaling
-
-    if os.path.exists(output_filename):
-        os.remove(output_filename)
-    f_out = open(output_filename, "a")  # Opening file-id for writing output
-
-    x_gs = []  # data for grid search
-    for id0 in srcData:  # The class with +1 is stored first
-        y.append(1)
-        str1 = "+1 "
-        x.append({dim + 1: Y[id0, dim] for dim in range(L_y)})
-        xx = [Y[id0, dim] for dim in range(L_y)]
-        x_gs.append(xx)
-        x_p.append({dim + 1: Y[id0, dim] for dim in range(L_y)})
-
-        for dim in range(L_y):
-            str1 += str(dim + 1) + ":" + str(Y[id0, dim]) + " "
-            # str1 += str(dim + 1) + ":" + "{0:.3f}".format(Y[id0, dim]) + " "
-        str1 += "\n"
-        f_out.write(str1)
-    for id1 in destData:
-        y.append(-1)
-        str1 = "-1 "
-        x.append({dim + 1: Y[id1, dim] for dim in range(L_y)})
-        xx = [Y[id1, dim] for dim in range(L_y)]
-        x_gs.append(xx)
-        x_n.append({dim + 1: Y[id1, dim] for dim in range(L_y)})
-        for dim in range(L_y):
-            str1 += str(dim + 1) + ":" + str(Y[id1, dim]) + " "
-            # str1 += str(dim + 1) + ":" + "{0:.3f}".format(Y[id1, dim]) + " "
-
-        str1 += "\n"
-        f_out.write(str1)
-    f_out.close()  # File must be closed for being used by svm_read_problem
+    with utils.io.open_for_write(output_filename) as f_out:
+        x_gs = []  # data for grid search
+        for id0 in srcData:  # The class with +1 is stored first
+            y.append(1)
+            str1 = "+1 "
+            x.append({dim + 1: Y[id0, dim] for dim in range(L_y)})
+            xx = [Y[id0, dim] for dim in range(L_y)]
+            x_gs.append(xx)
+            x_p.append({dim + 1: Y[id0, dim] for dim in range(L_y)})
+    
+            for dim in range(L_y):
+                str1 += str(dim + 1) + ":" + str(Y[id0, dim]) + " "
+                # str1 += str(dim + 1) + ":" + "{0:.3f}".format(Y[id0, dim]) + " "
+            str1 += "\n"
+            f_out.write(str1)
+        for id1 in destData:
+            y.append(-1)
+            str1 = "-1 "
+            x.append({dim + 1: Y[id1, dim] for dim in range(L_y)})
+            xx = [Y[id1, dim] for dim in range(L_y)]
+            x_gs.append(xx)
+            x_n.append({dim + 1: Y[id1, dim] for dim in range(L_y)})
+            for dim in range(L_y):
+                str1 += str(dim + 1) + ":" + str(Y[id1, dim]) + " "
+                # str1 += str(dim + 1) + ":" + "{0:.3f}".format(Y[id1, dim]) + " "
+    
+            str1 += "\n"
+            f_out.write(str1)
 
     return x, y, x_gs
 
