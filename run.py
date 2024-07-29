@@ -23,7 +23,7 @@ def runLearnHA():  # Calling the implementation from project BBC4CPS
 
     num_mode = parameters['modes']
     input_filename = parameters['input_filename']
-    output_filename = parameters['output_filename']
+    output_directory  = parameters['output_directory']
     default_user_stepsize = parameters['stepsize']
     list_of_trajectories, stepsize, system_dimension = parse_trajectories(input_filename)
     step_size = default_user_stepsize
@@ -59,7 +59,7 @@ def runLearnHA():  # Calling the implementation from project BBC4CPS
     # print("Number of modes chosen =", num_mode)
     # print("Number of modes learned = ", len(P_modes))
 
-    print_HA(P_modes, G, mode_inv, transitions, position, parameters, output_filename)   # prints an HA model file inside the folder outputs/
+    print_HA(P_modes, G, mode_inv, transitions, position, parameters)   # prints an HA model file inside the folder outputs/
 
     return
 

@@ -8,12 +8,13 @@ from infer_ha.infer_transitions.compute_assignments import compute_assignments
 from infer_ha.infer_transitions.guards import getGuard_inequality
 
 
-def compute_transitions(P_modes, position, segmentedTrajectories, L_y, boundary_order, Y, variableType_datastruct,
+def compute_transitions(output_dir, P_modes, position, segmentedTrajectories, L_y, boundary_order, Y, variableType_datastruct,
                         number_of_segments_before_cluster, number_of_segments_after_cluster):
     """
     This function decides to compute or ignore mode-invariant computation based on the user's choice.
 
 
+    :param output_dir: output directory.
     :param P_modes: holds a list of modes. Each mode is a list of structures; we call it a segment.
         Thus, P = [mode-1, mode-2, ... , mode-n] where mode-1 = [ segment-1, ... , segment-n] and segments are
         of type ([start_ode, end_ode], [start_exact, end_exact], [p1, ..., p_n]).
@@ -79,7 +80,7 @@ def compute_transitions(P_modes, position, segmentedTrajectories, L_y, boundary_
             # srcData.append(connect_pt[1])  # index [1] is the end_pt_position
             # destData.append(connect_pt[2])  # index [2] is the start_pt_position
 
-        guard_coeff = getGuard_inequality(srcData, destData, L_y, boundary_order, Y)
+        guard_coeff = getGuard_inequality(output_dir, srcData, destData, L_y, boundary_order, Y)
 
         # print("Check guard=", guard_coeff)
 

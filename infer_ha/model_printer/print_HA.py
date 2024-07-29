@@ -10,7 +10,7 @@ from infer_ha.model_printer.print_location import *
 from infer_ha.model_printer.print_transition import *
 import utils.io
 
-def print_HA(P_modes, G, mode_inv, transitions, position, learning_parameters, outputfilename):
+def print_HA(P_modes, G, mode_inv, transitions, position, learning_parameters):
     """
 
     :param P_modes: holds a list of modes. Each mode is a list of structures; we call it a segment.
@@ -39,6 +39,7 @@ def print_HA(P_modes, G, mode_inv, transitions, position, learning_parameters, o
 
     """
 
+    outputfilename = os.path.join(learning_parameters['output_directory'], "learnHA_out.txt")
     maxorder = learning_parameters['ode_degree']
     boundary_order = learning_parameters['guard_degree']
     num_mode = len(P_modes)   # size returned by DTW clustering algorithm.

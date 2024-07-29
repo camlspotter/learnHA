@@ -17,12 +17,12 @@ from infer_ha.utils.util_functions import rel_diff
 from infer_ha.clustering.gridSearch_fromSKLearn import gridSearchStart
 from utils import misc_math_functions as myUtil
 
-
-def getGuard_inequality(srcData, destData, L_y, boundary_order, Y):
+def getGuard_inequality(output_dir, srcData, destData, L_y, boundary_order, Y):
     """
     Implementation of an equal number of positive and negative data and the size of these data are not very high. It is
     equal to the number of connecting points.
 
+    :param output_dir: output directory name
     :param srcData: takes a list of position of the source mode
     :param destData: takes a list of position of the destination mode
     :param L_y: system dimension
@@ -49,14 +49,14 @@ def getGuard_inequality(srcData, destData, L_y, boundary_order, Y):
     x_p = []
     x_n = []
 
-    output_filename = "outputs/data_scale"    # This file is also used for SVM scaling
-    x, y, x_gs = create_data(output_filename, srcData, destData, L_y, Y) # outputs/data_scale file gets created
+    output_filename = os.path.join(output_dir, "data_scale") # This file is also used for SVM scaling
+    x, y, x_gs = create_data(output_filename, srcData, destData, L_y, Y)
     data_length = len(srcData)  # or len(destData)
     # print("data size for SVM =", data_length)
     # ******* scaling data ************
     # print('Before Storing data in file for conversion to csr_matrix')
     # print(x)
-    y, x = svm_read_problem('outputs/data_scale', return_scipy = True)  # y: ndarray, x: csr_matrix
+    y, x = svm_read_problem(os.path.join(output_dir, 'data_scale'), return_scipy = True)  # y: ndarray, x: csr_matrix
     # print('After scaling data')
     # print(x)
     # print('label y is ', y)
@@ -144,7 +144,7 @@ def getGuard_inequality(srcData, destData, L_y, boundary_order, Y):
 
     m = svm_model_training(x, y, boundary_order, c_value_optimal, coef_optimal, gamma_value_optimal)
 
-    svm_save_model('outputs/svm_model_file', m)
+    svm_save_model(os.path.join(output_dir, "svm_model_file"), m)
     guard_coeff = get_coeffs(L_y, m, gamma_value_optimal, order=boundary_order)  # this gives the hyperplane coefficients
 
     # print("guard_coeff is ", guard_coeff)

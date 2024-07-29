@@ -16,8 +16,7 @@ def read_commandline_arguments():
 
     parser = argparse.ArgumentParser(description='Learns HA model from input--output trajectories')
     parser.add_argument('-i', '--input-filename', help='input FileName containing trajectories', type=str, required=True)
-    parser.add_argument('-o', '--output-filename', help='output FileName with the learned HA model. Set to out.txt by default', default='out.txt',
-                        required=False)
+    parser.add_argument('--output-directory', help='output directory', required=True)
     parser.add_argument('-c', '--clustering-method', help='Clustering Algorithm. Options are: 1: DTW (default)  2: DBSCAN  3: piecelinear', type=int,
                         choices=[1, 2, 3], default=1, required=False)
     parser.add_argument('-d', '--ode-degree', help='Degree of polynomial in ODE. Set to 1 by default', type=int, default=1, required=False)
@@ -60,30 +59,6 @@ def read_commandline_arguments():
                         type=int, choices=[2, 3, 4, 5, 6], default=5, required=False)
 
     args = vars(parser.parse_args())    #  create a dict structure of the arguments
-    # note the key name replaces with '_' for all '-' in the arguments
-    '''
-    print("input =", args['input_filename'])
-    print("output =", args['output_filename'])
-    print("clustering-method =", args['clustering_method'])
-    print("ode-degree =", args['ode_degree'])
-    print("modes =", args['modes'])
-    print("guard-degree =", args['guard_degree'])
-    print("segmentation_error_tol =", args['segmentation_error_tol'])
-    print("threshold_distance =", args['threshold_distance'])
-    print("threshold_correlation =", args['threshold_correlation'])
-    print("dbscan_eps_dist =", args['dbscan_eps_dist'])
-    print("dbscan_min_samples =", args['dbscan_min_samples'])
-    print("size_input_variable =", args['size_input_variable'])
-    print("size_output_variable =", args['size_output_variable'])    
-    print("variable-types =", args['variable_types'])
-    print("pool_values =", args['pool_values'])
-    print("ode_speedup =", args['ode_speedup'])
-    print("is_invariant =", args['is_invariant'])
-    print("stepsize =", args['stepsize'])
-    print("filter-last-segment =", args['filter_last_segment'])
-    print("lmm-step-size =", args['lmm_step_size'])
-    
-    '''
 
     # print("variable-types =", args['variable_types'])
     # print("pool_values =", args['pool_values'])

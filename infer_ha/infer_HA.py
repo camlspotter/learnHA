@@ -24,7 +24,6 @@ def infer_model(list_of_trajectories, learning_parameters):
     """
     The main module to infer an HA model for the input trajectories.
 
-
     :param list_of_trajectories: Each element of the list is a trajectory. A trajectory is a 2-tuple of (time, vector), where
             time: is a list having a single item. The item is the sampling time, stored as a numpy.ndarray having structure
                 as (rows, ) where rows is the number of sample points. The dimension cols is empty meaning a single dim array.
@@ -148,7 +147,8 @@ def infer_model(list_of_trajectories, learning_parameters):
     '''
     # num_mode = len(P)
 
-    transitions = compute_transitions(P_modes, position, segmentedTrajectories, L_y, boundary_order, Y,
+    transitions = compute_transitions(learning_parameters['output_directory'],
+                                      P_modes, position, segmentedTrajectories, L_y, boundary_order, Y,
                                       variableType_datastruct, number_of_segments_before_cluster,
                                       number_of_segments_after_cluster)
 
