@@ -39,7 +39,7 @@ def print_HA(P_modes, G, mode_inv, transitions, position, learning_parameters):
 
     """
 
-    outputfilename = os.path.join(learning_parameters['output_directory'], "learnHA_out.txt")
+    outputfilename = os.path.join(learning_parameters['output_directory'], "learned_HA.txt")
     maxorder = learning_parameters['ode_degree']
     boundary_order = learning_parameters['guard_degree']
     num_mode = len(P_modes)   # size returned by DTW clustering algorithm.
