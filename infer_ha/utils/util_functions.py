@@ -30,12 +30,9 @@ def rel_diff(A, B):
 
 def matrowex(matr, l):
     """Pick some rows of a matrix to form a new matrix."""
-    finalmat = None
-    for i in range(0, len(l)):
-        if i == 0:
-            finalmat = np.mat(matr[l[i]])
-        else:
-            finalmat = np.r_[finalmat, np.mat(matr[l[i]])]
-    return finalmat
+    rows = []
+    for i in range(0, len(l)): # to
+        rows.append(matr[l[i]])
+    return np.array(rows)
 
 
