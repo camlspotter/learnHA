@@ -60,19 +60,18 @@ def get_initial_location(P_modes, position):
 
     P = create_simple_modes_positions(P_modes)
 
-    init_locations = []
-    val = P[0][0]  # first mode
-    # print("P[0][0] = val =", val)
-    indexVal = 0
-    for mods in range(0, len(P)):
-        if (P[mods][0] < val):
-            val = P[mods][0]
-            indexVal = mods
+#    minval = P[0][0]  # first mode
+#    minkey = 0
+#    for mods in range(0, len(P)):
+#        if (P[mods][0] < minval):
+#            minval = P[mods][0]
+#            minkey = mods
 
-    init_locations.append(indexVal)
+    minkey = min(enumerate(P), key= lambda x: x[1][0])[0] 
 
     # ToDo: to find all initial location/mode, use the structure segmented_traj: 1st position of each trajectory
+    return [minkey]
 
 
-    return init_locations
+
 

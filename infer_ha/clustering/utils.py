@@ -154,10 +154,11 @@ def create_simple_modes_positions(P_modes):
 
     P = []
     for mode in P_modes:
+        # mode : list[tuple[tuple[int, int], tuple[int, int], list[int]]]
         data_pos = []
-        for segs in mode:
+        for (_, _, poss) in mode:
             # make a simple mode
-            data_pos.extend(segs[2])    # merge/extend only the positions of the segment
+            data_pos.extend(poss)    # merge/extend only the positions of the segment
         P.append(data_pos)
 
     return P
