@@ -89,7 +89,7 @@ def compute_invariant (L_y, P_modes, Y):
             x_dim_list = list(map(itemgetter(var_dim+1), x_pts))
             upperBound = max(x_dim_list)
             lowerBound = min(x_dim_list)
-            invariant.append([lowerBound, upperBound])
+            invariant.append((lowerBound, upperBound))
         '''            
         upperBound = max(x_p1)
         lowerBound = min(x_p1)
