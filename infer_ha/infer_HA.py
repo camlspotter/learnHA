@@ -160,7 +160,7 @@ def infer_model(list_of_trajectories, learning_parameters):
 @typechecked
 def typecheck_ha(P_modes : list[list[tuple[tuple[int,int], tuple[int,int], list[int]]]],
                  G : list[np.ndarray],
-                 mode_inv : list[tuple[int, list[tuple[float,float]]]],
+                 mode_inv : list[ list[tuple[float,float]] ], # variable invariants per mode
                  transitions : list[tuple[int,          # src
                                           int,          # dest
                                           list[float],  # guard coeffs [ci], defines the guard:  x1 * c1 + x2 * c2 + .. + 1 * cn <= 0
