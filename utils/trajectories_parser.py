@@ -30,15 +30,13 @@ def preprocess_trajectories(list_of_trajectories):
 
     t_list = []
     y_list = []
-    posi = []
     position = []
 
     if len(list_of_trajectories) == 1:  # when list_of_trajectories is a single trajectory
         t_list, y_list = list_of_trajectories[0]
-        posi.append(0)  # start position
         # print("len of t_list =", len(t_list))
         # print("len of t_list[0] =", len(t_list[0]))
-        posi.append(len(t_list[0]))
+        posi=(0, len(t_list[0]))
         position.append(posi)
     else:
         t_list, y_list, position = convert_trajectories_to_single_list(list_of_trajectories)
@@ -67,7 +65,6 @@ def convert_trajectories_to_single_list(list_of_trajectories):
     t_list = []
     y_list = []
     position = []
-    posi = []
     start_posi = 0
 
     #  ****************************************
@@ -90,14 +87,12 @@ def convert_trajectories_to_single_list(list_of_trajectories):
             temp_y_array_all = np.vstack([temp_y_array_all, temp_y_array]) # appending the array
 
         # Computing position needed throughout the algorithm
-        posi.append(start_posi)  # the start position of a trajectory
         data_size = len(t_list_per_traj[0])
         end_posi = start_posi + data_size - 1 # minus 1 because of zero-based indexing
-        posi.append(end_posi)
+        posi=(start_posi, end_posi)
 
         start_posi = end_posi + 1 # +1 to start the next indexing sequence
         position.append(posi)
-        posi = []
         total_trajectories = total_trajectories + 1
 
     t_list.append(temp_t_array_all) # converting the array back to list containing a single item

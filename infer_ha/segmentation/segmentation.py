@@ -154,7 +154,7 @@ def two_fold_segmentation(A, b1, b2, ytuple, Y, size_of_input_variables, method,
             # if (good_high - good_low) >= stepM:   this is not safe
             if (near_high - near_low) >= stepM:    # when segment size is >= M points, where M is the step size of LMM
                 segment_positions = list(range(good_low, good_high + 1)) # is a list holding the positions of the points. range(x,<y) goes upto < y.
-                segment = ([near_low, near_high], [good_low, good_high], segment_positions)
+                segment = ((near_low, near_high), (good_low, good_high), segment_positions)
                 segmented_traj.append(segment)
 
             if high == max_id:

@@ -200,7 +200,7 @@ def cluster_by_dtw(segmented_traj, A, b1, Y, t_list, L_y, correl_threshold, dist
 
 
             if correlValue >= correl_threshold and (distance_threshold > 0 and distance < distance_threshold):  # distance is also compared. distance_threshold is threshold value to be supplied wisely
-                # print("i=", i, " and j=", j, " :  distance1 = ", distance1, " :  distance = ", distance,
+                # print("i=", i, " and j=", j, " :  distance1 = ", distance1, " :  distance = ", distance
                 #       "   and   correlation = ", correlValue)
                 # print("******************************************** Found *******************************")
                 # print("i=", i, " and j=", j, " :  Distance = ", distance, "   and   correlation = ", correlValue)

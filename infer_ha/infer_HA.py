@@ -17,6 +17,9 @@ from infer_ha.segmentation.compute_derivatives import diff_method_backandfor
 from utils.trajectories_parser import preprocess_trajectories
 from infer_ha.infer_transitions.compute_transitions import compute_transitions
 
+from typeguard import typechecked
+import numpy as np
+
 sys.setrecursionlimit(1000000)  # this is the limit
 
 
@@ -152,6 +155,17 @@ def infer_model(list_of_trajectories, learning_parameters):
                                       variableType_datastruct, number_of_segments_before_cluster,
                                       number_of_segments_after_cluster)
 
-    return P_modes, G, mode_inv, transitions, position
+    return typecheck_ha(P_modes, G, mode_inv, transitions, position)
 
-
+@typechecked
+def typecheck_ha(P_modes : list[list[tuple[tuple[int,int], tuple[int,int], list[int]]]],
+                 G : list[np.ndarray],
+                 mode_inv : list[tuple[int, list[list[float]]]],
+                 transitions : list[tuple[int,
+                                          int,
+                                          list[float],
+                                          np.ndarray,
+                                          np.ndarray]],
+                 position : list[tuple[int,int]]
+                 ):
+    return (P_modes, G, mode_inv, transitions, position)

@@ -107,7 +107,7 @@ def compute_invariant (L_y, P_modes, Y):
         lowerBound = min(x_p5)
         invariant.append([lowerBound, upperBound])
         '''
-        mode_inv.append([imode, invariant])
+        mode_inv.append((imode, invariant))
 
     # print("Mode-invariants =", mode_inv)
     return mode_inv

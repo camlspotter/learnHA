@@ -20,6 +20,7 @@ numpy = ">=2"
 fastdtw = "*"
 matplotlib = "*"
 libsvm-official = "==3.32.0"
+typeguard = "*"
 
 [dev-packages]
 pytest = "*"
