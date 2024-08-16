@@ -158,8 +158,11 @@ def infer_model(list_of_trajectories, learning_parameters):
     return typecheck_ha(P_modes, G, mode_inv, transitions, position)
 
 @typechecked
-def typecheck_ha(P_modes : list[list[tuple[tuple[int,int], tuple[int,int], list[int]]]],
-                 G : list[np.ndarray],
+def typecheck_ha(P_modes : list[list[tuple[tuple[int,int], # start-end ODE
+                                           tuple[int,int], # start-end exact
+                                           list[int]       # "positions of points of a trajectories"
+                                           ]]],
+                 G : list[np.ndarray],  # ODE coeffs, called Flow in the paper
                  mode_inv : list[ list[tuple[float,float]] ], # variable invariants per mode
                  transitions : list[tuple[int,          # src
                                           int,          # dest
@@ -168,6 +171,7 @@ def typecheck_ha(P_modes : list[list[tuple[tuple[int,int], tuple[int,int], list[
                                           np.ndarray    # assignment intercepts. 1D
                                                         # x'j = x1 * cj1 + x2 * cj2 + .. + xn *cjn + ij
                                           ]],
-                 position : list[tuple[int,int]]
+                 position : list[tuple[int,int]]  # used to determine the possible initial locations with P_modes
                  ):
+    # The initial location is the first element of the possible initial locations computed by get_initial_location(P_modes, position)
     return (P_modes, G, mode_inv, transitions, position)
