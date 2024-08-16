@@ -18,11 +18,10 @@ def print_assignment(f_out, assign_coeffs, intercepts):
             coeff_term = coeffs_per_variable[eachterm]
             trans_assign_per_variable += str(coeff_term) + " * " + "x" + str(eachterm)
             # trans_assign_per_variable += "{0:.7f}".format(coeff_term) + " * " + "x" + str(eachterm)
-            if eachterm != (len(coeffs_per_variable) - 1):
-                trans_assign_per_variable += " + "
+            trans_assign_per_variable += " + "
 
         # trans_assign_per_variable += " + " + "{0:.3f}".format(intercept_term) + "\n"
-        trans_assign_per_variable += " + " + str(intercept_term) + "\n"
+        trans_assign_per_variable += str(intercept_term) + "\n"
 
         trans_assign += trans_assign_per_variable
     f_out.write(trans_assign)

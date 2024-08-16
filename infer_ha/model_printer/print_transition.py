@@ -45,20 +45,12 @@ def print_transition(f_out, transitions, system_dim, boundary_order):
         coef_index += 1
 
     # print("Expression is ", gExp)
+    # The last coeff is in fact the intercept
     gExp[len(coeff_expansion) - 1] = "1"
     # print("Expression is ", gExp)
 
     for tr in range(0, len(transitions)):
-        src = transitions[tr][0]
-        dest = transitions[tr][1]
-        guard_coeff = transitions[tr][2]
-        # if tr == 0:
-        #     print("guard_coeff =", guard_coeff)
-        assign_coeffs = transitions[tr][3]
-        intercepts = transitions[tr][4]
-        # print("src=%d, dest=%d are " % (src + 1, dest + 1))
-        # print("Coefficients is ", coeffs)
-        # print("intercepts is ", intercepts)
+        (src, dest, guard_coeff, assign_coeffs, intercepts) = transitions[tr]
 
         trans_detail = "Transition-ID " + str(tr) + "\n"
         trans_detail += "Trans-Src-Dest " + str(src + 1) + " => " + str(dest + 1) + "\n"
