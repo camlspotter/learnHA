@@ -2,26 +2,17 @@
 This is the main module for inferring an HA model.
 """
 
-
 import sys  # This is used for command line arguments
+import numpy as np
+from typeguard import typechecked
 
-from infer_ha.helpers.plotDebug import plot_data_values, output_derivatives, plot_segmentation_new, \
-    plot_after_clustering, print_segmented_trajectories, analyse_output, plot_guard_points
-# from infer_ha.segmentation.segmentation import two_fold_segmentation_new, segmented_trajectories
 from infer_ha.segmentation.segmentation import two_fold_segmentation, segmented_trajectories
-
 from infer_ha.clustering.clustering import select_clustering
 from infer_ha.infer_invariants.invariants import compute_mode_invariant
-from libsvm.svmutil import *
 from infer_ha.segmentation.compute_derivatives import diff_method_backandfor
-from utils.trajectories_parser import preprocess_trajectories
 from infer_ha.infer_transitions.compute_transitions import compute_transitions
-
-from typeguard import typechecked
-import numpy as np
-import infer_ha.HA as HA
-
 from infer_ha.clustering.utils import create_simple_modes_positions
+from utils.trajectories_parser import preprocess_trajectories
 
 sys.setrecursionlimit(1000000)  # this is the limit
 
@@ -69,7 +60,6 @@ def infer_model(list_of_trajectories, learning_parameters):
     ep = learning_parameters['segmentation_error_tol']
     ep_backward = learning_parameters['segmentation_fine_error_tol']
     size_of_input_variables = learning_parameters['size_input_variable']
-    size_of_output_variables = learning_parameters['size_output_variable']
     variableType_datastruct =  learning_parameters['variableType_datastruct'] # processed and stored in data-struct
     isInvariant = learning_parameters['is_invariant']
 
@@ -83,7 +73,6 @@ def infer_model(list_of_trajectories, learning_parameters):
     # print("position = ", position)
     # Apply Linear Multistep Method
     A, b1, b2, Y, ytuple = diff_method_backandfor(y_list, maxorder, stepsize, stepM)   # compute forward and backward version of BDF
-    num_pt = Y.shape[0]
     # print("Initial computation done!")
 
     # ********* Debugging ***********************
@@ -143,14 +132,14 @@ def infer_model(list_of_trajectories, learning_parameters):
     # *************** Trying to plot the clustered points ***********************************
     # print("Number of num_mode= ", num_mode)
     # print("Number of Clusters, len(P)=", len(P))
-    '''
-    TODO: remove taking input 'num_mode' from user
-    
-    if (len(P) < num_mode):
-        print("Number of desired Modes = ", num_mode)
-        num_mode = len(P)
-        print("Number of Clusters Learned = ", len(P))
-    '''
+    # '''
+    # TODO: remove taking input 'num_mode' from user
+    # 
+    # if (len(P) < num_mode):
+    #     print("Number of desired Modes = ", num_mode)
+    #     num_mode = len(P)
+    #     print("Number of Clusters Learned = ", len(P))
+    # '''
     # num_mode = len(P)
 
     transitions = compute_transitions(learning_parameters['output_directory'],
@@ -177,12 +166,12 @@ def typecheck_ha(P_modes : list[list[tuple[tuple[int,int], # start-end ODE
                  position : list[tuple[int,int]]  # used to determine the possible initial locations with P_modes
                  ):
     # The initial location is the first element of the possible initial locations computed by get_initial_location(P_modes, position)
-    [init_location] = get_initial_location(P_modes, position)
+    [init_location] = get_initial_location(P_modes)
 
     return (P_modes, G, mode_inv, transitions, position, init_location)
 
 
-def get_initial_location(P_modes, position):
+def get_initial_location(P_modes):
     """
     At the moment we are printing only the mode-ID where the first/starting trajectory is contained in.
     Finding other initial modes, require searching segmented trajectories and identifying the probable initial positions
@@ -199,12 +188,9 @@ def get_initial_location(P_modes, position):
         init_locations: contains a list of initial location ID(s), having zero based indexing.
 
     """
-    # print("P = ", P)
-    # print("position = ", position)
-
     P = create_simple_modes_positions(P_modes)
 
-    minkey = min(enumerate(P), key= lambda x: x[1][0])[0] 
+    minkey = min(enumerate(P), key= lambda x: x[1][0])[0]
 
     # ToDo: to find all initial location/mode, use the structure segmented_traj: 1st position of each trajectory
     return [minkey]

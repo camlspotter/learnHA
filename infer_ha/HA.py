@@ -1,8 +1,5 @@
-import numpy as np
-import numpy.typing as npt
-from typing  import Any
 from dataclasses import dataclass
-import json
+import numpy as np
 
 @dataclass
 class Range():
@@ -39,16 +36,16 @@ class Transition():
     assignments : dict[str, Assignment]
 
 def build_guard( guard_coeffs : list[float] ) -> Guard:
-    return dict([("x" + str(i) if i < len(guard_coeffs) - 1 else "1", c) for (i, c) in enumerate(guard_coeffs)])
+    return { ("x" + str(i) if i < len(guard_coeffs) - 1 else "1"): c for (i, c) in enumerate(guard_coeffs) }
 
 assert str(build_guard([1,2,3,4])) == "{'x0': 1, 'x1': 2, 'x2': 3, '1': 4}", "build_guard bug"
 
 def build_assignment(coeffs : np.ndarray, intercept : float) -> Assignment:
-    d = dict([("x" + str(i), c) for (i, c) in enumerate(coeffs)])
+    d = { ("x" + str(i)): c for (i, c) in enumerate(coeffs) }
     d["1"] = intercept
     return d
 
-# XXX Should I cnovert np.float64 to float ? 
+# XXX Should I cnovert np.float64 to float ?
 assert (str(build_assignment( np.array([1.0,2.1,3.2]), 4.3 ))
         == "{'x0': np.float64(1.0), 'x1': np.float64(2.1), 'x2': np.float64(3.2), '1': 4.3}"), "build_assignment bug"
 
@@ -58,7 +55,7 @@ def build_assignments(coeffs : np.ndarray, intercepts : np.ndarray) -> dict[str,
     assert nvs1 == nvs2
     assert nvs1 == nvs3
     assignments = [build_assignment(coeffs, intercept) for (coeffs, intercept) in zip(coeffs, intercepts)]
-    return dict([("x" + str(i), a) for (i, a) in enumerate(assignments)])
+    return { ("x" + str(i)): a for (i, a) in enumerate(assignments) }
 
 assert (str(build_assignments( np.array([ [1,2,3], [4,5,6], [7,8,9] ]), np.array( [10, 11, 12] )))
         == "{'x0': {'x0': np.int64(1), 'x1': np.int64(2), 'x2': np.int64(3), '1': np.int64(10)}, 'x1': {'x0': np.int64(4), 'x1': np.int64(5), 'x2': np.int64(6), '1': np.int64(11)}, 'x2': {'x0': np.int64(7), 'x1': np.int64(8), 'x2': np.int64(9), '1': np.int64(12)}}")
@@ -85,14 +82,14 @@ class Mode():
     flow : dict[str,ODE]
 
 def build_invariant(inv : list[tuple[float, float]]) -> Invariant:
-    return dict([("x" + str(i), Range(min, max)) for (i,(min,max)) in enumerate(inv)])
+    return { ("x" + str(i)): Range(min, max) for (i,(min,max)) in enumerate(inv) }
 
 # XXX Very simliar to build_guard
 def build_ode(ode : np.ndarray) -> ODE:
-    return dict([("x" + str(i) if i < len(ode) - 1 else "1", c) for (i, c) in enumerate(ode)])
+    return { ("x" + str(i) if i < len(ode) - 1 else "1"): c for (i, c) in enumerate(ode) } 
 
 def build_odes(odes : np.ndarray) -> dict[str,ODE]:
-    return dict([ ("x" + str(i), o) for (i,o) in enumerate([build_ode(ode) for ode in odes]) ])
+    return { ("x" + str(i)): o for (i,o) in enumerate([build_ode(ode) for ode in odes]) }
 
 def build_Mode(id : int,
                inv : list[tuple[float, float]],
