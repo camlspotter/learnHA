@@ -55,9 +55,9 @@ class TestLearnHA(unittest.TestCase):
 
         parameters['stepsize'] = stepsize  # we assume trajectories are sampled at fixed size time-step
         parameters['variableType_datastruct'] = variableType_datastruct
-        P, G, mode_inv, transitions, position = infer_model(list_of_trajectories, parameters)
+        P, G, mode_inv, transitions, position, initial_location = infer_model(list_of_trajectories, parameters)
         # print("Number of modes learned = ", len(P))
-        print_HA(P, G, mode_inv, transitions, position, parameters)  # prints an HA model file
+        print_HA(P, G, mode_inv, transitions, position, parameters, initial_location)  # prints an HA model file
 
         backup_file = "data/test_output/oscillator_2_without_annotation.txt"
         test_generated_file = os.path.join(parameters['output_directory'], 'learn_HA.txt')
@@ -113,9 +113,9 @@ class TestLearnHA(unittest.TestCase):
 
         parameters['stepsize'] = stepsize  # we assume trajectories are sampled at fixed size time-step
         parameters['variableType_datastruct'] = variableType_datastruct
-        P, G, mode_inv, transitions, position = infer_model(list_of_trajectories, parameters)
+        P, G, mode_inv, transitions, position, initial_location = infer_model(list_of_trajectories, parameters)
         # print("Number of modes learned = ", len(P))
-        print_HA(P, G, mode_inv, transitions, position, parameters) # prints an HA model file
+        print_HA(P, G, mode_inv, transitions, position, parameters, initial_location) # prints an HA model file
 
         backup_file = "data/test_output/oscillator_2_with_annotation.txt"
         test_generated_file = os.path.join(parameters['output_directory'], 'learn_HA.txt')
@@ -172,9 +172,9 @@ class TestLearnHA(unittest.TestCase):
 
         parameters['stepsize'] = stepsize  # we assume trajectories are sampled at fixed size time-step
         parameters['variableType_datastruct'] = variableType_datastruct
-        P, G, mode_inv, transitions, position = infer_model(list_of_trajectories, parameters)
+        P, G, mode_inv, transitions, position, initial_location = infer_model(list_of_trajectories, parameters)
         # print("Number of modes learned = ", len(P))
-        print_HA(P, G, mode_inv, transitions, position, parameters) # prints an HA model file
+        print_HA(P, G, mode_inv, transitions, position, parameters, initial_location) # prints an HA model file
 
         backup_file = "data/test_output/bball_4.txt"
         test_generated_file = os.path.join(parameters['output_directory'], 'learn_HA.txt')

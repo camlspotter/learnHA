@@ -19,6 +19,9 @@ from infer_ha.infer_transitions.compute_transitions import compute_transitions
 
 from typeguard import typechecked
 import numpy as np
+import infer_ha.HA as HA
+
+from infer_ha.clustering.utils import create_simple_modes_positions
 
 sys.setrecursionlimit(1000000)  # this is the limit
 
@@ -160,9 +163,9 @@ def infer_model(list_of_trajectories, learning_parameters):
 @typechecked
 def typecheck_ha(P_modes : list[list[tuple[tuple[int,int], # start-end ODE
                                            tuple[int,int], # start-end exact
-                                           list[int]       # "positions of points of a trajectories"
+                                           list[int]       # "positions of points of the list of trajectories"
                                            ]]],
-                 G : list[np.ndarray],  # ODE coeffs, called Flow in the paper
+                 G : list[np.ndarray],  # ODE coeffs, called Flow in the paper  The array size is (#v + 1) * #o
                  mode_inv : list[ list[tuple[float,float]] ], # variable invariants per mode
                  transitions : list[tuple[int,          # src
                                           int,          # dest
@@ -174,4 +177,34 @@ def typecheck_ha(P_modes : list[list[tuple[tuple[int,int], # start-end ODE
                  position : list[tuple[int,int]]  # used to determine the possible initial locations with P_modes
                  ):
     # The initial location is the first element of the possible initial locations computed by get_initial_location(P_modes, position)
-    return (P_modes, G, mode_inv, transitions, position)
+    [init_location] = get_initial_location(P_modes, position)
+
+    return (P_modes, G, mode_inv, transitions, position, init_location)
+
+
+def get_initial_location(P_modes, position):
+    """
+    At the moment we are printing only the mode-ID where the first/starting trajectory is contained in.
+    Finding other initial modes, require searching segmented trajectories and identifying the probable initial positions
+    of the trajectories. Probable because we still drop points during segmentation (the start-point of a segmented trajectory).
+    This dropping of points (in addition to the first M points, where M is the step in LMM) makes it hard to track the
+    position of the initial trajectories using the data-structure position.
+
+    @param P_modes: holds a list of modes. Each mode is a list of structures; we call it a segment.
+           Thus, P = [mode-1, mode-2, ... , mode-n] where mode-1 = [ segment-1, ... , segment-n] and segments are
+           of type ([start_ode, end_ode], [start_exact, end_exact], [p1, ..., p_n]).
+           The size of the list P is equal to the number of clusters or modes of the learned hybrid automaton (HA).
+    @param position: is a list containing positions for the input list-of-trajectories.
+    @return:
+        init_locations: contains a list of initial location ID(s), having zero based indexing.
+
+    """
+    # print("P = ", P)
+    # print("position = ", position)
+
+    P = create_simple_modes_positions(P_modes)
+
+    minkey = min(enumerate(P), key= lambda x: x[1][0])[0] 
+
+    # ToDo: to find all initial location/mode, use the structure segmented_traj: 1st position of each trajectory
+    return [minkey]

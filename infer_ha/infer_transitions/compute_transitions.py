@@ -82,6 +82,9 @@ def compute_transitions(output_dir, P_modes, position, segmentedTrajectories, L_
 
         guard_coeff = getGuard_inequality(output_dir, srcData, destData, L_y, boundary_order, Y)
 
+        # C++ code assumes the first element of guard_coeff is either 0, 1 or -1
+        guard_coeff = normalize_guard(guard_coeff)
+
         # print("Check guard=", guard_coeff)
 
         '''
@@ -101,3 +104,9 @@ def compute_transitions(output_dir, P_modes, position, segmentedTrajectories, L_
         # print("All Transitions are: ",transitions)
 
     return transitions
+
+def normalize_guard(coeffs):
+    coeff0_abs = abs(coeffs[0])  # first column coefficient, can be used to divide on both sides to normalize. Taking only value not sign
+    if coeff0_abs != 0:
+        coeffs = [ c / coeff0_abs for c in coeffs ]
+    return coeffs

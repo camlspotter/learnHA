@@ -2,12 +2,10 @@
 url = "https://pypi.org/simple"
 verify_ssl = true
 name = "pypi"
-
 # OK
 # scikit-learn    1.3.2
 # scipy           1.10.1
 # numpy           1.24.4"
-
 # OK
 # scikit-learn    1.5.1
 # scipy           1.14.0
@@ -16,7 +14,7 @@ name = "pypi"
 [packages]
 scikit-learn = ">=1.5"
 scipy = ">=1.10.1"       
-numpy = ">=2"             
+numpy = "*"             
 fastdtw = "*"
 matplotlib = "*"
 libsvm-official = "==3.32.0"
@@ -24,6 +22,7 @@ typeguard = "*"
 
 [dev-packages]
 pytest = "*"
+mypy = "*"
 
 [requires]
 python_version = "3.12"

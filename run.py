@@ -7,6 +7,7 @@ from infer_ha import infer_HA as learnHA     #infer_model, svm_classify
 from infer_ha.model_printer.print_HA import print_HA
 from utils.parse_parameters import parse_trajectories
 from utils.commandline_parser import read_commandline_arguments, process_type_annotation_parameters
+import infer_ha.HA as HA
 
 methods = ['dbscan', 'piecelinear', 'dtw']
 
@@ -48,8 +49,10 @@ def runLearnHA():  # Calling the implementation from project BBC4CPS
 
     start = time.time()
     #################################################################################################
-    # P, G, mode_inv, transitions = learnHA.infer_model(list_of_trajectories, learning_parameters)
-    P_modes, G, mode_inv, transitions, position = learnHA.infer_model(list_of_trajectories, parameters)
+    P_modes, G, mode_inv, transitions, position, init_location = learnHA.infer_model(list_of_trajectories, parameters)
+
+    _ha = HA.build(init_location, G, mode_inv, transitions)
+    
     # Note P is the Segmented data. G is the coefficients of the ODE and boundary is the guard conditions
     #################################################################################################
     end = time.time()
@@ -59,7 +62,7 @@ def runLearnHA():  # Calling the implementation from project BBC4CPS
     # print("Number of modes chosen =", num_mode)
     # print("Number of modes learned = ", len(P_modes))
 
-    print_HA(P_modes, G, mode_inv, transitions, position, parameters)   # prints an HA model file inside the folder outputs/
+    print_HA(P_modes, G, mode_inv, transitions, position, parameters, init_location)   # prints an HA model file inside the folder outputs/
 
     return
 

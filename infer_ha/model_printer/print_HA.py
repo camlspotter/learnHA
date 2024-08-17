@@ -8,9 +8,12 @@ from utils import generator as generate
 from infer_ha.model_printer.print_header import *
 from infer_ha.model_printer.print_location import *
 from infer_ha.model_printer.print_transition import *
+import infer_ha.HA as HA
 import utils.io
+from dataclasses import asdict
+import json
 
-def print_HA(P_modes, G, mode_inv, transitions, position, learning_parameters):
+def print_HA(P_modes, G, mode_inv, transitions, position, learning_parameters, initial_location):
     """
 
     :param P_modes: holds a list of modes. Each mode is a list of structures; we call it a segment.
@@ -92,7 +95,12 @@ def print_HA(P_modes, G, mode_inv, transitions, position, learning_parameters):
 
     with utils.io.open_for_write(outputfilename) as f_out:
         print_header(f_out, num_mode, system_dim, transitions)
-        print_location(f_out, P_modes, G, mode_inv, Exp, position)
+        print_location(f_out, G, mode_inv, Exp, initial_location)
         print_transition(f_out, transitions, system_dim, boundary_order)
+
+    ha = HA.build(initial_location, G, mode_inv, transitions)
+    outputfilename = os.path.join(learning_parameters['output_directory'], "learned_HA.json")
+    with utils.io.open_for_write(outputfilename) as f_out:
+        f_out.write(json.dumps(asdict(ha), indent=2))
 
     return
