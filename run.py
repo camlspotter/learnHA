@@ -15,26 +15,16 @@ def runLearnHA():  # Calling the implementation from project BBC4CPS
     parameters = read_commandline_arguments()   # reads the command line values also can use -h to see help on usages
 
     input_filename = parameters['input_filename']
-    default_user_stepsize = parameters['stepsize']
-    list_of_trajectories, stepsize, system_dimension = parse_trajectories(input_filename)
-    step_size = default_user_stepsize
+    list_of_trajectories, stepsize_of_traj, system_dimension = parse_trajectories(input_filename)
 
-    # Giving priority to user selected step-size and not the step-size in the trajectories
-    if default_user_stepsize == 0.01:   #default is 0.01
-        step_size = stepsize    # obtained step-size from the trajectories
-    else:
-        step_size = default_user_stepsize  # user provided some step-size
+    if stepsize_of_traj != parameters['stepsize']:
+        print(f"Warning: --stepsize {parameters['stepsize']} is differentfrom the stepsize of trajectories {stepsize_of_traj}")
 
-    # print("stepsize = ", step_size)
-    # stepsize = 0.01
-    # print("list of trajectories is ",list_of_trajectories)
     variableType_datastruct = []  # structure that holds [var_index, var_name, var_type, pool_values]
     if len(parameters['variable_types']) >= 1:  # if user supply annotation arguments
         variableType_datastruct = process_type_annotation_parameters(parameters, system_dimension)
-
-    parameters['stepsize'] = step_size   # we assume trajectories are sampled at fixed size time-step
     parameters['variableType_datastruct'] = variableType_datastruct
-
+ 
     P_modes, G, mode_inv, transitions, position, init_location = learnHA.infer_model(list_of_trajectories, parameters)
 
     print_HA(P_modes, G, mode_inv, transitions, position, parameters, init_location)

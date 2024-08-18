@@ -1,5 +1,33 @@
 import argparse
+from typing import Optional, Any
+from dataclasses import dataclass
 
+@dataclass
+class Options():
+    input_filename : str
+    output_directory : str
+    clustering_method : int # 1: DTW (default)  2: DBSCAN  3: piecelinear',  default=1
+    ode_degree : int # Set to 1 by default', type=int, default=1, required=False)
+    modes : int # default=1, required=False)
+    guard_degree : int # default=1, required=False)
+    segmentation_error_tol : float # default=0.01, required=False)
+    segmentation_fine_error_tol : float # default=0.01, required=False)
+    threshold_distance : float # default=0.1, required=False)
+    threshold_correlation : float # default=0.8, required=False)
+    dbscan_eps_dist : float # default=0.01, required=False)
+    dbscan_min_samples : int # default=2, required=False)
+    size_input_variable : int #, required=True)
+    size_output_variable : int # required=True)
+    variable_types : str # default='', required=False)
+    variableType_datastruct : list[Any]  # structure that holds [var_index, var_name, var_type, pool_values]
+    pool_values : str # , default='', required=False)
+    constant_value : str # default='', required=False)
+    ode_speedup : int # , default=10, required=False)
+    is_invariant : int # type=int, choices=[0, 1, 2], default=0, required=False)
+    stepsize : float # default=0.01, required=False)
+    filter_last_segment : int # choices=[0,1], default=0, required=False)
+    lmm_step_size : int # choices=[2, 3, 4, 5, 6], default=5, required=False)
+    methods : str # dtw/dbscan/pieceliner
 
 def read_commandline_arguments():
     """
@@ -70,8 +98,12 @@ def read_commandline_arguments():
     elif args['clustering_method'] == 3:
         args['methods'] = "piecelinear"
 
-    return args
+    # variableType_datastruct will be set in run.py
+    args['variableType_datastruct'] = []
 
+    _options = Options(**args)
+    
+    return args
 
 def process_type_annotation_parameters(parameters, system_dim):
     """
