@@ -6,6 +6,7 @@ warnings.filterwarnings('ignore')   # disables FutureWarning in the use of clf.f
 
 from infer_ha.infer_HA import infer_model
 from infer_ha.model_printer.print_HA import print_HA
+from infer_ha.parameters import load_trajectories_and_fix_parameters
 from utils.parse_parameters import parse_trajectories
 from utils.commandline_parser import process_type_annotation_parameters
 import os
@@ -46,15 +47,8 @@ class TestLearnHA(unittest.TestCase):
         parameters['filter_last_segment'] = 1
         parameters['lmm_step_size'] = 5
 
-        input_filename = parameters['input_filename']
-        list_of_trajectories, stepsize, system_dimension = parse_trajectories(input_filename)
-        # print("list of trajectories is ", list_of_trajectories)
-        variableType_datastruct = []  # structure that holds [var_index, var_name, var_type, pool_values]
-        if len(parameters['variable_types']) >= 1:  # if user supply annotation arguments
-            variableType_datastruct = process_type_annotation_parameters(parameters, system_dimension)
+        (list_of_trajectories, parameters) = load_trajectories_and_fix_parameters(parameters)
 
-        parameters['stepsize'] = stepsize  # we assume trajectories are sampled at fixed size time-step
-        parameters['variableType_datastruct'] = variableType_datastruct
         P, G, mode_inv, transitions, position, initial_location = infer_model(list_of_trajectories, parameters)
         # print("Number of modes learned = ", len(P))
         print_HA(P, G, mode_inv, transitions, position, parameters, initial_location)  # prints an HA model file
@@ -69,8 +63,6 @@ class TestLearnHA(unittest.TestCase):
         result = filecmp.cmp(backup_file, test_generated_file, shallow=False)
         print(result)
         # self.assertTrue(result) # Fails if the output generated is not equal to the file stored in the data/test_output
-
-        pass
 
 
     def test_runLearnHA_osci_withAnnotate(self):
@@ -104,15 +96,8 @@ class TestLearnHA(unittest.TestCase):
         parameters['filter_last_segment'] = 1
         parameters['lmm_step_size'] = 5
 
-        input_filename = parameters['input_filename']
-        list_of_trajectories, stepsize, system_dimension = parse_trajectories(input_filename)
-        # print("list of trajectories is ", list_of_trajectories)
-        variableType_datastruct = []  # structure that holds [var_index, var_name, var_type, pool_values]
-        if len(parameters['variable_types']) >= 1:  # if user supply annotation arguments
-            variableType_datastruct = process_type_annotation_parameters(parameters, system_dimension)
+        (list_of_trajectories, parameters) = load_trajectories_and_fix_parameters(parameters)
 
-        parameters['stepsize'] = stepsize  # we assume trajectories are sampled at fixed size time-step
-        parameters['variableType_datastruct'] = variableType_datastruct
         P, G, mode_inv, transitions, position, initial_location = infer_model(list_of_trajectories, parameters)
         # print("Number of modes learned = ", len(P))
         print_HA(P, G, mode_inv, transitions, position, parameters, initial_location) # prints an HA model file
@@ -127,9 +112,6 @@ class TestLearnHA(unittest.TestCase):
         result = filecmp.cmp(backup_file, test_generated_file, shallow=False)
         print(result)
         # self.assertTrue(result) # Fails if the output generated is not equal to the file stored in the data/test_output
-
-        pass
-
 
     def test_runLearnHA_bball_withAnnotate(self):
 
@@ -163,15 +145,8 @@ class TestLearnHA(unittest.TestCase):
         parameters['stepsize'] = 0.01
         parameters['filter_last_segment'] = 1
 
-        input_filename = parameters['input_filename']
-        list_of_trajectories, stepsize, system_dimension = parse_trajectories(input_filename)
-        # print("list of trajectories is ", list_of_trajectories)
-        variableType_datastruct = []  # structure that holds [var_index, var_name, var_type, pool_values]
-        if len(parameters['variable_types']) >= 1:  # if user supply annotation arguments
-            variableType_datastruct = process_type_annotation_parameters(parameters, system_dimension)
+        (list_of_trajectories, parameters) = load_trajectories_and_fix_parameters(parameters)
 
-        parameters['stepsize'] = stepsize  # we assume trajectories are sampled at fixed size time-step
-        parameters['variableType_datastruct'] = variableType_datastruct
         P, G, mode_inv, transitions, position, initial_location = infer_model(list_of_trajectories, parameters)
         # print("Number of modes learned = ", len(P))
         print_HA(P, G, mode_inv, transitions, position, parameters, initial_location) # prints an HA model file
@@ -186,9 +161,6 @@ class TestLearnHA(unittest.TestCase):
         result = filecmp.cmp(backup_file, test_generated_file, shallow=False)
         print(result)
         # self.assertTrue(result) # Fails if the output generated is not equal to the file stored in the data/test_output
-
-        pass
-
 
 if __name__ == '__main__':
     unittest.main()
