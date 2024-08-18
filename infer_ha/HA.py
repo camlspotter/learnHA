@@ -1,3 +1,4 @@
+from typeguard import typechecked
 from dataclasses import dataclass
 import numpy as np
 
@@ -105,6 +106,7 @@ class HybridAutomaton():
     modes : list[Mode]
     transitions : list[Transition]
 
+@typechecked
 def build(init_mode : int,
           G : list[np.ndarray],
           mode_inv : list[ list[tuple[float, float]] ],

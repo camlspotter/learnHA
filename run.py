@@ -37,8 +37,6 @@ def runLearnHA():  # Calling the implementation from project BBC4CPS
 
     P_modes, G, mode_inv, transitions, position, init_location = learnHA.infer_model(list_of_trajectories, parameters)
 
-    _ha = HA.build(init_location, G, mode_inv, transitions)
-
     print_HA(P_modes, G, mode_inv, transitions, position, parameters, init_location)
 
 if __name__ == '__main__':
