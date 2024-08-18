@@ -18,23 +18,25 @@ def BDF_backward_version(stepM, stepsize, y_points, index):
     @return:
     """
 
-
-    if stepM == 2:
-        backward_derivative = (3 * y_points[index] - 4 * y_points[index - 1] + 1 * y_points[index - 2]) / (2 * stepsize)
-
-    if stepM == 3:
-        backward_derivative = (11 * y_points[index] - 18 * y_points[index - 1] + 9 * y_points[index - 2] - 2 * y_points[index - 3]) / (6 * stepsize)
-
-    if stepM == 4:
-        backward_derivative = (25 * y_points[index] - 48 * y_points[index - 1] + 36 * y_points[index - 2] - 16 * y_points[index - 3] + 3 * y_points[index - 4]) / (12 * stepsize)
-
-    if stepM == 5:
-        backward_derivative = (137 * y_points[index] - 300 * y_points[index - 1] + 300 * y_points[index - 2] - 200 *
-                           y_points[index - 3] + 75 * y_points[index - 4] - 12 * y_points[index - 5]) / (60 * stepsize)
-
-    if stepM == 6:
-        backward_derivative = (147 * y_points[index] - 360 * y_points[index - 1] + 450 * y_points[index - 2] - 400 *
-            y_points[index - 3] + 225 * y_points[index - 4] - 72 * y_points[index - 5] + 10 * y_points[index - 6]) / (60 * stepsize)
+    match stepM:
+        case 2:
+            backward_derivative = (3 * y_points[index] - 4 * y_points[index - 1] + 1 * y_points[index - 2]) / (2 * stepsize)
+        case 3:
+            backward_derivative = (11 * y_points[index] - 18 * y_points[index - 1] + 9 * y_points[index - 2] - 2 * y_points[index - 3]) / (6 * stepsize)
+    
+        case 4:
+            backward_derivative = (25 * y_points[index] - 48 * y_points[index - 1] + 36 * y_points[index - 2] - 16 * y_points[index - 3] + 3 * y_points[index - 4]) / (12 * stepsize)
+    
+        case 5:
+            backward_derivative = (137 * y_points[index] - 300 * y_points[index - 1] + 300 * y_points[index - 2] - 200 *
+                                   y_points[index - 3] + 75 * y_points[index - 4] - 12 * y_points[index - 5]) / (60 * stepsize)
+    
+        case 6:
+            backward_derivative = (147 * y_points[index] - 360 * y_points[index - 1] + 450 * y_points[index - 2] - 400 *
+                                   y_points[index - 3] + 225 * y_points[index - 4] - 72 * y_points[index - 5] + 10 * y_points[index - 6]) / (60 * stepsize)
+    
+        case _:
+            assert false
 
     return backward_derivative
 
@@ -50,22 +52,26 @@ def BDF_forward_version(stepM, stepsize, y_points, index):
     @return:
     """
 
-    if stepM == 2:
-        forward_derivative = (-3 * y_points[index] + 4 * y_points[index + 1] - 1 * y_points[index + 2]) / (2 * stepsize)
+    match stepM:
+        case 2:
+            forward_derivative = (-3 * y_points[index] + 4 * y_points[index + 1] - 1 * y_points[index + 2]) / (2 * stepsize)
 
-    if stepM == 3:
-        forward_derivative = (-11 * y_points[index] + 18 * y_points[index + 1] - 9 * y_points[index + 2] + 2 * y_points[index + 3]) / (6 * stepsize)
+        case 3:
+            forward_derivative = (-11 * y_points[index] + 18 * y_points[index + 1] - 9 * y_points[index + 2] + 2 * y_points[index + 3]) / (6 * stepsize)
 
-    if stepM == 4:
-        forward_derivative = (-25 * y_points[index] + 48 * y_points[index + 1] - 36 * y_points[index + 2] + 16 * y_points[index + 3] - 3 * y_points[index + 4]) / (12 * stepsize)
+        case 4:
+            forward_derivative = (-25 * y_points[index] + 48 * y_points[index + 1] - 36 * y_points[index + 2] + 16 * y_points[index + 3] - 3 * y_points[index + 4]) / (12 * stepsize)
 
-    if stepM == 5:
-        forward_derivative = (-137 * y_points[index] + 300 * y_points[index + 1] - 300 * y_points[index + 2] + 200 * y_points[index + 3] - 75 * y_points[index + 4] + 12 * y_points[index + 5]) / (60 * stepsize)
+        case 5:
+            forward_derivative = (-137 * y_points[index] + 300 * y_points[index + 1] - 300 * y_points[index + 2] + 200 * y_points[index + 3] - 75 * y_points[index + 4] + 12 * y_points[index + 5]) / (60 * stepsize)
 
-    if stepM == 6:
-        forward_derivative = (-147 * y_points[index] + 360 * y_points[index + 1] - 450 * y_points[index + 2] + 400 *
-                               y_points[index + 3] - 225 * y_points[index + 4] + 72 * y_points[index + 5] - 10 *
-                               y_points[index + 6]) / (60 * stepsize)
+        case 6:
+            forward_derivative = (-147 * y_points[index] + 360 * y_points[index + 1] - 450 * y_points[index + 2] + 400 *
+                                  y_points[index + 3] - 225 * y_points[index + 4] + 72 * y_points[index + 5] - 10 *
+                                  y_points[index + 6]) / (60 * stepsize)
+
+        case _:
+            assert false
 
     return forward_derivative
 
