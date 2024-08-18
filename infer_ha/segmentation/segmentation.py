@@ -245,7 +245,7 @@ def segmented_trajectories(clfs, segmented_traj, position, method, filter_last_s
     seg = position[traj_id - 1]  # starting trajectory=0
     start_trajectory_pos = seg[0]
     end_trajectory_pos = seg[1]
-    traj_segs = []
+    traj_segs : list[int] = []
     del_index = 0 # index pointer for each segment in res
     del_res_indices = []    # store the list of indices of res to be deleted
     for seg_traj_element in segmented_traj:

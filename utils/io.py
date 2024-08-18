@@ -1,6 +1,6 @@
 import os
 
-def open_for_write(path):
+def open_for_write(path : str):
     """
     Same as open(path, "w") but mkdir the directory if necessary
     """

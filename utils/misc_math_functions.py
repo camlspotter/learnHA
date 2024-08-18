@@ -1,7 +1,4 @@
-from typing import List
-
-
-def permut(n: int, k: int) -> List[List[int]]:
+def permut(n: int, k: int) -> list[list[int]]:
     """
     Author: Amit Gurung
     :param self:
@@ -10,7 +7,7 @@ def permut(n: int, k: int) -> List[List[int]]:
     :return: All the coefficients of the multinomial expansion of the form (a+b+c+ ... + k)^n
     """
     res = []
-    myres = []
+    myres : list[list[int]] = []
 
     def backtrack(start, comb):
         sumEle = 0
@@ -37,7 +34,7 @@ def permut(n: int, k: int) -> List[List[int]]:
     return myres  # returns all the list that satisfy the constrain such that r1+r2+...+rk == n
 
 
-def factorial(i):
+def factorial(i : int) -> int:
     if i == 0:
         return 1
     fact = 1

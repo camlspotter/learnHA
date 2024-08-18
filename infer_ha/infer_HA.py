@@ -54,6 +54,7 @@ def infer_model(list_of_trajectories, learning_parameters):
     """
 
     stepsize = learning_parameters.stepsize
+    print("stepsize =", stepsize)
     maxorder = learning_parameters.ode_degree
     boundary_order = learning_parameters.guard_degree
     ep = learning_parameters.segmentation_error_tol
@@ -61,13 +62,10 @@ def infer_model(list_of_trajectories, learning_parameters):
     size_of_input_variables = learning_parameters.size_input_variable
     variableType_datastruct =  learning_parameters.variableType_datastruct # processed and stored in data-struct
     isInvariant = learning_parameters.is_invariant
-
     methods = learning_parameters.methods
     stepM = learning_parameters.lmm_step_size # 2 for engine-timing  #  the step size of Linear Multi-step Method (step M)
     # print("stepM =", stepM)
-    mode_inv = []
-    transitions = []
-    print("stepsize =", stepsize)
+
     t_list, y_list, position = preprocess_trajectories(list_of_trajectories)
     # print("position = ", position)
     # Apply Linear Multistep Method
@@ -170,7 +168,7 @@ def typecheck_ha(P_modes : list[list[tuple[tuple[int,int], # start-end ODE
     return (P_modes, G, mode_inv, transitions, position, init_location)
 
 
-def get_initial_location(P_modes):
+def get_initial_location(P_modes) -> list[int]:
     """
     At the moment we are printing only the mode-ID where the first/starting trajectory is contained in.
     Finding other initial modes, require searching segmented trajectories and identifying the probable initial positions
