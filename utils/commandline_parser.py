@@ -32,7 +32,7 @@ class Options():
     ode_speedup : int # , default=10
     is_invariant : bool # default=True
     stepsize : float # default=0. 01, required=False
-    filter_last_segment : int # choices=[0,1], default=0
+    filter_last_segment : bool # default=False
     lmm_step_size : int # choices=[2, 3, 4, 5, 6], default=5
     methods : str # dtw/dbscan/pieceliner
 
@@ -87,8 +87,7 @@ def read_commandline_arguments():
     parser.add_argument('--stepsize', help='Fixed sampling time step-size of the input trajectories. Set to 0.01 by default',
                         type=float, default=0.01, required=False)
     parser.add_argument('--filter-last-segment',
-                        help='1 to enable and 0 to disable (default) filtering out the last segment from a trajectory during segmentation', type=int,
-                        choices=[0,1], default=0, required=False)
+                        help='True to enable and False to disable (default) filtering out the last segment from a trajectory during segmentation', type=bool, default=False, required=False)
     parser.add_argument('--lmm-step-size',
                         help='Options are: 2/3/4/5/6. Higher values computes more accurate derivatives. 5 is set default',
                         type=int, choices=[2, 3, 4, 5, 6], default=5, required=False)

@@ -194,7 +194,7 @@ def two_fold_segmentation(A, b1, b2, ytuple, Y, size_of_input_variables, method,
     return segmented_traj, clfs, drop
 
 
-def segmented_trajectories(clfs, segmented_traj, position, method, filter_last_segment=1):
+def segmented_trajectories(clfs, segmented_traj, position, method, filter_last_segment : bool):
     """
     Perform segmentation of trajectories to create data structure containing segment positions. This process helps in
     keeping track of the connected segments. This information is later used to infer transitions of an HA.
@@ -265,7 +265,7 @@ def segmented_trajectories(clfs, segmented_traj, position, method, filter_last_s
             # that is, no segments will overlap.
             del_res_indices.append(del_index - 1)   # stores the previous index for deletion
             # delete when single_segment_per_trajectory not Found and user selected the option filter_last_segment
-            if (found_single_segment_per_trajecotry == 0) and (filter_last_segment == 1):
+            if (found_single_segment_per_trajecotry == 0) and filter_last_segment:
                 segments_per_traj = segments_per_traj[ : -1]    # deletes the last segment before creating segmented-trajectories
             segmentedTrajectories.append(segments_per_traj)
 
@@ -281,7 +281,7 @@ def segmented_trajectories(clfs, segmented_traj, position, method, filter_last_s
 
     del_res_indices.append(del_index - 1)  # stores the previous index for deletion
     # delete when single_segment_per_trajectory not Found and user selected the option filter_last_segment
-    if (found_single_segment_per_trajecotry == 0) and (filter_last_segment == 1):
+    if (found_single_segment_per_trajecotry == 0) and filter_last_segment:
         segments_per_traj = segments_per_traj[ : -1]   # deletes the last segment before creating segmented-trajectories
     segmentedTrajectories.append(segments_per_traj)  # the last segmented trajectory
     # ************************************ End of segmentation ******************************************
@@ -290,7 +290,7 @@ def segmented_trajectories(clfs, segmented_traj, position, method, filter_last_s
 
     # cluster_by_DTW = True
     # delete when single_segment_per_trajectory not Found and user selected the option filter_last_segment
-    if (found_single_segment_per_trajecotry == 0) and (filter_last_segment == 1):
+    if (found_single_segment_per_trajecotry == 0) and filter_last_segment:
         for pos in reversed(del_res_indices):
             segmented_traj.pop(pos)
             if method != "dtw":

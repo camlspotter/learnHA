@@ -102,7 +102,7 @@ def infer_model(list_of_trajectories, learning_parameters):
     # print("clfs size = ", len(clfs))
 
     # Instead of deleting the last segment for all models. It is better to ask user's options for deleting
-    filter_last_segment = learning_parameters.filter_last_segment  # 1 for delete last segment and 0 NOT to delete
+    filter_last_segment = learning_parameters.filter_last_segment  # True for delete last segment and False NOT to delete
     # print("filter_last_segment", filter_last_segment)
     segmentedTrajectories, segmented_traj, clfs = segmented_trajectories(clfs, segmented_traj, position, methods, filter_last_segment) # deleted the last segment in each trajectory
     # print("Segmentation done!")
