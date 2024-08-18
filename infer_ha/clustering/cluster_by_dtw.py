@@ -19,7 +19,7 @@ from ..helpers.plotDebug import print_segmented_trajectories, print_P_modes
 from ..helpers import plotDebug as plotdebug
 
 def get_desired_ODE_coefficients(P_modes, A, b1, maximum_ode_prune_factor):
-    """
+    r"""
     ODE inference.
     This function computes the coefficients of the polynomial ODE for each cluster/mode. Note during ODE coefficient
     inferring we only consider in each mode the total number segements <= maximum_ode_prune_factor which is a value
@@ -91,7 +91,7 @@ def get_desired_ODE_coefficients(P_modes, A, b1, maximum_ode_prune_factor):
 
 def cluster_by_dtw(segmented_traj, A, b1, Y, t_list, L_y, correl_threshold, distance_threshold,
                    size_of_input_variables, stepM, maximum_ode_prune_factor=50):
-    """
+    r"""
     This function contains our approach to clustering using the DTW algorithm.
 
     :param segmented_traj: is a list of a custom data structure consisting of segmented trajectories (positions). Each

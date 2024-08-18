@@ -72,7 +72,7 @@ def BDF_forward_version(stepM, stepsize, y_points, index):
 
 
 def diff_method_backandfor(y_list, order, stepsize, stepM):
-    """Using multi-step backwards differentiation formula (BDF) to calculate the
+    r"""Using multi-step backwards differentiation formula (BDF) to calculate the
     coefficient matrix. We have concatenated all the trajectories into a single list because this helped us discard fewer data than
     considering trajectories as a list of independent trajectories. This is because, for the first M points (M the
     step size of BDF), derivatives can not be computed using the backward BDF. In contrast, for the last M points,

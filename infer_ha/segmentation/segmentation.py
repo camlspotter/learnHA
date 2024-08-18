@@ -8,7 +8,7 @@ from sklearn import linear_model
 from infer_ha.utils.util_functions import rel_diff, matrowex
 
 def two_fold_segmentation(A, b1, b2, ytuple, Y, size_of_input_variables, method, stepM, ep_FwdBwd=0.01, ep_backward=0.1):
-    """
+    r"""
     Main idea: (Step-1) We compare backward and forward derivatives at each point of the trajectories. Near the boundary
     of these points, their relative difference will be high. Now, we record these boundary points as the first set of
     start and end points. Next to obtain the exact point of jump, we search further from the first end point to find the
@@ -351,7 +351,7 @@ def segment_and_fit(A, b1, b2, ytuple, ep=0.01):
     return res, drop, clfs
 
 def two_fold_segmentation_new(A, b1, b2, ytuple, size_of_input_variables, method, ep=0.01):
-    """
+    r"""
     Main idea: (Step-1) We compare backward and forward derivatives at each point of the trajectories. Near the boundary
     of these points, their relative difference will be high. We compute the backward derivatives and compare them with
     their previous backward derivatives to determine the exact point. If they are identical, the point is considered to

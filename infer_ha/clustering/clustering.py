@@ -13,7 +13,7 @@ from infer_ha.clustering.cluster_by_dtw import cluster_by_dtw
 from infer_ha.clustering.cluster_by_others import dbscan_cluster, merge_cluster_tol2
 
 def select_clustering(segmented_traj, A, b1, clfs, Y, t_list, L_y, learning_parameters, stepM):
-    """
+    r"""
     A wrapper module that enables the selection of different approaches to the clustering algorithm.
 
     :param segmented_traj: is a list of a custom data structure consisting of segmented trajectories (positions). Each item

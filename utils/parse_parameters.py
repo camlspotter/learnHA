@@ -271,24 +271,24 @@ def parse_trajectories(input_filename):
     trajectory = (t_list, y_list)  # create a tuple of (time and vector of list of single item, where item is np.array)
     list_of_trajectories.append(trajectory)  # create a list of trajectories
 
-    '''
-    print("y_list = ", y_list)
-    print("totalPoints = ", totalPoints)
-    print("totalPoints in y_list = ", len(y_list))
-
-    print ("Type of t_list = ", type(t_list))
-    print("Type of type(t_list[0]) = ", type(t_list[0]))
-    print("Type of t_list[0].shape= ", t_list[0].shape)
-    print("Type of t_list[0].shape[0]= ", t_list[0].shape[0])
-    # print("Type of t_list[0].shape[1]= ", t_list[0].shape[1]) Error coz only one dimension available and no cols
-    print ("t_list = ", t_list)
-
-    print("Type of y_list = ", type(y_list))
-    print("Type of type(y_list[0]) = ", type(y_list[0]))
-    print("Type of y_list[0].shape= ", y_list[0].shape)   # prints the shape of y_list (15015, 5) = (rows, colmns)
-    print("Type of y_list[0].shape[1]= ", y_list[0].shape[1])   # shape[0] for rows or records and shape[1] is cols or dimension
-    # print("y_list = ", y_list)
-    '''
+#     '''
+#     print("y_list = ", y_list)
+#     print("totalPoints = ", totalPoints)
+#     print("totalPoints in y_list = ", len(y_list))
+# 
+#     print ("Type of t_list = ", type(t_list))
+#     print("Type of type(t_list[0]) = ", type(t_list[0]))
+#     print("Type of t_list[0].shape= ", t_list[0].shape)
+#     print("Type of t_list[0].shape[0]= ", t_list[0].shape[0])
+#     # print("Type of t_list[0].shape[1]= ", t_list[0].shape[1]) Error coz only one dimension available and no cols
+#     print ("t_list = ", t_list)
+# 
+#     print("Type of y_list = ", type(y_list))
+#     print("Type of type(y_list[0]) = ", type(y_list[0]))
+#     print("Type of y_list[0].shape= ", y_list[0].shape)   # prints the shape of y_list (15015, 5) = (rows, colmns)
+#     print("Type of y_list[0].shape[1]= ", y_list[0].shape[1])   # shape[0] for rows or records and shape[1] is cols or dimension
+#     # print("y_list = ", y_list)
+#     '''
     # print("t_list = ", t_list)
     # print ("t_list[0][2] = ", t_list[0][2])
     # print ("t_list[0][1] = ", t_list[0][1])

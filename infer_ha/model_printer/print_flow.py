@@ -1,6 +1,6 @@
 
 def print_flow_dynamics(f_out, G, modeID, Exp):
-    """
+    r"""
 
     :param f_out: file pointer where the output is printed.
     :param G: is a list. Each item of the list G is a list that holds the coefficients (obtained using linear regression)
