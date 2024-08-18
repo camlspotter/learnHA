@@ -1,32 +1,39 @@
+from enum import Enum
 import argparse
 from typing import Optional, Any
 from dataclasses import dataclass
 
 @dataclass
+class ClusteringMethod(Enum):
+    DTW = 1
+    DBSCAN = 2
+    PIECELINEAR = 3
+    
+@dataclass
 class Options():
     input_filename : str
     output_directory : str
-    clustering_method : int # 1: DTW (default)  2: DBSCAN  3: piecelinear',  default=1
-    ode_degree : int # Set to 1 by default', type=int, default=1, required=False)
-    modes : int # default=1, required=False)
-    guard_degree : int # default=1, required=False)
-    segmentation_error_tol : float # default=0.01, required=False)
-    segmentation_fine_error_tol : float # default=0.01, required=False)
-    threshold_distance : float # default=0.1, required=False)
-    threshold_correlation : float # default=0.8, required=False)
-    dbscan_eps_dist : float # default=0.01, required=False)
-    dbscan_min_samples : int # default=2, required=False)
-    size_input_variable : int #, required=True)
-    size_output_variable : int # required=True)
-    variable_types : str # default='', required=False)
+    clustering_method : ClusteringMethod # 1: DTW (default)  2: DBSCAN  3: piecelinear'
+    ode_degree : int # default=1
+    modes : int # default=1
+    guard_degree : int # default=1
+    segmentation_error_tol : float # default=0.01
+    segmentation_fine_error_tol : float # default=0.01
+    threshold_distance : float # default=0.1
+    threshold_correlation : float # default=0.8
+    dbscan_eps_dist : float # default=0.01
+    dbscan_min_samples : int # default=2
+    size_input_variable : int
+    size_output_variable : int
+    variable_types : str # default=''
     variableType_datastruct : list[Any]  # structure that holds [var_index, var_name, var_type, pool_values]
-    pool_values : str # , default='', required=False)
-    constant_value : str # default='', required=False)
-    ode_speedup : int # , default=10, required=False)
-    is_invariant : int # type=int, choices=[0, 1, 2], default=0, required=False)
-    stepsize : float # default=0.01, required=False)
-    filter_last_segment : int # choices=[0,1], default=0, required=False)
-    lmm_step_size : int # choices=[2, 3, 4, 5, 6], default=5, required=False)
+    pool_values : str # , default=''
+    constant_value : str # default=''
+    ode_speedup : int # , default=10
+    is_invariant : bool # default=True
+    stepsize : float # default=0. 01, required=False
+    filter_last_segment : int # choices=[0,1], default=0
+    lmm_step_size : int # choices=[2, 3, 4, 5, 6], default=5
     methods : str # dtw/dbscan/pieceliner
 
 def read_commandline_arguments():
@@ -75,8 +82,8 @@ def read_commandline_arguments():
                         type=str, default='', required=False)
     parser.add_argument('--ode-speedup', help='Maximum number of segments to include for ODE computation. Set to 10 by default',
                         type=int, default=10, required=False)
-    parser.add_argument('--is-invariant', help='Options are: 0/1/2. Values 0 (default) and 1 computes invariant and 2 disable computation',
-                        type=int, choices=[0, 1, 2], default=0, required=False)
+    parser.add_argument('--is-invariant', help='Values True (default) computes invariant and False disables computation',
+                        type=bool, default=True, required=False)
     parser.add_argument('--stepsize', help='Fixed sampling time step-size of the input trajectories. Set to 0.01 by default',
                         type=float, default=0.01, required=False)
     parser.add_argument('--filter-last-segment',

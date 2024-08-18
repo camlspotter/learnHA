@@ -43,7 +43,7 @@ class TestLearnHA(unittest.TestCase):
         ps['pool_values'] = ''
         ps['constant_value'] = ''
         ps['ode_speedup'] = 50
-        ps['is_invariant'] = 0
+        ps['is_invariant'] = True
         ps['stepsize'] = 0.01
         ps['filter_last_segment'] = 1
         ps['lmm_step_size'] = 5
@@ -92,7 +92,7 @@ class TestLearnHA(unittest.TestCase):
         ps['pool_values'] = ''
         ps['constant_value'] = ''
         ps['ode_speedup'] = 50
-        ps['is_invariant'] = 0
+        ps['is_invariant'] = True
         ps['stepsize'] = 0.01
         ps['filter_last_segment'] = 1
         ps['lmm_step_size'] = 5
@@ -118,7 +118,7 @@ class TestLearnHA(unittest.TestCase):
 
         ps = {}
         print("Running test runLearnHA module with Bouncing Ball model with type annotation")
-        # python3 run.py --input-filename data/test_data/simu_bball_4.txt --output-filename bball_4.txt --modes 1 --clustering-method 1 --ode-degree 1 --guard-degree 1 --segmentation-error-tol 0.1 --segmentation-fine-error-tol 0.9 --filter-last-segment 1 --threshold-correlation 0.8 --threshold-distance 9.0 --size-input-variable 1 --size-output-variable 2 --variable-types 'x0=t1,x1=t1' --pool-values '' --ode-speedup 50 --is-invariant 2
+        # python3 run.py --input-filename data/test_data/simu_bball_4.txt --output-filename bball_4.txt --modes 1 --clustering-method 1 --ode-degree 1 --guard-degree 1 --segmentation-error-tol 0.1 --segmentation-fine-error-tol 0.9 --filter-last-segment 1 --threshold-correlation 0.8 --threshold-distance 9.0 --size-input-variable 1 --size-output-variable 2 --variable-types 'x0=t1,x1=t1' --pool-values '' --ode-speedup 50 --is-invariant False
 
         ps['input_filename'] = "data/test_data/simu_bball_4.txt"
         ps['output_directory'] = "_test/bball_4"
@@ -142,7 +142,7 @@ class TestLearnHA(unittest.TestCase):
         ps['lmm_step_size'] = 5
         ps['pool_values'] = ''
         ps['ode_speedup'] = 50
-        ps['is_invariant'] = 2
+        ps['is_invariant'] = False
         ps['stepsize'] = 0.01
         ps['filter_last_segment'] = 1
 

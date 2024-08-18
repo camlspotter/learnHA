@@ -10,7 +10,7 @@ from operator import itemgetter
 from infer_ha.clustering.utils import create_simple_modes_positions
 
 
-def compute_mode_invariant(L_y, P_modes, Y, invariant_enabled):
+def compute_mode_invariant(L_y, P_modes, Y, invariant_enabled : bool):
     """
     This function decides to compute or ignore mode-invariant computation based on the user's choice.
 
@@ -29,11 +29,11 @@ def compute_mode_invariant(L_y, P_modes, Y, invariant_enabled):
     # Todo: think better option.
     # 0 and 1: enabled 2: disabled
     mode_inv = []
-    if invariant_enabled == 2:
-        print("Computing Mode Invariant IGNORED!")
-    else:
+    if invariant_enabled:
         mode_inv = compute_invariant(L_y, P_modes, Y)
         print("Computing Mode Invariant done!")
+    else:
+        print("Computing Mode Invariant IGNORED!")
 
     # mode_inv = compute_invariant(L_y, P_modes, Y)  # Always compute mode Invariant irrespective of user's choice for BBC
                                                 # since it is now needed for automata composition
