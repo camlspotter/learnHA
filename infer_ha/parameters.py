@@ -1,4 +1,4 @@
-from utils.parse_parameters import parse_trajectories
+from utils.trajectories_parser import parse_trajectories
 from utils.commandline_parser import read_commandline_arguments, process_type_annotation_parameters, Options
 
 def load_trajectories_and_fix_parameters(parameters):
