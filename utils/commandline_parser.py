@@ -31,7 +31,7 @@ class Options():
     constant_value : str # default=''
     ode_speedup : int # , default=10
     is_invariant : bool # default=True
-    stepsize : float # default=0. 01, required=False
+    stepsize : float # default=0.01
     filter_last_segment : bool # default=False
     lmm_step_size : int # choices=[2, 3, 4, 5, 6], default=5
     methods : str # dtw/dbscan/pieceliner
@@ -54,6 +54,7 @@ def read_commandline_arguments():
     parser.add_argument('--output-directory', help='output directory', required=True)
     parser.add_argument('-c', '--clustering-method', help='Clustering Algorithm. Options are: 1: DTW (default)  2: DBSCAN  3: piecelinear', type=int,
                         choices=[1, 2, 3], default=1, required=False)
+
     parser.add_argument('-d', '--ode-degree', help='Degree of polynomial in ODE. Set to 1 by default', type=int, default=1, required=False)
     parser.add_argument('-m', '--modes', help='Number of modes. Used only in piecelinear clustering algorithm. Set to 1 by default',
                         type=int, default=1, required=False)
