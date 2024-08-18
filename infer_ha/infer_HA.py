@@ -16,7 +16,6 @@ from utils.trajectories_parser import preprocess_trajectories
 
 sys.setrecursionlimit(1000000)  # this is the limit
 
-
 def infer_model(list_of_trajectories, learning_parameters):
     """
     The main module to infer an HA model for the input trajectories.
@@ -54,17 +53,17 @@ def infer_model(list_of_trajectories, learning_parameters):
 
     """
 
-    stepsize = learning_parameters['stepsize']
-    maxorder = learning_parameters['ode_degree']
-    boundary_order = learning_parameters['guard_degree']
-    ep = learning_parameters['segmentation_error_tol']
-    ep_backward = learning_parameters['segmentation_fine_error_tol']
-    size_of_input_variables = learning_parameters['size_input_variable']
-    variableType_datastruct =  learning_parameters['variableType_datastruct'] # processed and stored in data-struct
-    isInvariant = learning_parameters['is_invariant']
+    stepsize = learning_parameters.stepsize
+    maxorder = learning_parameters.ode_degree
+    boundary_order = learning_parameters.guard_degree
+    ep = learning_parameters.segmentation_error_tol
+    ep_backward = learning_parameters.segmentation_fine_error_tol
+    size_of_input_variables = learning_parameters.size_input_variable
+    variableType_datastruct =  learning_parameters.variableType_datastruct # processed and stored in data-struct
+    isInvariant = learning_parameters.is_invariant
 
-    methods = learning_parameters['methods']
-    stepM = learning_parameters['lmm_step_size'] # 2 for engine-timing  #  the step size of Linear Multi-step Method (step M)
+    methods = learning_parameters.methods
+    stepM = learning_parameters.lmm_step_size # 2 for engine-timing  #  the step size of Linear Multi-step Method (step M)
     # print("stepM =", stepM)
     mode_inv = []
     transitions = []
@@ -103,7 +102,7 @@ def infer_model(list_of_trajectories, learning_parameters):
     # print("clfs size = ", len(clfs))
 
     # Instead of deleting the last segment for all models. It is better to ask user's options for deleting
-    filter_last_segment = learning_parameters['filter_last_segment']  # 1 for delete last segment and 0 NOT to delete
+    filter_last_segment = learning_parameters.filter_last_segment  # 1 for delete last segment and 0 NOT to delete
     # print("filter_last_segment", filter_last_segment)
     segmentedTrajectories, segmented_traj, clfs = segmented_trajectories(clfs, segmented_traj, position, methods, filter_last_segment) # deleted the last segment in each trajectory
     # print("Segmentation done!")
@@ -142,7 +141,7 @@ def infer_model(list_of_trajectories, learning_parameters):
     # '''
     # num_mode = len(P)
 
-    transitions = compute_transitions(learning_parameters['output_directory'],
+    transitions = compute_transitions(learning_parameters.output_directory,
                                       P_modes, position, segmentedTrajectories, L_y, boundary_order, Y,
                                       variableType_datastruct, number_of_segments_before_cluster,
                                       number_of_segments_after_cluster)

@@ -42,9 +42,9 @@ def print_HA(P_modes, G, mode_inv, transitions, position, learning_parameters, i
 
     """
 
-    outputfilename = os.path.join(learning_parameters['output_directory'], "learned_HA.txt")
-    maxorder = learning_parameters['ode_degree']
-    boundary_order = learning_parameters['guard_degree']
+    outputfilename = os.path.join(learning_parameters.output_directory, "learned_HA.txt")
+    maxorder = learning_parameters.ode_degree
+    boundary_order = learning_parameters.guard_degree
     num_mode = len(P_modes)   # size returned by DTW clustering algorithm.
     total_ode_coeff = G[0].shape[1] # total columns of 1st location's ODE. Size is dimension + constant-intercept term
 
@@ -99,7 +99,7 @@ def print_HA(P_modes, G, mode_inv, transitions, position, learning_parameters, i
         print_transition(f_out, transitions, system_dim, boundary_order)
 
     ha = HA.build(initial_location, G, mode_inv, transitions)
-    outputfilename = os.path.join(learning_parameters['output_directory'], "learned_HA.json")
+    outputfilename = os.path.join(learning_parameters.output_directory, "learned_HA.json")
     with utils.io.open_for_write(outputfilename) as f_out:
         f_out.write(json.dumps(asdict(ha), indent=2))
 

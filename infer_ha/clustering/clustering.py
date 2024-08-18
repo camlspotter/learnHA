@@ -41,16 +41,16 @@ def select_clustering(segmented_traj, A, b1, clfs, Y, t_list, L_y, learning_para
     """
 
     # print("Clustering segmented points ...")
-    maxorder = learning_parameters['ode_degree']
-    num_mode = learning_parameters['modes']
-    ep = learning_parameters['segmentation_error_tol']
-    size_of_input_variables = learning_parameters['size_input_variable']
-    method = learning_parameters['methods']
-    maximum_ode_prune_factor = learning_parameters['ode_speedup']
-    correl_threshold = learning_parameters['threshold_correlation']
-    distance_threshold = learning_parameters['threshold_distance']
-    dbscan_eps_dist = learning_parameters['dbscan_eps_dist']
-    dbscan_min_samples = learning_parameters['dbscan_min_samples']
+    maxorder = learning_parameters.ode_degree
+    num_mode = learning_parameters.modes
+    ep = learning_parameters.segmentation_error_tol
+    size_of_input_variables = learning_parameters.size_input_variable
+    method = learning_parameters.methods
+    maximum_ode_prune_factor = learning_parameters.ode_speedup
+    correl_threshold = learning_parameters.threshold_correlation
+    distance_threshold = learning_parameters.threshold_distance
+    dbscan_eps_dist = learning_parameters.dbscan_eps_dist
+    dbscan_min_samples = learning_parameters.dbscan_min_samples
 
     P_modes = []
     G = []

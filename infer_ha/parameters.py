@@ -1,5 +1,5 @@
 from utils.parse_parameters import parse_trajectories
-from utils.commandline_parser import read_commandline_arguments, process_type_annotation_parameters
+from utils.commandline_parser import read_commandline_arguments, process_type_annotation_parameters, Options
 
 def load_trajectories_and_fix_parameters(parameters):
     '''
@@ -16,4 +16,6 @@ def load_trajectories_and_fix_parameters(parameters):
         variableType_datastruct = process_type_annotation_parameters(parameters, system_dimension)
     parameters['variableType_datastruct'] = variableType_datastruct
 
-    return (list_of_trajectories, parameters)
+    ops = Options(**parameters)
+
+    return (list_of_trajectories, ops)
