@@ -3,8 +3,7 @@ This module is used to parse the list of trajectories structure to construct str
 """
 import numpy as np
 from numpy.typing import NDArray
-
-Trajectories = tuple[ list[NDArray[np.float64]], list[NDArray[np.float64]] ]
+from infer_ha.trajectories import Trajectories
 
 def preprocess_trajectories(list_of_trajectories : list[Trajectories]) -> tuple[ list[NDArray[np.float64]],
                                                                                  list[NDArray[np.float64]],

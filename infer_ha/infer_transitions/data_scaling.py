@@ -1,7 +1,7 @@
 import numpy as np
 import os
-from utils import misc_math_functions as myUtil
-import utils.io
+from infer_ha.utils import misc_math_functions as myUtil
+from infer_ha.utils import io
 
 def create_data(output_filename, srcData, destData, L_y, Y):
     """
@@ -21,7 +21,7 @@ def create_data(output_filename, srcData, destData, L_y, Y):
     x_p = []
     x_n = []
 
-    with utils.io.open_for_write(output_filename) as f_out:
+    with io.open_for_write(output_filename) as f_out:
         x_gs = []  # data for grid search
         for id0 in srcData:  # The class with +1 is stored first
             y.append(1)

@@ -1,5 +1,4 @@
 import os
-import utils.io
 import csv
 import matplotlib.pyplot as plt
 
@@ -8,7 +7,7 @@ import itertools
 
 from infer_ha.clustering.utils import create_simple_per_segmented_positions_exact, create_simple_modes_positions_for_ODE
 from infer_ha.utils.util_functions import rel_diff
-
+from infer_ha.utils import io
 
 def plot_signals(timeSignal1, Signal1, timeSignal2, Signal2):
     # Note Signal1 and Signal2 only has output variables
@@ -504,7 +503,7 @@ def print_data_value(position, Y, dimension):
     return x_pts
 
 def output_derivatives(b1, b2, Y, size_of_input_variables):
-    file_out = utils.io.open_for_write("outputs/amit_backward.txt")
+    file_out = io.open_for_write("outputs/amit_backward.txt")
     file_out.write("b1 backward derivatives: \n")
     str1 = ""
     pos_value = 0
@@ -521,7 +520,7 @@ def output_derivatives(b1, b2, Y, size_of_input_variables):
         file_out.write(str1)
     file_out.close()
 
-    file_out2 = utils.io.open_for_write("outputs/amit_forward.txt")
+    file_out2 = io.open_for_write("outputs/amit_forward.txt")
     file_out2.write("b2 forward derivatives: \n")
     pos_value = 0
     relDiff = 0.0
@@ -562,7 +561,7 @@ def analyse_output(segmentedTrajectories, b1, b2, Y, t_list, L_y, size_of_input_
     # varIndex = 2  # 0 and 1 are input-variable and 2 is the output variable for engine-timing
 
     # ##### writing to a csv file for debugging and analysing values #########
-    file_csv = utils.io.open_for_write('segmentationFile.csv')
+    file_csv = io.open_for_write('segmentationFile.csv')
     writer = csv.writer(file_csv)   # file pointer created
     rowValue = ["pos", "t_value", "x_"+str(varIndex) , "BDF_backward", "BDF_forward", "Seg-ID"]
     writer.writerow(rowValue)

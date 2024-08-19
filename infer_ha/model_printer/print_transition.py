@@ -1,7 +1,7 @@
 
 from infer_ha.model_printer.print_guard import *
 from infer_ha.model_printer.print_assignment import *
-from utils import misc_math_functions as myUtil
+from infer_ha.utils import misc_math_functions as myUtil
 
 def print_transition(f_out, transitions, system_dim, boundary_order):
     """

@@ -15,7 +15,7 @@ from libsvm.svmutil import svm_save_model, svm_predict
 # from libsvm.svmutil import *
 from infer_ha.utils.util_functions import rel_diff
 from infer_ha.clustering.gridSearch_fromSKLearn import gridSearchStart
-from utils import misc_math_functions as myUtil
+from infer_ha.utils import misc_math_functions as myUtil
 
 def getGuard_inequality(output_dir, srcData, destData, L_y, boundary_order, Y):
     """

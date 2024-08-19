@@ -4,7 +4,7 @@ This module computes the derivatives
 
 import numpy as np
 
-from utils import generator as generate # generate_complete_polynomial
+from infer_ha.utils import generator as generate # generate_complete_polynomial
 
 
 def BDF_backward_version(stepM, stepsize, y_points, index):
