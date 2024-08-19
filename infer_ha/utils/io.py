@@ -1,6 +1,7 @@
 import os
+from io import TextIOWrapper
 
-def open_for_write(path : str):
+def open_for_write(path : str) -> TextIOWrapper:
     """
     Same as open(path, "w") but mkdir the directory if necessary
     """

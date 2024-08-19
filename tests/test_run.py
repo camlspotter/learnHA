@@ -2,18 +2,31 @@ import unittest
 
 import filecmp
 import warnings
-warnings.filterwarnings('ignore')   # disables FutureWarning in the use of clf.fit()
+import os
+import json
+from dataclasses import asdict
 
 from infer_ha.infer_HA import infer_model
+from infer_ha import HA
 from infer_ha.model_printer.print_HA import print_HA
 from infer_ha.parameters import load_trajectories_and_fix_parameters
 from infer_ha.utils.trajectories_parser import parse_trajectories
 from infer_ha.utils.commandline_parser import process_type_annotation_parameters
-import os
+import infer_ha.utils.io as utils_io
 
 # To execute this test from the project folder "learnHA" type the command
 # amit@amit-Alienware-m15-R4:~/MyPythonProjects/learningHA/learnHA$ python -m unittest discover -v
 
+
+def write_HA(parameters, raw):
+    outputfilename = os.path.join(parameters.output_directory, "learned_HA.txt")
+    with utils_io.open_for_write(outputfilename) as f_out:
+        print_HA(f_out, raw)
+
+    ha = HA.build(raw)
+    outputfilename = os.path.join(parameters.output_directory, "learned_HA.json")
+    with utils_io.open_for_write(outputfilename) as f_out:
+        f_out.write(json.dumps(asdict(ha), indent=2))
 
 class TestLearnHA(unittest.TestCase):
 
@@ -50,9 +63,8 @@ class TestLearnHA(unittest.TestCase):
 
         (list_of_trajectories, parameters) = load_trajectories_and_fix_parameters(ps)
 
-        P, G, mode_inv, transitions, position, initial_location = infer_model(list_of_trajectories, parameters)
-        # print("Number of modes learned = ", len(P))
-        print_HA(P, G, mode_inv, transitions, position, parameters, initial_location)  # prints an HA model file
+        raw = infer_model(list_of_trajectories, parameters)
+        write_HA(parameters, raw)  # prints an HA model file
 
         backup_file = "data/test_output/oscillator_2_without_annotation.txt"
         test_generated_file = os.path.join(parameters.output_directory, 'learn_HA.txt')
@@ -99,9 +111,8 @@ class TestLearnHA(unittest.TestCase):
 
         (list_of_trajectories, parameters) = load_trajectories_and_fix_parameters(ps)
 
-        P, G, mode_inv, transitions, position, initial_location = infer_model(list_of_trajectories, parameters)
-        # print("Number of modes learned = ", len(P))
-        print_HA(P, G, mode_inv, transitions, position, parameters, initial_location) # prints an HA model file
+        raw = infer_model(list_of_trajectories, parameters)
+        write_HA(parameters, raw) # prints an HA model file
 
         backup_file = "data/test_output/oscillator_2_with_annotation.txt"
         test_generated_file = os.path.join(parameters.output_directory, 'learn_HA.txt')
@@ -148,9 +159,8 @@ class TestLearnHA(unittest.TestCase):
 
         (list_of_trajectories, parameters) = load_trajectories_and_fix_parameters(ps)
 
-        P, G, mode_inv, transitions, position, initial_location = infer_model(list_of_trajectories, parameters)
-        # print("Number of modes learned = ", len(P))
-        print_HA(P, G, mode_inv, transitions, position, parameters, initial_location) # prints an HA model file
+        raw = infer_model(list_of_trajectories, parameters)
+        write_HA(parameters, raw)
 
         backup_file = "data/test_output/bball_4.txt"
         test_generated_file = os.path.join(parameters.output_directory, 'learn_HA.txt')

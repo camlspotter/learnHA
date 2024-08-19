@@ -15,10 +15,11 @@ from infer_ha.clustering.utils import create_simple_modes_positions
 from infer_ha.utils.trajectories_parser import preprocess_trajectories
 from infer_ha.trajectories import Trajectories
 from infer_ha.utils.commandline_parser import Options
+from infer_ha.HA import Raw
 
 sys.setrecursionlimit(1000000)  # this is the limit
 
-def infer_model(list_of_trajectories : list[Trajectories], learning_parameters : Options):
+def infer_model(list_of_trajectories : list[Trajectories], learning_parameters : Options) -> Raw:
     """
     The main module to infer an HA model for the input trajectories.
 
@@ -122,6 +123,7 @@ def infer_model(list_of_trajectories : list[Trajectories], learning_parameters :
     # P, Drop = dropclass(P, G, drop, A, b1, Y, ep, stepsize)  # appends the dropped point to a cluster that fits well
     # print("Total dropped points (after fixing) are: ", len(Drop))
     number_of_segments_after_cluster = len(P_modes)
+    [init_location] = get_initial_location(P_modes)
     # print("P_modes = ", P_modes)
 
     # *************** Trying to plot points ***********************************
@@ -146,29 +148,19 @@ def infer_model(list_of_trajectories : list[Trajectories], learning_parameters :
                                       variableType_datastruct, number_of_segments_before_cluster,
                                       number_of_segments_after_cluster)
 
-    return typecheck_ha(P_modes, G, mode_inv, transitions, position)
+    raw = Raw(num_mode= number_of_segments_after_cluster,
+              G= G,
+              mode_inv= mode_inv,
+              transitions= transitions,
+              initial_location= init_location,
+              ode_degree= learning_parameters.ode_degree,
+              guard_degree= learning_parameters.guard_degree)
+
+    return typecheck_ha(raw)
 
 @typechecked
-def typecheck_ha(P_modes : list[list[tuple[tuple[int,int], # start-end ODE
-                                           tuple[int,int], # start-end exact
-                                           list[int]       # "positions of points of the list of trajectories"
-                                           ]]],
-                 G : list[np.ndarray],  # ODE coeffs, called Flow in the paper  The array size is (#v + 1) * #o
-                 mode_inv : list[ list[tuple[float,float]] ], # variable invariants per mode
-                 transitions : list[tuple[int,          # src
-                                          int,          # dest
-                                          list[float],  # guard coeffs [ci], defines the guard:  x1 * c1 + x2 * c2 + .. + 1 * cn <= 0
-                                          np.ndarray,   # assignment coeffs. 2D
-                                          np.ndarray    # assignment intercepts. 1D
-                                                        # x'j = x1 * cj1 + x2 * cj2 + .. + xn *cjn + ij
-                                          ]],
-                 position : list[tuple[int,int]]  # used to determine the possible initial locations with P_modes
-                 ):
-    # The initial location is the first element of the possible initial locations computed by get_initial_location(P_modes, position)
-    [init_location] = get_initial_location(P_modes)
-
-    return (P_modes, G, mode_inv, transitions, position, init_location)
-
+def typecheck_ha( raw : Raw ) -> Raw:
+    return raw
 
 def get_initial_location(P_modes) -> list[int]:
     """

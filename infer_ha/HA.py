@@ -3,6 +3,22 @@ from dataclasses import dataclass
 import numpy as np
 
 @dataclass
+class Raw():
+    num_mode : int          # num_mode
+    G : list[np.ndarray]    # ODE coeffs, called Flow in the paper.  The array size is (#v + 1) * #o
+    mode_inv : list[ list[ tuple[ float, float ] ] ]  # Variable invariants per mode
+    transitions : list[tuple[int,          # src
+                             int,          # dest
+                             list[float],  # guard coeffs [ci], defines the guard:  x1 * c1 + x2 * c2 + .. + 1 * cn <= 0
+                             np.ndarray,   # assignment coeffs. 2D
+                             np.ndarray    # assignment intercepts. 1D
+                             # x'j = x1 * cj1 + x2 * cj2 + .. + xn *cjn + ij
+                             ]]
+    initial_location : int
+    ode_degree : int         # required for printing
+    guard_degree : int       # required for printing
+
+@dataclass
 class Range():
     min : float
     max : float
@@ -107,23 +123,16 @@ class HybridAutomaton():
     transitions : list[Transition]
 
 @typechecked
-def build(init_mode : int,
-          G : list[np.ndarray],
-          mode_inv : list[ list[tuple[float, float]] ],
-          transitions : list[tuple[int,
-                                   int,
-                                   list[float],
-                                   np.ndarray,
-                                   np.ndarray
-                                   ]]) -> HybridAutomaton:
+def build(raw : Raw) -> HybridAutomaton:
+    mode_inv = raw.mode_inv
     # if invariant_enabled == 2, mode_inv is empty!
     if mode_inv == []:
-        mode_inv = [[]] * len(G)  # empty invariants
+        mode_inv = [[]] * len(raw.G)  # empty invariants
     else:
-        assert (len(G) == len(mode_inv)), f"len(G) = {len(G)}  len(mode_inv) = {len(mode_inv)}"
+        assert (len(raw.G) == len(raw.mode_inv)), f"len(G) = {len(raw.G)}  len(mode_inv) = {len(raw.mode_inv)}"
 
-    modes = [ build_Mode (id, inv, odes) for (id, (inv, odes)) in enumerate(zip(mode_inv, G)) ]
+    modes = [ build_Mode (id, inv, odes) for (id, (inv, odes)) in enumerate(zip(raw.mode_inv, raw.G)) ]
 
-    transs : list[Transition] = [ build_Transition(trans) for trans in transitions ]
+    transs : list[Transition] = [ build_Transition(trans) for trans in raw.transitions ]
 
-    return HybridAutomaton(init_mode= init_mode, modes= modes, transitions= transs)
+    return HybridAutomaton(init_mode= raw.initial_location, modes= modes, transitions= transs)

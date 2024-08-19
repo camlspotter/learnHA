@@ -4,16 +4,16 @@ This module prints an HA model into a plain .txt file
 
 import os
 
+from io import TextIOWrapper
 from infer_ha.utils import generator as generate
 from infer_ha.model_printer.print_header import *
 from infer_ha.model_printer.print_location import *
 from infer_ha.model_printer.print_transition import *
 import infer_ha.HA as HA
+from infer_ha.utils.commandline_parser import Options
 from infer_ha.utils import io
-from dataclasses import asdict
-import json
 
-def print_HA(P_modes, G, mode_inv, transitions, position, learning_parameters, initial_location):
+def print_HA(f_out : TextIOWrapper, raw : HA.Raw) -> None:
     """
 
     :param P_modes: holds a list of modes. Each mode is a list of structures; we call it a segment.
@@ -42,10 +42,14 @@ def print_HA(P_modes, G, mode_inv, transitions, position, learning_parameters, i
 
     """
 
-    outputfilename = os.path.join(learning_parameters.output_directory, "learned_HA.txt")
-    maxorder = learning_parameters.ode_degree
-    boundary_order = learning_parameters.guard_degree
-    num_mode = len(P_modes)   # size returned by DTW clustering algorithm.
+    num_mode = raw.num_mode
+    G = raw.G
+    mode_inv = raw.mode_inv
+    transitions = raw.transitions
+    initial_location = raw.initial_location
+
+    maxorder = raw.ode_degree
+    boundary_order = raw.guard_degree
     total_ode_coeff = G[0].shape[1] # total columns of 1st location's ODE. Size is dimension + constant-intercept term
 
     total_ode_rows = G[0].shape[0]  # total row of 1st location's ODE. Size is dimension
@@ -93,14 +97,10 @@ def print_HA(P_modes, G, mode_inv, transitions, position, learning_parameters, i
     # print ("After calling P is ", P)
     # print("After calling G is ", G)
 
-    with io.open_for_write(outputfilename) as f_out:
-        print_header(f_out, num_mode, system_dim, transitions)
-        print_location(f_out, G, mode_inv, Exp, initial_location)
-        print_transition(f_out, transitions, system_dim, boundary_order)
-
-    ha = HA.build(initial_location, G, mode_inv, transitions)
-    outputfilename = os.path.join(learning_parameters.output_directory, "learned_HA.json")
-    with io.open_for_write(outputfilename) as f_out:
-        f_out.write(json.dumps(asdict(ha), indent=2))
+# with io.open_for_write(outputfilename) as f_out:
+#    outputfilename = os.path.join(learning_parameters.output_directory, "learned_HA.txt")
+    print_header(f_out, num_mode, system_dim, transitions)
+    print_location(f_out, G, mode_inv, Exp, initial_location)
+    print_transition(f_out, transitions, system_dim, boundary_order)
 
     return
