@@ -36,7 +36,7 @@ def BDF_backward_version(stepM, stepsize, y_points, index):
                                    y_points[index - 3] + 225 * y_points[index - 4] - 72 * y_points[index - 5] + 10 * y_points[index - 6]) / (60 * stepsize)
     
         case _:
-            assert false
+            assert false, "invalid stepM"
 
     return backward_derivative
 
@@ -71,7 +71,7 @@ def BDF_forward_version(stepM, stepsize, y_points, index):
                                   y_points[index + 6]) / (60 * stepsize)
 
         case _:
-            assert false
+            assert false, "invalid stepM"
 
     return forward_derivative
 
