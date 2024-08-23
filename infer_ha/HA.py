@@ -18,6 +18,9 @@ class Raw():
     ode_degree : int         # required for printing
     guard_degree : int       # required for printing
 
+    input_variables : list[str]
+    output_variables : list[str]
+
 @dataclass
 class Range():
     min : float
@@ -98,21 +101,22 @@ class Mode():
     invariant : Invariant
     flow : dict[str,ODE]
 
-def build_invariant(inv : list[tuple[float, float]]) -> Invariant:
-    return { ("x" + str(i)): Range(min, max) for (i,(min,max)) in enumerate(inv) }
+def build_invariant(vars : list[str], inv : list[tuple[float, float]]) -> Invariant:
+    return { vars[i]: Range(min, max) for (i,(min,max)) in enumerate(inv) }
 
 # XXX Very simliar to build_guard
-def build_ode(ode : np.ndarray) -> ODE:
-    return { ("x" + str(i) if i < len(ode) - 1 else "1"): c for (i, c) in enumerate(ode) } 
+def build_ode(vars : list[str], ode : np.ndarray) -> ODE:
+    return { (vars[i] if i < len(ode) - 1 else "1"): c for (i, c) in enumerate(ode) }
 
-def build_odes(odes : np.ndarray) -> dict[str,ODE]:
-    return { ("x" + str(i)): o for (i,o) in enumerate([build_ode(ode) for ode in odes]) }
+def build_odes(vars : list[str], odes : np.ndarray) -> dict[str,ODE]:
+    return { vars[i]: o for (i,o) in enumerate([build_ode(vars, ode) for ode in odes]) }
 
-def build_Mode(id : int,
+def build_Mode(vars : list[str],
+               id : int,
                inv : list[tuple[float, float]],
                odes : np.ndarray) -> Mode:
-    invariant = build_invariant(inv)
-    flow = build_odes(odes)
+    invariant = build_invariant(vars, inv)
+    flow = build_odes(vars, odes)
     return Mode(id= id, invariant= invariant, flow= flow)
 
 
@@ -121,6 +125,8 @@ class HybridAutomaton():
     init_mode : int
     modes : list[Mode]
     transitions : list[Transition]
+    input_variables : list[str]
+    output_variables : list[str]
 
 @typechecked
 def build(raw : Raw) -> HybridAutomaton:
@@ -131,8 +137,14 @@ def build(raw : Raw) -> HybridAutomaton:
     else:
         assert (len(raw.G) == len(raw.mode_inv)), f"len(G) = {len(raw.G)}  len(mode_inv) = {len(raw.mode_inv)}"
 
-    modes = [ build_Mode (id, inv, odes) for (id, (inv, odes)) in enumerate(zip(raw.mode_inv, raw.G)) ]
+    vars = raw.input_variables + raw.output_variables
 
-    transs : list[Transition] = [ build_Transition(trans) for trans in raw.transitions ]
+    modes = [ build_Mode (vars, id, inv, odes) for (id, (inv, odes)) in enumerate(zip(raw.mode_inv, raw.G)) ]
 
-    return HybridAutomaton(init_mode= raw.initial_location, modes= modes, transitions= transs)
+    transs : list[Transition] = [ build_Transition(id, trans) for (id, trans) in enumerate(raw.transitions) ]
+
+    return HybridAutomaton(init_mode= raw.initial_location,
+                           modes= modes,
+                           transitions= transs,
+                           input_variables= raw.input_variables,
+                           output_variables = raw.output_variables)

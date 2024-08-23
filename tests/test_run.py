@@ -60,6 +60,8 @@ class TestLearnHA(unittest.TestCase):
         ps['stepsize'] = 0.01
         ps['filter_last_segment'] = True
         ps['lmm_step_size'] = 5
+        ps['input_variables'] = []
+        ps['output_variables'] = []
 
         (list_of_trajectories, parameters) = load_trajectories_and_fix_parameters(ps)
 
@@ -108,6 +110,8 @@ class TestLearnHA(unittest.TestCase):
         ps['stepsize'] = 0.01
         ps['filter_last_segment'] = True
         ps['lmm_step_size'] = 5
+        ps['input_variables'] = []
+        ps['output_variables'] = []
 
         (list_of_trajectories, parameters) = load_trajectories_and_fix_parameters(ps)
 
@@ -156,6 +160,8 @@ class TestLearnHA(unittest.TestCase):
         ps['is_invariant'] = False
         ps['stepsize'] = 0.01
         ps['filter_last_segment'] = True
+        ps['input_variables'] = []
+        ps['output_variables'] = []
 
         (list_of_trajectories, parameters) = load_trajectories_and_fix_parameters(ps)
 

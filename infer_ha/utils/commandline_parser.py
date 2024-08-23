@@ -34,7 +34,9 @@ class Options():
     stepsize : float # default=0.01
     filter_last_segment : bool # default=False
     lmm_step_size : int # choices=[2, 3, 4, 5, 6], default=5
-    methods : str # dtw/dbscan/pieceliner
+
+    input_variables : list[str]
+    output_variables : list[str]
 
 def read_commandline_arguments():
     """
@@ -93,6 +95,13 @@ def read_commandline_arguments():
                         help='Options are: 2/3/4/5/6. Higher values computes more accurate derivatives. 5 is set default',
                         type=int, choices=[2, 3, 4, 5, 6], default=5, required=False)
 
+    parser.add_argument('--input-variables',
+                        help='Input variable names separated by commas',
+                        type=str, default="", required=False)
+    parser.add_argument('--output-variables',
+                        help='Output variable names separated by commas',
+                        type=str, default="", required=False)
+
     args = vars(parser.parse_args())    #  create a dict structure of the arguments
 
     # print("variable-types =", args['variable_types'])
@@ -107,6 +116,12 @@ def read_commandline_arguments():
 
     # variableType_datastruct will be set in run.py
     args['variableType_datastruct'] = []
+
+    args['input_variables'] = [] if args['input_variables'] == "" else args['input_variables'].split(",")
+    args['output_variables'] = [] if args['output_variables'] == "" else args['output_variables'].split(",")
+
+    print("input_variables:", args['input_variables'])
+    print("output_variables:", args['output_variables'])
 
     _options = Options(**args)
     

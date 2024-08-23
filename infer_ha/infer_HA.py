@@ -148,13 +148,25 @@ def infer_model(list_of_trajectories : list[Trajectories], learning_parameters :
                                       variableType_datastruct, number_of_segments_before_cluster,
                                       number_of_segments_after_cluster)
 
+    if learning_parameters.input_variables == []:
+        learning_parameters.input_variables = [f"x{i}" for i in range(0, learning_parameters.size_input_variable)]
+
+    if learning_parameters.output_variables == []:
+        learning_parameters.output_variables = [f"x{i}" for i in range(learning_parameters.size_input_variable, learning_parameters.size_input_variable + learning_parameters.size_output_variable)]
+
+    print("input_variables:", learning_parameters.input_variables)
+    print("output_variables:", learning_parameters.output_variables)
+
     raw = Raw(num_mode= number_of_segments_after_cluster,
               G= G,
               mode_inv= mode_inv,
               transitions= transitions,
               initial_location= init_location,
               ode_degree= learning_parameters.ode_degree,
-              guard_degree= learning_parameters.guard_degree)
+              guard_degree= learning_parameters.guard_degree,
+              input_variables= learning_parameters.input_variables,
+              output_variables= learning_parameters.output_variables
+              )
 
     return typecheck_ha(raw)
 
