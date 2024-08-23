@@ -50,6 +50,7 @@ Assignment = dict[str,float]  # Σ_i1x_i + a_
 
 @dataclass
 class Transition():
+    id : int
     src : int
     dst : int
     guard : Guard
@@ -80,7 +81,8 @@ def build_assignments(coeffs : np.ndarray, intercepts : np.ndarray) -> dict[str,
 assert (str(build_assignments( np.array([ [1,2,3], [4,5,6], [7,8,9] ]), np.array( [10, 11, 12] )))
         == "{'x0': {'x0': np.int64(1), 'x1': np.int64(2), 'x2': np.int64(3), '1': np.int64(10)}, 'x1': {'x0': np.int64(4), 'x1': np.int64(5), 'x2': np.int64(6), '1': np.int64(11)}, 'x2': {'x0': np.int64(7), 'x1': np.int64(8), 'x2': np.int64(9), '1': np.int64(12)}}")
 
-def build_Transition(trans : tuple[int,
+def build_Transition(id : int,
+                     trans : tuple[int,
                                    int,
                                    list[float],
                                    np.ndarray,
@@ -90,7 +92,8 @@ def build_Transition(trans : tuple[int,
 
     guard = build_guard(guard_coeffs)
     assignments = build_assignments(assignment_coeffs, assignment_intercepts)
-    return Transition(src= src,
+    return Transition(id= id,
+                      src= src,
                       dst= dst,
                       guard= guard,
                       assignments= assignments)
@@ -127,6 +130,9 @@ class HybridAutomaton():
     transitions : list[Transition]
     input_variables : list[str]
     output_variables : list[str]
+
+    def outgoing_transitions(self, mode_id : int) -> list[Transition]:
+        return [tr for tr in self.transitions if tr.src == mode_id ]
 
 @typechecked
 def build(raw : Raw) -> HybridAutomaton:
