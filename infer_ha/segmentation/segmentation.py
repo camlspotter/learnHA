@@ -6,6 +6,7 @@ Contains modules related to the segmentation process
 from sklearn import linear_model
 
 from infer_ha.utils.util_functions import rel_diff, matrowex
+from infer_ha.utils.commandline_parser import ClusteringMethod
 
 def two_fold_segmentation(A, b1, b2, ytuple, Y, size_of_input_variables, method, stepM, ep_FwdBwd=0.01, ep_backward=0.1):
     r"""
@@ -174,8 +175,7 @@ def two_fold_segmentation(A, b1, b2, ytuple, Y, size_of_input_variables, method,
     clfs = []
 
     # cluster_by_DTW = True
-    # if cluster_by_DTW == False: # for DTW we do not need clfs computation at this stage but for dbscan/linearpiece we need
-    if method != "dtw":  # for DTW we do not need clfs computation at this stage, but for dbscan/linearpiece we need
+    if method != ClusteringMethod.DTW:  # for DTW we do not need clfs computation at this stage, but for dbscan/linearpiece we need
         # print ("len of segmented_traj", len(segmented_traj))
         for seg_element in segmented_traj:
             lst = seg_element[2]  # access the third item of the tuple
@@ -293,7 +293,7 @@ def segmented_trajectories(clfs, segmented_traj, position, method, filter_last_s
     if (found_single_segment_per_trajecotry == 0) and filter_last_segment:
         for pos in reversed(del_res_indices):
             segmented_traj.pop(pos)
-            if method != "dtw":
+            if method != ClusteringMethod.DTW:
                 clfs.pop(pos)    # for DTW we do not have clfs at this stage, so skipping this line
             # if not cluster_by_DTW:  # for DTW clustering we do not have clfs data. So skipping this line saves time
             #     clfs.pop(pos)
@@ -477,7 +477,7 @@ def two_fold_segmentation_new(A, b1, b2, ytuple, size_of_input_variables, method
     # cluster_by_DTW = True
     # if cluster_by_DTW == False: # for DTW we do not need clfs computation at this stage but for dbscan/linearpiece we need
 
-    if method != "dtw":  # for DTW we do not need clfs computation at this stage but for dbscan/linearpiece we need
+    if method != ClusteringMethod.DTW:  # for DTW we do not need clfs computation at this stage but for dbscan/linearpiece we need
         # print ("len of res", len(res))
         for lst in res:
             # print("List in res is ", lst)

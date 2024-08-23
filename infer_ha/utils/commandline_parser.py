@@ -3,17 +3,16 @@ import argparse
 from typing import Optional, Any
 from dataclasses import dataclass
 
-@dataclass
+# @dataclass # We cannot use @dataclass with Enum: @dataclass overrides __eq__
 class ClusteringMethod(Enum):
-    DTW = 1
-    DBSCAN = 2
-    PIECELINEAR = 3
-    
+    DTW = "dtw"
+    DBSCAN = "dbscan"
+    PIECELINEAR = "piecelinear"
+   
 @dataclass
 class Options():
     input_filename : str
     output_directory : str
-    clustering_method : ClusteringMethod # 1: DTW (default)  2: DBSCAN  3: piecelinear'
     ode_degree : int # default=1
     modes : int # default=1
     guard_degree : int # default=1
@@ -34,6 +33,7 @@ class Options():
     stepsize : float # default=0.01
     filter_last_segment : bool # default=False
     lmm_step_size : int # choices=[2, 3, 4, 5, 6], default=5
+    methods : ClusteringMethod # dtw/dbscan/piecelinear
 
     input_variables : list[str]
     output_variables : list[str]
@@ -54,7 +54,7 @@ def read_commandline_arguments():
     parser = argparse.ArgumentParser(description='Learns HA model from input--output trajectories')
     parser.add_argument('-i', '--input-filename', help='input FileName containing trajectories', type=str, required=True)
     parser.add_argument('--output-directory', help='output directory', required=True)
-    parser.add_argument('-c', '--clustering-method', help='Clustering Algorithm. Options are: 1: DTW (default)  2: DBSCAN  3: piecelinear', type=int,
+    parser.add_argument('-c', '--clustering-method', help='Clustering Algorithm. Options are: 1: dtw (default)  2: dbscan  3: piecelinear', type=int,
                         choices=[1, 2, 3], default=1, required=False)
 
     parser.add_argument('-d', '--ode-degree', help='Degree of polynomial in ODE. Set to 1 by default', type=int, default=1, required=False)
@@ -107,13 +107,21 @@ def read_commandline_arguments():
     # print("variable-types =", args['variable_types'])
     # print("pool_values =", args['pool_values'])
 
-    if args['clustering_method'] == 1:
-        args['methods'] = "dtw"
-    elif args['clustering_method'] == 2:
-        args['methods'] = "dbscan"
-    elif args['clustering_method'] == 3:
-        args['methods'] = "piecelinear"
+    match args['clustering_method']:
+        case 1:
+            args['methods'] = ClusteringMethod.DTW
 
+        case 2:
+            args['methods'] = ClusteringMethod.DBSCAN
+
+        case 3:
+            args['methods'] = ClusteringMethod.PIECELINEAR
+
+        case _:
+            assert false, "invalid --clustering-method"
+
+    del args['clustering_method']
+    
     # variableType_datastruct will be set in run.py
     args['variableType_datastruct'] = []
 

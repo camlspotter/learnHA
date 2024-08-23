@@ -11,7 +11,7 @@ from infer_ha import HA
 from infer_ha.model_printer.print_HA import print_HA
 from infer_ha.parameters import load_trajectories_and_fix_parameters
 from infer_ha.utils.trajectories_parser import parse_trajectories
-from infer_ha.utils.commandline_parser import process_type_annotation_parameters
+from infer_ha.utils.commandline_parser import process_type_annotation_parameters, ClusteringMethod
 import infer_ha.utils.io as utils_io
 
 # To execute this test from the project folder "learnHA" type the command
@@ -38,8 +38,7 @@ class TestLearnHA(unittest.TestCase):
         ps['input_filename'] = "data/test_data/simu_oscillator_2.txt"
         ps['output_directory'] = "_test/oscillator_2_withoutAnnotate"
 
-        ps['clustering_method'] = 1
-        ps['methods'] = "dtw"
+        ps['methods'] = ClusteringMethod.DTW
 
         ps['ode_degree'] = 1
         ps['modes'] = 4
@@ -88,8 +87,7 @@ class TestLearnHA(unittest.TestCase):
         ps['input_filename'] = "data/test_data/simu_oscillator_2.txt"
         ps['output_directory'] = "_test/oscillator_2_withAnnotate"
 
-        ps['clustering_method'] = 1
-        ps['methods'] = "dtw"
+        ps['methods'] = ClusteringMethod.DTW
 
         ps['ode_degree'] = 1
         ps['modes'] = 4
@@ -138,8 +136,7 @@ class TestLearnHA(unittest.TestCase):
         ps['input_filename'] = "data/test_data/simu_bball_4.txt"
         ps['output_directory'] = "_test/bball_4"
 
-        ps['clustering_method'] = 1
-        ps['methods'] = "dtw"
+        ps['methods'] = ClusteringMethod.DTW
 
         ps['ode_degree'] = 1
         ps['modes'] = 1
