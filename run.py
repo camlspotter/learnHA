@@ -10,6 +10,7 @@ from infer_ha.parameters import load_trajectories_and_fix_parameters
 from infer_ha.utils.trajectories_parser import parse_trajectories
 from infer_ha.utils.commandline_parser import read_commandline_arguments, process_type_annotation_parameters
 import infer_ha.utils.io as utils_io
+from infer_ha.slx_compiler import compile, OdeSolverType, InvariantMode
 
 def runLearnHA():  # Calling the implementation from project BBC4CPS
     '''
@@ -34,6 +35,9 @@ def runLearnHA():  # Calling the implementation from project BBC4CPS
     with utils_io.open_for_write(outputfilename) as f_out:
         f_out.write(json.dumps(asdict(ha), indent=2))
 
+    outputfilename = os.path.join(parameters.output_directory, "generate_learned_modelX_slx.m")
+    with utils_io.open_for_write(outputfilename) as f_out:
+        compile(f_out, ha, OdeSolverType.FIXED, "learned_model0", InvariantMode.INCLUDE_NONE)
 
 if __name__ == '__main__':
     runLearnHA()
