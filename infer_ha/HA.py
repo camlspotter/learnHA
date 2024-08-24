@@ -61,32 +61,34 @@ class Transition():
     guard : Guard
     assignments : dict[str, Assignment]
 
-def build_guard( guard_coeffs : list[float] ) -> Guard:
-    return { ("x" + str(i) if i < len(guard_coeffs) - 1 else "1"): c for (i, c) in enumerate(guard_coeffs) }
+def build_guard(vars : list[str], guard_coeffs : list[float] ) -> Guard:
+    return { (vars[i] if i < len(guard_coeffs) - 1 else "1"): c for (i, c) in enumerate(guard_coeffs) }
 
-assert str(build_guard([1,2,3,4])) == "{'x0': 1, 'x1': 2, 'x2': 3, '1': 4}", "build_guard bug"
+assert str(build_guard(["a", "b", "c"], [1,2,3,4])) == "{'a': 1, 'b': 2, 'c': 3, '1': 4}", "build_guard bug"
 
-def build_assignment(coeffs : np.ndarray, intercept : float) -> Assignment:
-    d = { ("x" + str(i)): c for (i, c) in enumerate(coeffs) }
+def build_assignment(vars : list[str], coeffs : np.ndarray, intercept : float) -> Assignment:
+    d = { vars[i]: c for (i, c) in enumerate(coeffs) }
     d["1"] = intercept
     return d
 
 # XXX Should I cnovert np.float64 to float ?
-assert (str(build_assignment( np.array([1.0,2.1,3.2]), 4.3 ))
-        == "{'x0': np.float64(1.0), 'x1': np.float64(2.1), 'x2': np.float64(3.2), '1': 4.3}"), "build_assignment bug"
+assert (str(build_assignment(["a", "b", "c"], np.array([1.0,2.1,3.2]), 4.3 ))
+        == "{'a': np.float64(1.0), 'b': np.float64(2.1), 'c': np.float64(3.2), '1': 4.3}"), "build_assignment bug"
 
-def build_assignments(coeffs : np.ndarray, intercepts : np.ndarray) -> dict[str,Assignment]:
+def build_assignments(vars : list[str], output_vars : list[str], coeffs : np.ndarray, intercepts : np.ndarray) -> dict[str,Assignment]:
     (nvs1, nvs2) = coeffs.shape
     (nvs3,) = intercepts.shape  # syntax for 1 element tuple
     assert nvs1 == nvs2
     assert nvs1 == nvs3
-    assignments = [build_assignment(coeffs, intercept) for (coeffs, intercept) in zip(coeffs, intercepts)]
-    return { ("x" + str(i)): a for (i, a) in enumerate(assignments) }
+    assignments = [build_assignment(vars, coeffs, intercept) for (coeffs, intercept) in zip(coeffs, intercepts)]
+    return { vars[i]: a for (i, a) in enumerate(assignments) if vars[i] in output_vars }
 
-assert (str(build_assignments( np.array([ [1,2,3], [4,5,6], [7,8,9] ]), np.array( [10, 11, 12] )))
-        == "{'x0': {'x0': np.int64(1), 'x1': np.int64(2), 'x2': np.int64(3), '1': np.int64(10)}, 'x1': {'x0': np.int64(4), 'x1': np.int64(5), 'x2': np.int64(6), '1': np.int64(11)}, 'x2': {'x0': np.int64(7), 'x1': np.int64(8), 'x2': np.int64(9), '1': np.int64(12)}}")
+assert (str(build_assignments( ["a", "b", "c"], ["a", "b", "c"], np.array([ [1,2,3], [4,5,6], [7,8,9] ]), np.array( [10, 11, 12] )))
+        == "{'a': {'a': np.int64(1), 'b': np.int64(2), 'c': np.int64(3), '1': np.int64(10)}, 'b': {'a': np.int64(4), 'b': np.int64(5), 'c': np.int64(6), '1': np.int64(11)}, 'c': {'a': np.int64(7), 'b': np.int64(8), 'c': np.int64(9), '1': np.int64(12)}}")
 
 def build_Transition(id : int,
+                     vars : list[str],
+                     output_vars : list[str],
                      trans : tuple[int,
                                    int,
                                    list[float],
@@ -95,8 +97,8 @@ def build_Transition(id : int,
                                    ]) -> Transition:
     (src, dst, guard_coeffs, assignment_coeffs, assignment_intercepts) = trans
 
-    guard = build_guard(guard_coeffs)
-    assignments = build_assignments(assignment_coeffs, assignment_intercepts)
+    guard = build_guard(vars, guard_coeffs)
+    assignments = build_assignments(vars, output_vars, assignment_coeffs, assignment_intercepts)
     return Transition(id= id,
                       src= src,
                       dst= dst,
@@ -116,15 +118,17 @@ def build_invariant(vars : list[str], inv : list[tuple[float, float]]) -> Invari
 def build_ode(vars : list[str], ode : np.ndarray) -> ODE:
     return { (vars[i] if i < len(ode) - 1 else "1"): c for (i, c) in enumerate(ode) }
 
-def build_odes(vars : list[str], odes : np.ndarray) -> dict[str,ODE]:
-    return { vars[i]: o for (i,o) in enumerate([build_ode(vars, ode) for ode in odes]) }
+def build_odes(vars : list[str], output_vars : list[str], odes : np.ndarray) -> dict[str,ODE]:
+    iodes = [ (i, ode) for (i, ode) in enumerate(odes) if vars[i] in output_vars ]
+    return { vars[i] : build_ode(vars, ode) for (i, ode) in iodes }
 
-def build_Mode(vars : list[str],
-               id : int,
+def build_Mode(id : int,
+               vars : list[str],
+               output_vars : list[str],
                inv : list[tuple[float, float]],
                odes : np.ndarray) -> Mode:
     invariant = build_invariant(vars, inv)
-    flow = build_odes(vars, odes)
+    flow = build_odes(vars, output_vars, odes)
     return Mode(id= id, invariant= invariant, flow= flow)
 
 
@@ -150,9 +154,9 @@ def build(raw : Raw) -> HybridAutomaton:
 
     vars = raw.input_variables + raw.output_variables
 
-    modes = [ build_Mode (vars, id, inv, odes) for (id, (inv, odes)) in enumerate(zip(raw.mode_inv, raw.G)) ]
+    modes = [ build_Mode (id, vars, raw.output_variables, inv, odes) for (id, (inv, odes)) in enumerate(zip(raw.mode_inv, raw.G)) ]
 
-    transs : list[Transition] = [ build_Transition(id, trans) for (id, trans) in enumerate(raw.transitions) ]
+    transs : list[Transition] = [ build_Transition(id, vars, raw.output_variables, trans) for (id, trans) in enumerate(raw.transitions) ]
 
     return HybridAutomaton(init_mode= raw.initial_location,
                            modes= modes,
