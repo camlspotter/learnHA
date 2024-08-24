@@ -118,7 +118,7 @@ def read_commandline_arguments():
             args['methods'] = ClusteringMethod.PIECELINEAR
 
         case _:
-            assert false, "invalid --clustering-method"
+            assert False, "invalid --clustering-method"
 
     del args['clustering_method']
     
