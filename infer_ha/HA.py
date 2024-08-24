@@ -26,7 +26,7 @@ class Range():
     min : float
     max : float
 
-    def __init__(self, min, max):
+    def __init__(self, min : float, max : float):
         assert min <= max, "Invalid range"
         self.min= min
         self.max= max
