@@ -45,7 +45,7 @@ Invariant = dict[str,Range]  # ∧a_i <= x_i <= b_i
 POLYNOMIAL = dict[str,float] # Σ_i1x_i +c
 
 def string_of_polynomial(p : POLYNOMIAL) -> str:
-    return " + ".join([f"{k} * {v}" for (k,v) in p.items()])
+    return " + ".join([(f"{v}" if k == "1" else f"{k} * {v}") for (k,v) in p.items()])
 
 ODE = POLYNOMIAL
 
