@@ -1,7 +1,7 @@
 from enum import Enum
 from io import TextIOWrapper
 import textwrap
-from infer_ha.HA import HybridAutomaton, Assignment, Transition, Mode, POLYNOMIAL, Invariant
+from infer_ha.HA import HybridAutomaton, Assignment, Transition, Mode, Polynomial, Invariant
 from dataclasses import dataclass, asdict
 
 oneVersusOne_oneVersusRest : int = 1  #XXX enum?
@@ -34,7 +34,7 @@ class HA(HybridAutomaton):
     def is_output_variable(self, v : str) -> bool:
         return v in self.output_variables
 
-    def string_of_polynomial(self, p : POLYNOMIAL) -> str:
+    def string_of_polynomial(self, p : Polynomial) -> str:
         return " + ".join([f"{v}{"" if k == "1" else f" * x{self.variable_rev_dict[k]}"}" for (k,v) in p.items()])
 
     def string_of_invariant(self, inv : Invariant) -> str:

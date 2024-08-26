@@ -42,16 +42,16 @@ assert str(ex_Range2) == "Range(min=1, max=2)", "Range bug"
 
 Invariant = dict[str,Range]  # ∧a_i <= x_i <= b_i
 
-POLYNOMIAL = dict[str,float] # Σ_i1x_i +c
+Polynomial = dict[str,float] # Σ_i1x_i +c
 
-def string_of_polynomial(p : POLYNOMIAL) -> str:
+def string_of_polynomial(p : Polynomial) -> str:
     return " + ".join([(f"{v}" if k == "1" else f"{k} * {v}") for (k,v) in p.items()])
 
-ODE = POLYNOMIAL
+ODE = Polynomial
 
-Guard = POLYNOMIAL
+Guard = Polynomial
 
-Assignment = POLYNOMIAL
+Assignment = Polynomial
 
 @dataclass
 class Transition():
