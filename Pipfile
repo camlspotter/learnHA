@@ -22,7 +22,9 @@ typeguard = "*"
 pylint = "*"
 pydantic = "*"
 # https://pypi.org/project/matlabengine/9.13.11/
-matlabengine = "==9.10.5"
+# matlabengine = "==9.10.5"
+matlabengine = "==9.13.11"
+mypy = "*"
 
 [dev-packages]
 pytest = "*"
