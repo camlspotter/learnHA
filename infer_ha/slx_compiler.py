@@ -2,6 +2,7 @@ from enum import Enum
 from io import TextIOWrapper
 import textwrap
 from infer_ha.HA import HybridAutomaton, Assignment, Transition, Mode, Polynomial, Invariant
+import infer_ha.HA
 from dataclasses import dataclass, asdict
 
 oneVersusOne_oneVersusRest : int = 1  #XXX enum?
@@ -17,10 +18,6 @@ class InvariantMode(Enum):
 
 @dataclass
 class HA(HybridAutomaton):
-    ode_solver_type : OdeSolverType
-    ode_solver : str
-    simulink_model_name : str
-    invariant_mode : InvariantMode
     variable_dict : dict[int, str]  # xi -> var.  Initialized by __post_init__
     variable_rev_dict : dict[str, int]  # var -> xi  Initialized by __post_init__
 
@@ -35,26 +32,18 @@ class HA(HybridAutomaton):
         return v in self.output_variables
 
     def string_of_polynomial(self, p : Polynomial) -> str:
-        return " + ".join([f"{v}{"" if k == "1" else f" * x{self.variable_rev_dict[k]}"}" for (k,v) in p.items()])
+        return infer_ha.HA.string_of_polynomial({ ("1" if k == "1" else f"x{self.variable_rev_dict[k]}") : v for (k,v) in p.items() })
 
     def string_of_invariant(self, inv : Invariant) -> str:
-        return " && ".join([f"{r.min} <= x{self.variable_rev_dict[v]} && x{self.variable_rev_dict[v]} <= {r.max}"
-                            for (v, r) in inv.items()])
+        return infer_ha.HA.string_of_invariant({ f"x{self.variable_rev_dict[k]}" : r for (k,r) in inv.items() })
 
-def build_HA(ha_orig : HybridAutomaton,
-             ode_solver_type : OdeSolverType,
-             ode_solver : str,
-             simulink_model_name : str,
-             invariant_mode : InvariantMode):
+# Adds variable-index tables
+def extend_HA(ha_orig : HybridAutomaton):
     d = ha_orig.__dict__
-    d['ode_solver_type'] = ode_solver_type
-    d['ode_solver'] = ode_solver
-    d['simulink_model_name'] = simulink_model_name
-    d['invariant_mode'] = invariant_mode
     d['variable_dict'] = {} # reinitialized by __post_init__
     d['variable_rev_dict'] = {} # reinitialized by __post_init__
     ha = HA(**d)
-    if ha == None:
+    if ha is None:
         assert False, "Invalid HA"
     return ha
 
@@ -64,31 +53,32 @@ def compile(out : TextIOWrapper,
             ode_solver : str,
             simulink_model_name : str,
             invariant_mode : InvariantMode) -> None:
-    ha : HA = build_HA(ha_orig, ode_solver_type, ode_solver, simulink_model_name, invariant_mode)
+    # ha : HA = build_HA(ha_orig, ode_solver_type, ode_solver, simulink_model_name, invariant_mode)
+    ha : HA = extend_HA(ha_orig)
 
     out.write("%% Script file for generating Programmatically Simulink Model!\n")
-    printDefinition(out, ha)
+    printDefinition(out, ha, simulink_model_name, ode_solver_type, ode_solver)
 
     if len(ha.modes) == 3 and oneVersusOne_oneVersusRest == 2:
         # Create random Matlab function only when non-deterministic situation arise
         addMatlabFunction(out)
 
     addLocations(out, ha)
-    addTransitions(out, ha)
+    addTransitions(out, ha, invariant_mode)
     addDefaultTransition(out, ha)
     variableCreation(out, ha)
 
     # Output ports from the Chart to be connected using lines to the outputComponents
     out.write("\n\n")
-    out.write(f"chartOutSignal = get_param('{ha.simulink_model_name}/Chart', 'PortHandles'); \n\n")
+    out.write(f"chartOutSignal = get_param('{simulink_model_name}/Chart', 'PortHandles'); \n\n")
 
-    addInputComponents(out, ha) # when model has input variables
-    addOutputComponents(out, ha)
+    addInputComponents(out, ha, simulink_model_name) # when model has input variables
+    addOutputComponents(out, ha, simulink_model_name)
     # addConnectionLines(out)
 
     out.write("\n\n")
-    out.write(f"Simulink.BlockDiagram.arrangeSystem('{ha.simulink_model_name}');\n")
-    out.write(f"Simulink.BlockDiagram.arrangeSystem('{ha.simulink_model_name}/Chart');\n\n")
+    out.write(f"Simulink.BlockDiagram.arrangeSystem('{simulink_model_name}');\n")
+    out.write(f"Simulink.BlockDiagram.arrangeSystem('{simulink_model_name}/Chart');\n\n")
     out.write(textwrap.dedent(
         """
         sfsave;
@@ -97,24 +87,29 @@ def compile(out : TextIOWrapper,
         bdclose all;
         """)[1:-1])
 
-def printDefinition(out : TextIOWrapper, ha : HA) -> None:
+def printDefinition(out : TextIOWrapper,
+                    ha : HA,
+                    simulink_model_name : str,
+                    ode_solver_type : OdeSolverType,
+                    ode_solver : str) -> None:
     out.write("bdclose all;\n")
-    out.write(f"sfnew {ha.simulink_model_name}\n")
+    out.write(f"sfnew {simulink_model_name}\n")
     out.write("rt = sfroot;\n")
     out.write("ch = find(rt,'-isa','Stateflow.Chart');\n")
     # outfile << "set_param(bdroot, 'StopTime', 'timeFinal', 'MaxStep', 'timeStepMax'); \n";  //This is for variable-step with MaxStep as timeStepMax
     # Working with Fixed-step   outfile << "set_param(bdroot, 'SolverType','Fixed-step', 'StopTime', 'timeFinal', 'FixedStep', 'timeStepMax'); \n";  //This is for Fixed-step size
 
-    match ha.ode_solver_type:
+    match ode_solver_type:
         case OdeSolverType.VARIABLE:
             # std::cout <<"ODE Solver Type: Variable-step" << std::endl;
             # This makes the model Variable-step
-            out.write(f"set_param(bdroot, 'SolverType', 'Variable-step', 'StopTime', 'timeFinal', 'SolverName', '{ha.ode_solver}', 'MaxStep', 'timeStepMax');\n") 
+            out.write(f"set_param(bdroot, 'SolverType', 'Variable-step', 'StopTime', 'timeFinal', 'SolverName', '{ode_solver}', 'MaxStep', 'timeStepMax');\n") 
 
         case OdeSolverType.FIXED:
-            out.write(f"set_param(bdroot, 'SolverType', 'Fixed-step', 'StopTime', 'timeFinal', 'SolverName', '{ha.ode_solver}', 'FixedStep', 'timeStepMax');\n")
+            out.write(f"set_param(bdroot, 'SolverType', 'Fixed-step', 'StopTime', 'timeFinal', 'SolverName', '{ode_solver}', 'FixedStep', 'timeStepMax');\n")
 
         case _:
+            print("ode_solver_type:", ode_solver_type, OdeSolverType.FIXED, ode_solver_type == OdeSolverType.FIXED)
             assert False
 
     out.write(textwrap.dedent(
@@ -158,8 +153,6 @@ def addLocations(out, ha : HA) -> None:
     height : int = 60
     state_gap : int = 100
 
-    print("HA", ha)
-
     for loc in ha.modes:
         loc_id = loc.id + 1
         out.write(f"loc{loc_id} = Stateflow.State(ch);\n")
@@ -197,7 +190,9 @@ def addLocations(out, ha : HA) -> None:
  
         pos_x = pos_x + width + state_gap
 
-def addTransitions(out, ha : HA) -> None:
+def addTransitions(out,
+                   ha : HA,
+                   invariant_mode : InvariantMode) -> None:
     out.write("\n\n%% Adding Transition for each Locations or States\n")
 
     pos_x = 30
@@ -283,7 +278,7 @@ def addTransitions(out, ha : HA) -> None:
             condition_str = ""
             cnt = 0
 
-            match ha.invariant_mode:
+            match invariant_mode:
                 case InvariantMode.INCLUDE_BOTH:
                   #include both input and output constraints as invariant
                   condition_str = ha.string_of_invariant(loc.invariant)
@@ -358,7 +353,9 @@ def variableCreation(out, ha : HA) -> None:
     localVariableCreation(out, ha)
     parameterVariableCreation(out, ha)
 
-def addInputComponents(out, ha : HA) -> None:
+def addInputComponents(out,
+                       ha : HA,
+                       simulink_model_name : str) -> None:
     out.write("\n%% *** Adding Input  components ****\n")
 
     y_pos = 18
@@ -368,20 +365,22 @@ def addInputComponents(out, ha : HA) -> None:
 
     for var in ha.input_variables:
         var_id = f"x{ha.variable_rev_dict[var]}"
-        out.write(f"add_block('simulink/Sources/In1', '{ha.simulink_model_name}/{var_id}In');\n")
-        out.write(f"{var_id}Input = get_param('{ha.simulink_model_name}/{var_id}In', 'PortHandles');\n")
-        out.write(f"set_param('{ha.simulink_model_name}/{var_id}In', 'Port', '{portNo}');\n")
-        out.write(f"set_param('{ha.simulink_model_name}/{var_id}In', 'SignalType', 'auto');\n")
-        out.write(f"set_param('{ha.simulink_model_name}/{var_id}In', 'position', [-40, {y_pos}, 0, {height}]);\n")
+        out.write(f"add_block('simulink/Sources/In1', '{simulink_model_name}/{var_id}In');\n")
+        out.write(f"{var_id}Input = get_param('{simulink_model_name}/{var_id}In', 'PortHandles');\n")
+        out.write(f"set_param('{simulink_model_name}/{var_id}In', 'Port', '{portNo}');\n")
+        out.write(f"set_param('{simulink_model_name}/{var_id}In', 'SignalType', 'auto');\n")
+        out.write(f"set_param('{simulink_model_name}/{var_id}In', 'position', [-40, {y_pos}, 0, {height}]);\n")
         out.write("\n\n")
-        out.write(f"add_line('{ha.simulink_model_name}', {var_id}Input.Outport(1), chartOutSignal.Inport({portNo}));\n")
+        out.write(f"add_line('{simulink_model_name}', {var_id}Input.Outport(1), chartOutSignal.Inport({portNo}));\n")
         out.write("\n\n")
 
         height += next_height;
         y_pos += next_height;
         portNo += 1
 
-def addOutputComponents(out, ha : HA) -> None:
+def addOutputComponents(out,
+                        ha : HA,
+                        simulink_model_name : str) -> None:
     # The number of output components is equal to the number of variables. Not anymore now they are separate.
     out.write("\n\n%% *** Adding Output components ****\n")
 
@@ -395,15 +394,15 @@ def addOutputComponents(out, ha : HA) -> None:
         # connecting the output port of the Chart to input port of the Output component
         #Creating an output-component for every variable (both input and output variables)
         var_id = f"x{ha.variable_rev_dict[var]}"
-        out.write(f"add_block('simulink/Sinks/Out1', '{ha.simulink_model_name}/{var_id}Out');\n")
-        out.write(f"{var_id}Output = get_param('{ha.simulink_model_name}/{var_id}Out', 'PortHandles');\n")
-        out.write(f"set_param('{ha.simulink_model_name}/{var_id}Out', 'SignalName', '{var_id}Out');\n")
-        out.write(f"set_param('{ha.simulink_model_name}/{var_id}Out', 'Port', '{portNo}');\n")
-        out.write(f"set_param('{ha.simulink_model_name}/{var_id}Out', 'SignalType', 'auto');\n")
-        out.write(f"set_param('{ha.simulink_model_name}/{var_id}Out', 'position', [140, {y_pos}, 180, {height}]);\n")
+        out.write(f"add_block('simulink/Sinks/Out1', '{simulink_model_name}/{var_id}Out');\n")
+        out.write(f"{var_id}Output = get_param('{simulink_model_name}/{var_id}Out', 'PortHandles');\n")
+        out.write(f"set_param('{simulink_model_name}/{var_id}Out', 'SignalName', '{var_id}Out');\n")
+        out.write(f"set_param('{simulink_model_name}/{var_id}Out', 'Port', '{portNo}');\n")
+        out.write(f"set_param('{simulink_model_name}/{var_id}Out', 'SignalType', 'auto');\n")
+        out.write(f"set_param('{simulink_model_name}/{var_id}Out', 'position', [140, {y_pos}, 180, {height}]);\n")
 
         out.write("\n\n")
-        out.write(f"add_line('{ha.simulink_model_name}', chartOutSignal.Outport({portNo}), {var_id}Output.Inport(1));\n")
+        out.write(f"add_line('{simulink_model_name}', chartOutSignal.Outport({portNo}), {var_id}Output.Inport(1));\n")
         out.write("\n\n")
         height += next_height;
         y_pos += next_height;
@@ -413,13 +412,13 @@ def addOutputComponents(out, ha : HA) -> None:
     # portNo will follow the sequence Output variable followed by Input variables
     for var in ha.input_variables:
         var_id = f"x{ha.variable_rev_dict[var]}"
-        out.write(f"add_block('simulink/Sinks/Out1', '{ha.simulink_model_name}/{var_id}Out');\n")
-        out.write(f"{var_id}Output = get_param('{ha.simulink_model_name}/{var_id}Out', 'PortHandles');\n")
-        out.write(f"set_param('{ha.simulink_model_name}/{var_id}Out', 'SignalName', '{var_id}Out');\n")
-        out.write(f"set_param('{ha.simulink_model_name}/{var_id}Out', 'Port', '{portNo}');\n")
-        out.write(f"set_param('{ha.simulink_model_name}/{var_id}Out', 'SignalType', 'auto');\n")
-        out.write(f"set_param('{ha.simulink_model_name}/{var_id}Out', 'position', [140, {y_pos}, 180, {height}]);\n")
-        out.write(f"add_line('{ha.simulink_model_name}', {var_id}Input.Outport(1), {var_id}Output.Inport(1));\n")
+        out.write(f"add_block('simulink/Sinks/Out1', '{simulink_model_name}/{var_id}Out');\n")
+        out.write(f"{var_id}Output = get_param('{simulink_model_name}/{var_id}Out', 'PortHandles');\n")
+        out.write(f"set_param('{simulink_model_name}/{var_id}Out', 'SignalName', '{var_id}Out');\n")
+        out.write(f"set_param('{simulink_model_name}/{var_id}Out', 'Port', '{portNo}');\n")
+        out.write(f"set_param('{simulink_model_name}/{var_id}Out', 'SignalType', 'auto');\n")
+        out.write(f"set_param('{simulink_model_name}/{var_id}Out', 'position', [140, {y_pos}, 180, {height}]);\n")
+        out.write(f"add_line('{simulink_model_name}', {var_id}Input.Outport(1), {var_id}Output.Inport(1));\n")
         out.write("\n\n")
 
         height += next_height;
