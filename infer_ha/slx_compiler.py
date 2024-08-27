@@ -93,7 +93,7 @@ def printDefinition(out : TextIOWrapper,
                     ode_solver_type : OdeSolverType,
                     ode_solver : str) -> None:
     out.write("bdclose all;\n")
-    out.write(f"sfnew {simulink_model_name}\n")
+    out.write(f"sfnew {simulink_model_name};\n")
     out.write("rt = sfroot;\n")
     out.write("ch = find(rt,'-isa','Stateflow.Chart');\n")
     # outfile << "set_param(bdroot, 'StopTime', 'timeFinal', 'MaxStep', 'timeStepMax'); \n";  //This is for variable-step with MaxStep as timeStepMax
