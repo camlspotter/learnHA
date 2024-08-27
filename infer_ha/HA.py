@@ -45,10 +45,13 @@ assert str(ex_Range2) == "Range(min=1.0, max=2.0)", "Range bug" + str(ex_Range)
 
 Invariant = dict[str,Range]  # ∧a_i <= x_i <= b_i
 
+def string_of_invariant(inv : Invariant) -> str:
+    return " && ".join([f"{r.min} <= {v} && {v} <= {r.max}" for (v, r) in inv.items()])
+
 Polynomial = dict[str,float] # Σ_i1x_i +c
 
 def string_of_polynomial(p : Polynomial) -> str:
-    return " + ".join([(f"{v}" if k == "1" else f"{k} * {v}") for (k,v) in p.items()])
+    return " + ".join([( f"{v}" if k == "1" else f"{v} * {k}") for (k,v) in p.items()])
 
 ODE = Polynomial
 
