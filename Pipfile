@@ -22,7 +22,7 @@ typeguard = "*"
 pylint = "*"
 pydantic = "*"
 # https://pypi.org/project/matlabengine/9.13.11/
-matlabengine = "==9.13.11"
+matlabengine = "==9.10.5"
 
 [dev-packages]
 pytest = "*"
@@ -31,4 +31,4 @@ mypy = "*"
 [requires]
 # python_version = "3.12"
 # The latest Python version supported by MATLAB R2022b is 3.10
-python_version = "3.10"
+python_version = "3.8"
