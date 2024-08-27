@@ -20,6 +20,7 @@ matplotlib = "*"
 libsvm-official = "==3.32.0"
 typeguard = "*"
 pylint = "*"
+pydantic = "*"
 
 [dev-packages]
 pytest = "*"

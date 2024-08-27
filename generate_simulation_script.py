@@ -2,13 +2,13 @@ from os import path
 from io import TextIOWrapper
 import textwrap
 
-from dataclasses import dataclass
+from pydantic.dataclasses import dataclass
 import argparse
 import infer_ha.utils.io as utils_io
 from infer_ha.simulation_script import generate_simulation_script
 
 @dataclass
-class Options():
+class Options:
     title : str
     script_file : str
     simulink_model_file : str

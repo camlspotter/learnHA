@@ -1,9 +1,12 @@
 from typeguard import typechecked
-from dataclasses import dataclass
+# pydantic.dataclasses is required for JSON conversions of nested dataclasses
+from pydantic.dataclasses import dataclass
+from pydantic import ConfigDict
 import numpy as np
 
-@dataclass
-class Raw():
+# Some magic is required to include np.ndarray in dataclass
+@dataclass(config=ConfigDict(arbitrary_types_allowed=True))
+class Raw:
     num_mode : int          # num_mode
     G : list[np.ndarray]    # ODE coeffs, called Flow in the paper.  The array size is (#v + 1) * #o
     mode_inv : list[ list[ tuple[ float, float ] ] ]  # Variable invariants per mode
@@ -22,7 +25,7 @@ class Raw():
     output_variables : list[str]
 
 @dataclass
-class Range():
+class Range:
     min : float
     max : float
 
@@ -36,9 +39,9 @@ class Range():
 
 assert Range(1,2).contains(1.5), "Range.contains failure"
 ex_Range : Range = Range(1, 2)
-assert str(ex_Range) == "Range(min=1, max=2)", "Range bug"
+assert str(ex_Range) == "Range(min=1.0, max=2.0)", "Range bug:" + str(ex_Range)
 ex_Range2 : Range = Range(min=1, max=2)
-assert str(ex_Range2) == "Range(min=1, max=2)", "Range bug"
+assert str(ex_Range2) == "Range(min=1.0, max=2.0)", "Range bug" + str(ex_Range)
 
 Invariant = dict[str,Range]  # ∧a_i <= x_i <= b_i
 
@@ -54,7 +57,7 @@ Guard = Polynomial
 Assignment = Polynomial
 
 @dataclass
-class Transition():
+class Transition:
     id : int
     src : int
     dst : int
@@ -106,7 +109,7 @@ def build_Transition(id : int,
                       assignments= assignments)
 
 @dataclass
-class Mode():
+class Mode:
     id : int
     invariant : Invariant
     flow : dict[str,ODE]
@@ -133,7 +136,7 @@ def build_Mode(id : int,
 
 
 @dataclass
-class HybridAutomaton():
+class HybridAutomaton:
     init_mode : int
     modes : list[Mode]
     transitions : list[Transition]

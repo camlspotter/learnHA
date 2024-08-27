@@ -1,7 +1,7 @@
 from enum import Enum
 import argparse
 from typing import Optional, Any
-from dataclasses import dataclass
+from pydantic.dataclasses import dataclass
 
 # @dataclass # We cannot use @dataclass with Enum: @dataclass overrides __eq__
 class ClusteringMethod(Enum):
@@ -10,7 +10,7 @@ class ClusteringMethod(Enum):
     PIECELINEAR = "piecelinear"
    
 @dataclass
-class Options():
+class Options:
     input_filename : str
     output_directory : str
     ode_degree : int # default=1
