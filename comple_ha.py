@@ -10,7 +10,7 @@ import infer_ha.utils.io as utils_io
 from infer_ha.simulation_script import generate_simulation_script
 from infer_ha.slx_compiler import OdeSolverType, InvariantMode, compile
 from infer_ha.HA import HybridAutomaton
-from infer_ha.matlab import matlab
+from infer_ha.matlab import matlab_engine
 
 @dataclass
 class Options:
@@ -65,7 +65,7 @@ def run() -> None:
                 opt.simulink_model_name,
                 opt.invariant_mode)
 
-    matlab.run(opt.output_matlab_script)
+    matlab_engine.run(opt.output_matlab_script)
 
 if __name__ == '__main__':
     run()
