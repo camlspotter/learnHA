@@ -3,6 +3,9 @@ from typeguard import typechecked
 from pydantic.dataclasses import dataclass
 from pydantic import ConfigDict
 import numpy as np
+import random
+from infer_ha.invariant import Invariant
+from infer_ha.range import Range
 
 # Some magic is required to include np.ndarray in dataclass
 @dataclass(config=ConfigDict(arbitrary_types_allowed=True))
@@ -23,30 +26,6 @@ class Raw:
 
     input_variables : list[str]
     output_variables : list[str]
-
-@dataclass
-class Range:
-    min : float
-    max : float
-
-    def __init__(self, min : float, max : float):
-        assert min <= max, "Invalid range"
-        self.min= min
-        self.max= max
-
-    def contains(self, x : float) -> bool:
-        return self.min <= x <= self.max
-
-assert Range(1,2).contains(1.5), "Range.contains failure"
-ex_Range : Range = Range(1, 2)
-assert str(ex_Range) == "Range(min=1.0, max=2.0)", "Range bug:" + str(ex_Range)
-ex_Range2 : Range = Range(min=1, max=2)
-assert str(ex_Range2) == "Range(min=1.0, max=2.0)", "Range bug" + str(ex_Range)
-
-Invariant = dict[str,Range]  # ∧a_i <= x_i <= b_i
-
-def string_of_invariant(inv : Invariant) -> str:
-    return " && ".join([f"{r.min} <= {v} && {v} <= {r.max}" for (v, r) in inv.items()])
 
 Polynomial = dict[str,float] # Σ_i1x_i +c
 

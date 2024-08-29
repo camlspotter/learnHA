@@ -13,6 +13,7 @@ from infer_ha.parameters import load_trajectories_and_fix_parameters
 from infer_ha.utils.trajectories_parser import parse_trajectories
 from infer_ha.utils.commandline_parser import process_type_annotation_parameters, ClusteringMethod
 import infer_ha.utils.io as utils_io
+import infer_ha.invariant
 
 # To execute this test from the project folder "learnHA" type the command
 # amit@amit-Alienware-m15-R4:~/MyPythonProjects/learningHA/learnHA$ python -m unittest discover -v
@@ -175,6 +176,11 @@ class TestLearnHA(unittest.TestCase):
         result = filecmp.cmp(backup_file, test_generated_file, shallow=False)
         print(result)
         # self.assertTrue(result) # Fails if the output generated is not equal to the file stored in the data/test_output
+
+class TestInvariant(unittest.TestCase):
+
+    def test_parser(self):
+        infer_ha.invariant.tests()
 
 if __name__ == '__main__':
     unittest.main()

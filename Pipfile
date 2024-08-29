@@ -25,6 +25,7 @@ pydantic = "*"
 # matlabengine = "==9.10.5"
 matlabengine = "==9.13.11"
 mypy = "*"
+pyparsing = "*"
 
 [dev-packages]
 pytest = "*"

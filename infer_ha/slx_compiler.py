@@ -1,7 +1,9 @@
 from enum import Enum
 from io import TextIOWrapper
 import textwrap
-from infer_ha.HA import HybridAutomaton, Assignment, Transition, Mode, Polynomial, Invariant
+from infer_ha.HA import HybridAutomaton, Assignment, Transition, Mode, Polynomial
+from infer_ha.invariant import Invariant
+import infer_ha.invariant
 import infer_ha.HA
 from dataclasses import dataclass, asdict
 
@@ -35,7 +37,7 @@ class HA(HybridAutomaton):
         return infer_ha.HA.string_of_polynomial({ ("1" if k == "1" else f"x{self.variable_rev_dict[k]}") : v for (k,v) in p.items() })
 
     def string_of_invariant(self, inv : Invariant) -> str:
-        return infer_ha.HA.string_of_invariant({ f"x{self.variable_rev_dict[k]}" : r for (k,r) in inv.items() })
+        return infer_ha.invariant.string_of_invariant({ f"x{self.variable_rev_dict[k]}" : r for (k,r) in inv.items() })
 
 # Adds variable-index tables
 def extend_HA(ha_orig : HybridAutomaton):
