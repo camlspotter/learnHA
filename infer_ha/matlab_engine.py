@@ -1,5 +1,5 @@
 from typing import Optional, Any
-import matlab.engine
+import matlab.engine # type: ignore
 
 MatlabEngine = Any
 

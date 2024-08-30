@@ -10,7 +10,7 @@ import infer_ha.utils.io as utils_io
 from infer_ha.simulation_script import generate_simulation_script
 from infer_ha.slx_compiler import OdeSolverType, InvariantMode, compile
 from infer_ha.HA import HybridAutomaton
-from infer_ha.matlab import matlab_engine
+from infer_ha.matlab_engine import matlab_engine
 
 @dataclass
 class Options:
