@@ -91,7 +91,7 @@ def check_invariant(inv):
 
 @typechecked
 def invariant_of_string(s : str) -> Invariant:
-    check_invariant(invariant.parse_string(s))
+    return check_invariant(invariant.parse_string(s))
 
 def test_invariant():
     for test in [
