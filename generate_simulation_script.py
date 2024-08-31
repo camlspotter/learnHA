@@ -1,3 +1,19 @@
+# Usage examples
+#
+# pipenv run python ./generate_simulation_script.py \
+#   --script-file original_model_simulate.m.bypython \
+#   --simulink-model-file ../src/test_cases/engine/learn_ha_loop/ex_sldemo_bounce_Input.slx \
+#   --output-file _result/bball/AfterAnnotation/original_model_simulation_step.txt \
+#   --time-horizon 10 --sampling-time 0.01 --fixed-interval-data False \
+#   --input-variables "u" --output-variables "x,v"
+#
+# pipenv run python ./generate_simulation_script.py \
+#   --script-file learned_model_simulate0.m.bypython \
+#   --simulink-model-file learned_model0.slx \
+#   --output-file _result/bball/AfterAnnotation/learned_model_traces0.txt \
+#   --time-horizon 13.000000 --sampling-time 0.001000 --fixed-interval-data False \
+#   --input-variables "x0" --output-variables "x1,x2"
+
 from os import path
 from io import TextIOWrapper
 import textwrap
