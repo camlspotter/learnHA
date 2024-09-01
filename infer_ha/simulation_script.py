@@ -8,7 +8,6 @@ import infer_ha.utils.io as utils_io
 def generate_simulation_script(out : TextIOWrapper,
                                title : str,
                                simulink_model_filename : str,
-                               output_filename : str,
                                time_horizon : float,
                                sampling_time : float,
                                fixed_interval_data : bool,
@@ -18,10 +17,12 @@ def generate_simulation_script(out : TextIOWrapper,
     """
     - simulink_model_filename: is the simulink model filename that has the automaton design
     - script_filename: is the script file with .m extention to be created for running the simulink model with initial input/output values
-    - output_filename: is a text-file containing time-serise trace in the order of time, followed by input and then output variables.
 
     Note: input-port in the simulink model must be assigned names as "x0In", "x1In", etc. Moreover, list of input and output variables must be supplied in the command-line.
     """
+    assert path.isabs(simulink_model_filename), \
+        "generate_simulation_script: simulink_model_filename cannot be relative: " \
+        + simulink_model_filename
     
     out.write(textwrap.dedent(
     f"""\
@@ -140,7 +141,7 @@ def generate_simulation_script(out : TextIOWrapper,
 
     out.write(textwrap.dedent(
     f"""\
-    result_filename = '{output_filename}';
+    % result_filename = 'output_filename'; Now given by setvar
     writematrix(result_matrix, result_filename, 'Delimiter', 'tab');
     """))
 

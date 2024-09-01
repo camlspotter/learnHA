@@ -26,8 +26,6 @@ import random
 #   --max-generate-trace-size 1024  --ode-speedup 50 \
 #   --solver-type fixed --ode-solver FixedStepAuto
 
-cwd = os.getcwd()
-
 input_variables = ['u']
 output_variables = ['x', 'v']
 invariant = { 'u': Range(-9.9, -9.5),
@@ -35,25 +33,26 @@ invariant = { 'u': Range(-9.9, -9.5),
               'v': Range(15, 15) }
 number_of_cps_dict= { 'u': 4 }
 var_type_dict= { 'u': VarType.LINEAR }
-simulink_model_filename= os.path.join(cwd, '../../src/test_cases/engine/learn_ha_loop/ex_sldemo_bounce_Input.slx')
+simulink_model_filename= os.path.abspath('../../src/test_cases/engine/learn_ha_loop/ex_sldemo_bounce_Input.slx')
 time_horizon= 13.0
 sampling_time = 0.001
 fixed_interval_data= False
 
-output_filename= os.path.join(cwd, "model_simulation.txt")
+# output_filename= os.path.abspath("model_simulation.txt")
+# output_filename= os.path.abspath("model_simulation.txt")
+output_filename= os.path.abspath("model_simulation.txt")
 
 try:
     os.mkdir('_test')
 except:
     pass
 
-script_filename= "_test/model_simulate.m"
+script_filename= "_test/simulate_model.m"
 
 with utils_io.open_for_write(script_filename) as out:
     generate_simulation_script(out= out,
                                title= 'Title',
                                simulink_model_filename= simulink_model_filename,
-                               output_filename= output_filename,
                                time_horizon= time_horizon,
                                sampling_time= sampling_time,
                                fixed_interval_data= fixed_interval_data,
@@ -71,6 +70,7 @@ sis = generate_simulation_input(rng= random.Random(),
 print(sis)
  
 simulate( script_filename= script_filename,
+          output_filename= output_filename,
           input_variables= input_variables,
           output_variables= output_variables,
           input_value_ts= sis.input_value_ts,

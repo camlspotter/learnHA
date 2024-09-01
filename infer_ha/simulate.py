@@ -1,13 +1,21 @@
+from os import path
 import matlab
 from infer_ha.matlab_engine import matlab_engine
 
 def simulate(script_filename : str,
+             output_filename : str,
              input_variables : list[str],
              output_variables : list[str],
              input_value_ts : dict[str, list[tuple[float, float]]],
              initial_output_values : dict[str, float]):
 
+    assert path.isabs(output_filename), \
+        "simulate: output_filename cannot be relative: " \
+        + output_filename
+
     variable_index : dict[str,int] = { v : i for (i, v) in enumerate(input_variables + output_variables) }
+
+    matlab_engine.setvar("result_filename", output_filename)
 
     for (var, v) in initial_output_values.items():
         matlab_engine.setvar(f"a{variable_index[var]}", v)
