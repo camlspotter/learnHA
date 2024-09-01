@@ -1,3 +1,4 @@
+import os
 from infer_ha.simulate import simulate
 from infer_ha.simulation_input import generate_simulation_input, VarType
 from infer_ha.range import Range
@@ -25,6 +26,8 @@ import random
 #   --max-generate-trace-size 1024  --ode-speedup 50 \
 #   --solver-type fixed --ode-solver FixedStepAuto
 
+cwd = os.getcwd()
+
 input_variables = ['u']
 output_variables = ['x', 'v']
 invariant = { 'u': Range(-9.9, -9.5),
@@ -32,14 +35,19 @@ invariant = { 'u': Range(-9.9, -9.5),
               'v': Range(15, 15) }
 number_of_cps_dict= { 'u': 4 }
 var_type_dict= { 'u': VarType.LINEAR }
-simulink_model_filename= '../../src/test_cases/engine/learn_ha_loop/ex_sldemo_bounce_Input.slx'
+simulink_model_filename= os.path.join(cwd, '../../src/test_cases/engine/learn_ha_loop/ex_sldemo_bounce_Input.slx')
 time_horizon= 13.0
 sampling_time = 0.001
 fixed_interval_data= False
 
-output_filename= "model_simulation.txt"
+output_filename= os.path.join(cwd, "model_simulation.txt")
 
-script_filename= "tmp_model_simulate.m"
+try:
+    os.mkdir('_test')
+except:
+    pass
+
+script_filename= "_test/model_simulate.m"
 
 with utils_io.open_for_write(script_filename) as out:
     generate_simulation_script(out= out,
