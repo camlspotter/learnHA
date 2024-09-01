@@ -9,7 +9,8 @@ def load_trajectories_and_fix_parameters(parameters):
     list_of_trajectories, stepsize_of_traj, system_dimension = parse_trajectories(input_filename)
 
     if stepsize_of_traj != parameters['stepsize']:
-        print(f"Warning: --stepsize {parameters['stepsize']} is differentfrom the stepsize of trajectories {stepsize_of_traj}")
+        print(f"Warning: --stepsize {parameters['stepsize']} is different from the stepsize of trajectories {stepsize_of_traj}. Use the one in the file")
+        parameters['stepsize'] = stepsize_of_traj
 
     variableType_datastruct = []  # structure that holds [var_index, var_name, var_type, pool_values]
     if len(parameters['variable_types']) >= 1:  # if user supply annotation arguments
