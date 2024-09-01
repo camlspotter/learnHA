@@ -98,16 +98,17 @@ def generate_simulation_script(out : TextIOWrapper,
     %% Plot the result
     y = simOut.get('yOut');
     t = simOut.get('tOut');
-    [rsize, csize] = size(y);
-    % *********** Plotting the original output from the Simulink model *****************
-    for i=1:csize
-        figure(i);
-        plot(t, y( : , i));
-        title('{title}','FontSize',26, 'FontWeight', 'bold');
-        xlabel('time', 'FontSize',26, 'FontWeight', 'bold');
-        grid on;
-        grid minor;
-    end
+    % comment out this shows a plot
+    % [rsize, csize] = size(y);
+    % % *********** Plotting the original output from the Simulink model *****************
+    % for i=1:csize
+    %     figure(i);
+    %     plot(t, y( : , i));
+    %     title('{title}','FontSize',26, 'FontWeight', 'bold');
+    %     xlabel('time', 'FontSize',26, 'FontWeight', 'bold');
+    %     grid on;
+    %     grid minor;
+    % end
     """))
 
 
