@@ -35,13 +35,23 @@ class Options:
     output_variables : list[str]
     
 def get_options() -> Options:
+    def argparse_bool(x : str):
+        match x.lower():
+            case "true":
+                return True
+            case "false":
+                return False
+            case _:
+                assert False, "invalid boolean value"
+
     parser = argparse.ArgumentParser(description="Simulation runner builder")
     parser.add_argument('--title', help='Title', type=str, default= "DefaultTitle", required=False)
     parser.add_argument('--script-file', help='Script file destination', type=str, required=True)
     parser.add_argument('--simulink-model-file', help='SLX model file', type=str, required=True)
     parser.add_argument('-Z', '--time-horizon', help='The global time horizon of computation', type=float, required=True)
     parser.add_argument('-s', '--sampling-time', help='The sampling time (time-step)', type=float, required=True)
-    parser.add_argument('--fixed-interval-data', help='Extract simulation data as fixed interval.  False:data extracted based on the solver in the model.  True:data extracted as fixed time-step(recommended for equivalence testing)', type=bool, default=True, required=False)
+    # Beware! argparse's type=bool is broken
+    parser.add_argument('--fixed-interval-data', help='Extract simulation data as fixed interval.  False:data extracted based on the solver in the model.  True:data extracted as fixed time-step(recommended for equivalence testing)', type=argparse_bool, default=True, required=False)
     parser.add_argument('--input-variables', help='Input variables', type=str, required=True)
     parser.add_argument('--output-variables', help='Output variables', type=str, required=True)
     args = vars(parser.parse_args())

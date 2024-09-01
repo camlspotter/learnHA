@@ -51,6 +51,15 @@ def read_commandline_arguments():
 
     """
 
+    def argparse_bool(x : str):
+        match x.lower():
+            case "true":
+                return True
+            case "false":
+                return False
+            case _:
+                assert False, "invalid boolean value"
+
     parser = argparse.ArgumentParser(description='Learns HA model from input--output trajectories')
     parser.add_argument('-i', '--input-filename', help='input FileName containing trajectories', type=str, required=True)
     parser.add_argument('--output-directory', help='output directory', required=True)
@@ -85,12 +94,14 @@ def read_commandline_arguments():
                         type=str, default='', required=False)
     parser.add_argument('--ode-speedup', help='Maximum number of segments to include for ODE computation. Set to 10 by default',
                         type=int, default=10, required=False)
+    # Beware! argparse's type=bool is broken
     parser.add_argument('--is-invariant', help='Values True (default) computes invariant and False disables computation',
-                        type=bool, default=True, required=False)
+                        type=argparse_bool, default=True, required=False)
     parser.add_argument('--stepsize', help='Fixed sampling time step-size of the input trajectories. Set to 0.01 by default',
                         type=float, default=0.01, required=False)
+    # Beware! argparse's type=bool is broken
     parser.add_argument('--filter-last-segment',
-                        help='True to enable and False to disable (default) filtering out the last segment from a trajectory during segmentation', type=bool, default=False, required=False)
+                        help='True to enable and False to disable (default) filtering out the last segment from a trajectory during segmentation', type=argparse_bool, default=False, required=False)
     parser.add_argument('--lmm-step-size',
                         help='Options are: 2/3/4/5/6. Higher values computes more accurate derivatives. 5 is set default',
                         type=int, choices=[2, 3, 4, 5, 6], default=5, required=False)
@@ -132,7 +143,7 @@ def read_commandline_arguments():
     print("output_variables:", args['output_variables'])
 
     _options = Options(**args)
-    
+
     return args
 
 def process_type_annotation_parameters(parameters, system_dim):
