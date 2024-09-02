@@ -14,9 +14,10 @@
 #   --time-horizon 13.000000 --sampling-time 0.001000 --fixed-interval-data False \
 #   --input-variables "x0" --output-variables "x1,x2"
 
-from pydantic.dataclasses import dataclass
-from typeguard import typechecked
 import argparse
+from typeguard import typechecked
+from pydantic.dataclasses import dataclass
+
 import infer_ha.utils.io as utils_io
 from infer_ha.simulation_script import generate_simulation_script
 from infer_ha.utils.argparse_bool import argparse_bool
@@ -31,7 +32,7 @@ class Options:
     fixed_interval_data : bool
     input_variables : list[str]
     output_variables : list[str]
-    
+
 @typechecked
 def get_options() -> Options:
     parser = argparse.ArgumentParser(description="Simulation runner builder")
@@ -63,6 +64,6 @@ def run() -> None:
                                    opt.input_variables,
                                    opt.output_variables)
 
-    
+
 if __name__ == '__main__':
     run()
