@@ -1,10 +1,11 @@
 import os
+import random
+
 from infer_ha.simulate import simulate
 from infer_ha.simulation_input import generate_simulation_input, VarType
 from infer_ha.range import Range
 from infer_ha.simulation_script import generate_simulation_script
 import infer_ha.utils.io as utils_io
-import random
 
 # ./HybridLearner --engine learn-ha-loop --output-directory $OUTDIR \
 #   --simulink-model-file ../src/test_cases/engine/learn_ha_loop/ex_sldemo_bounce_Input.slx \
@@ -66,9 +67,9 @@ sis = generate_simulation_input(rng= random.Random(),
                                 var_types= var_types,
                                 input_variables= input_variables,
                                 output_variables= output_variables)
-                                 
+
 print(sis)
- 
+
 simulate( script_file= script_file,
           output_file= output_file,
           input_variables= input_variables,
