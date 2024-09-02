@@ -1,8 +1,8 @@
-import matplotlib.pyplot as plt
-import numpy as np
 import csv
 import argparse
 import os
+import numpy as np
+import matplotlib.pyplot as plt
 
 parser = argparse.ArgumentParser(description="TSV timeseries plotter to SVG")
 parser.add_argument('tsv', metavar='tsv', type=str, help='Timeseries TSV file')
