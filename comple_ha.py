@@ -1,4 +1,4 @@
-# pipenv run python comple_ha.py --ode-solver-type fixed --ode-solver FixedStepAuto --invariant-mode 2 learned_HA.json
+# pipenv run python compile_ha.py --ode-solver-type fixed --ode-solver FixedStepAuto --invariant-mode 2 learned_HA.json
 from os import path
 from io import TextIOWrapper
 import textwrap
