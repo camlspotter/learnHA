@@ -1,5 +1,5 @@
 from infer_ha.utils.trajectories_parser import parse_trajectories
-from infer_ha.utils.commandline_parser import read_commandline_arguments, process_type_annotation_parameters, Options
+from infer_ha.utils.commandline_parser import process_type_annotation_parameters, Options
 
 def load_trajectories_and_fix_parameters(parameters):
     '''
