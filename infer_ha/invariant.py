@@ -72,6 +72,7 @@ invariant = pp.infix_notation(
 def check_invariant(inv):
     match inv:
         case [ineqs]:
+            invariant : Invariant = {}
             variables = { x for ((x, _), _) in ineqs }
             d = dict(ineqs)
             for x in variables:
@@ -81,10 +82,10 @@ def check_invariant(inv):
                 except KeyError:
                     assert False, f"Invalid range specification for {x}: missing one of range limits: {ineqs}"
                 try:
-                    d[x] = Range(min, max)
-                except e:
-                    assert False, f"Invalid range specification for {x}: {ineqs}"
-            return d
+                    invariant[x] = Range(min, max)
+                except:
+                    assert False, f"Invalid range specification for {x}: Range({min}, {max})"
+            return invariant
         case _:
             assert False
 
