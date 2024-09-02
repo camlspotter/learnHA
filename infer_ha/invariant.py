@@ -57,7 +57,6 @@ def check_inequality(tkns):
             assert False
 
 def check_and(tkns):
-    print("&&", tkns)
     match tkns:
         case [[a, "&&", c]]:
             return [a + c]
