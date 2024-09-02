@@ -56,7 +56,6 @@ def infer_model(list_of_trajectories : list[Trajectories], learning_parameters :
     """
 
     stepsize = learning_parameters.stepsize
-    print("stepsize =", stepsize)
     maxorder = learning_parameters.ode_degree
     boundary_order = learning_parameters.guard_degree
     ep = learning_parameters.segmentation_error_tol

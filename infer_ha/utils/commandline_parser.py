@@ -32,7 +32,7 @@ class Options:
     constant_value : str # default=''
     ode_speedup : int # , default=10
     is_invariant : bool # default=True
-    stepsize : float # default=0.01
+    stepsize : float # set by parameters.py
     filter_last_segment : bool # default=False
     lmm_step_size : int # choices=[2, 3, 4, 5, 6], default=5
     methods : ClusteringMethod # dtw/dbscan/piecelinear
@@ -94,8 +94,6 @@ def read_commandline_arguments():
     # Beware! argparse's type=bool is broken
     parser.add_argument('--is-invariant', help='Values True (default) computes invariant and False disables computation',
                         type=argparse_bool, default=True, required=False)
-    parser.add_argument('--stepsize', help='Fixed sampling time step-size of the input trajectories. Set to 0.01 by default',
-                        type=float, default=0.01, required=False)
     # Beware! argparse's type=bool is broken
     parser.add_argument('--filter-last-segment',
                         help='True to enable and False to disable (default) filtering out the last segment from a trajectory during segmentation', type=argparse_bool, default=False, required=False)
@@ -138,8 +136,6 @@ def read_commandline_arguments():
 
     print("input_variables:", args['input_variables'])
     print("output_variables:", args['output_variables'])
-
-    _options = Options(**args)
 
     return args
 
