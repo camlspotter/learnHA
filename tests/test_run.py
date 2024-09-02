@@ -1,7 +1,6 @@
 import unittest
 
 import filecmp
-import warnings
 import os
 import json
 from dataclasses import asdict
@@ -10,8 +9,7 @@ from infer_ha.infer_HA import infer_model
 from infer_ha import HA
 from infer_ha.model_printer.print_HA import print_HA
 from infer_ha.parameters import load_trajectories_and_fix_parameters
-from infer_ha.utils.trajectories_parser import parse_trajectories
-from infer_ha.utils.commandline_parser import process_type_annotation_parameters, ClusteringMethod
+from infer_ha.utils.commandline_parser import ClusteringMethod
 import infer_ha.utils.io as utils_io
 import infer_ha.invariant
 
