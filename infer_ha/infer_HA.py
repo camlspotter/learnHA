@@ -3,7 +3,6 @@ This is the main module for inferring an HA model.
 """
 
 import sys  # This is used for command line arguments
-import numpy as np
 from typeguard import typechecked
 
 from infer_ha.segmentation.segmentation import two_fold_segmentation, segmented_trajectories
