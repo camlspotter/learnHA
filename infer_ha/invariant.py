@@ -1,5 +1,4 @@
 from typeguard import typechecked
-from typing import Any
 import pyparsing as pp
 from infer_ha.range import Range
 import random
