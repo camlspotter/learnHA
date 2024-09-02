@@ -1,11 +1,12 @@
 from enum import Enum
 from io import TextIOWrapper
 import textwrap
-from infer_ha.HA import HybridAutomaton, Assignment, Transition, Mode, Polynomial
+from dataclasses import dataclass
+
+from infer_ha.HA import HybridAutomaton, Assignment, Polynomial
 from infer_ha.invariant import Invariant
 import infer_ha.invariant
 import infer_ha.HA
-from dataclasses import dataclass, asdict
 
 oneVersusOne_oneVersusRest : int = 1  #XXX enum?
 
@@ -59,7 +60,7 @@ def compile(out : TextIOWrapper,
     ha : HA = extend_HA(ha_orig)
 
     out.write("%% Script file for generating Programmatically Simulink Model!\n")
-    printDefinition(out, ha, simulink_model_name, ode_solver_type, ode_solver)
+    printDefinition(out, simulink_model_name, ode_solver_type, ode_solver)
 
     if len(ha.modes) == 3 and oneVersusOne_oneVersusRest == 2:
         # Create random Matlab function only when non-deterministic situation arise
@@ -90,7 +91,6 @@ def compile(out : TextIOWrapper,
         """)[1:-1])
 
 def printDefinition(out : TextIOWrapper,
-                    ha : HA,
                     simulink_model_name : str,
                     ode_solver_type : OdeSolverType,
                     ode_solver : str) -> None:
@@ -165,7 +165,7 @@ def addLocations(out, ha : HA) -> None:
         out.write(f"str = ['loc{loc_id}', 10, ...\n") # 10 here is ASCII char indicate newline char
         out.write(" 'du: ', 10, ...\n")
         # Now get the ODE for each variable_dot
-        derivatives = loc.flow # list<flow_equation>
+        # derivatives = loc.flow # list<flow_equation>
         # int var_index=0; // fixing this hard-coded indexing approach
         # string variableName="", prime_variableName;
         # size_t pos;
@@ -217,7 +217,7 @@ def addTransitions(out,
         different_position += 1.1
         # If the model is a Single Location with no Transitions this Loop will not be executed
         transition_count : int = 0
-        list_guardToInvariant : list[str] # equality guard to NotEquality guard for locations' invariant (Matlab's unconditional fixes)
+        # list_guardToInvariant : list[str] # equality guard to NotEquality guard for locations' invariant (Matlab's unconditional fixes)
         # However, this fix is not correct when given guard is other than equality guard. For eg x >= 7. Here replacing Not will not work out.
         # Better, fix is to use the actual invariant of the location and replace it. So, here we must have invariant given.
 
@@ -278,7 +278,6 @@ def addTransitions(out,
             #Now it is better by replacing with the actual invariant constraints
             #------------ new code --------------
             condition_str = ""
-            cnt = 0
 
             match invariant_mode:
                 case InvariantMode.INCLUDE_BOTH:
