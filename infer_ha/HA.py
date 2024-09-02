@@ -3,7 +3,6 @@ from typeguard import typechecked
 from pydantic.dataclasses import dataclass
 from pydantic import ConfigDict
 import numpy as np
-import random
 from infer_ha.invariant import Invariant
 from infer_ha.range import Range
 
