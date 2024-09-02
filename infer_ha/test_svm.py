@@ -1,8 +1,6 @@
 from sklearn import datasets
-from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 from libsvm.svmutil import svm_train, svm_predict, svm_problem, svm_parameter
-from libsvm.commonutil import svm_read_problem
 import matplotlib.pyplot as plt
 import numpy as np
 
