@@ -3,7 +3,7 @@ from pydantic.dataclasses import dataclass
 from dataclasses import asdict
 import random
 from infer_ha.range import Range
-from infer_ha.invariant import Invariant, instance_of_invariant
+from infer_ha.invariant import Invariant
 import json
 
 class VarType(Enum):
