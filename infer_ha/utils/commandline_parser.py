@@ -2,6 +2,7 @@ from enum import Enum
 import argparse
 from typing import Optional, Any
 from pydantic.dataclasses import dataclass
+from typeguard import typechecked
 
 # @dataclass # We cannot use @dataclass with Enum: @dataclass overrides __eq__
 class ClusteringMethod(Enum):
@@ -37,6 +38,10 @@ class Options:
 
     input_variables : list[str]
     output_variables : list[str]
+
+@typechecked
+def check_options(d : dict[str,Any]) -> Options:
+    return Options(**d)
 
 def read_commandline_arguments():
     """

@@ -3,7 +3,7 @@ from os import path
 from io import TextIOWrapper
 import textwrap
 import json
-
+from typeguard import typechecked
 from dataclasses import dataclass
 import argparse
 import infer_ha.utils.io as utils_io
@@ -21,6 +21,7 @@ class Options:
     output_matlab_script : str     # aaa/bbb/learned_ha_compile.m
     simulink_model_name : str      # aaa/bbb/learned_ha
 
+@typechecked
 def get_options() -> Options:
     parser = argparse.ArgumentParser(description="Hybrid Automaton to SLX compiler")
     parser.add_argument('ha_json_file', metavar='ha.json', type=str, help='Hybrid Automaton definition JSON path')

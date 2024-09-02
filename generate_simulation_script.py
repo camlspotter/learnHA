@@ -19,6 +19,7 @@ from io import TextIOWrapper
 import textwrap
 
 from pydantic.dataclasses import dataclass
+from typeguard import typechecked
 import argparse
 import infer_ha.utils.io as utils_io
 from infer_ha.simulation_script import generate_simulation_script
@@ -34,6 +35,7 @@ class Options:
     input_variables : list[str]
     output_variables : list[str]
     
+@typechecked
 def get_options() -> Options:
     def argparse_bool(x : str):
         match x.lower():
