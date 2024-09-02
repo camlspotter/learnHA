@@ -3,21 +3,18 @@
 # pipenv run python generate_simulation_inputs.py --num-inputs 100 --time-horizon 13.0 --input-variables 'u' --output-variables 'x,v' --invariant '-9.9 <= u && u <= -9.5 && 10.2 <= x && x <= 10.5 && 15 <= v && v <= 15' --number-of-cps 'u:4' --var-types 'u:linear' -o simulation_inputs.json
 
 import os
-from infer_ha.simulate import simulate
-from infer_ha.simulation_input import generate_simulation_input, VarType
-from infer_ha.range import Range
-from infer_ha.simulation_script import generate_simulation_script
-import infer_ha.utils.io as utils_io
-from infer_ha.utils.argparse_bool import argparse_bool
 import random
-from pydantic.dataclasses import dataclass
-from dataclasses import asdict
-from typeguard import typechecked
-import argparse
-from infer_ha.invariant import Invariant, invariant_of_string
-from typing import Optional
 import json
 import sys
+import argparse
+from typing import Optional
+from dataclasses import asdict
+from typeguard import typechecked
+from pydantic.dataclasses import dataclass
+
+from infer_ha.simulation_input import generate_simulation_input, VarType
+import infer_ha.utils.io as utils_io
+from infer_ha.invariant import Invariant, invariant_of_string
 
 @dataclass
 class Options:
