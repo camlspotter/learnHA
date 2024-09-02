@@ -1,13 +1,10 @@
 # pipenv run python compile_ha.py --ode-solver-type fixed --ode-solver FixedStepAuto --invariant-mode 2 learned_HA.json
 from os import path
-from io import TextIOWrapper
-import textwrap
 import json
-from typeguard import typechecked
-from dataclasses import dataclass
 import argparse
+from dataclasses import dataclass
+from typeguard import typechecked
 import infer_ha.utils.io as utils_io
-from infer_ha.simulation_script import generate_simulation_script
 from infer_ha.slx_compiler import OdeSolverType, InvariantMode, compile
 from infer_ha.HA import HybridAutomaton
 from infer_ha.matlab_engine import matlab_engine
@@ -47,7 +44,7 @@ def get_options() -> Options:
     print("output:", args['output_file'])
     print("compile_script:", args['output_matlab_script'])
     print("simulink_model_name:", args['simulink_model_name'])
-    
+
     del args['output_file']
 
     return Options(**args)
