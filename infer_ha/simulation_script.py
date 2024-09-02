@@ -2,9 +2,6 @@ from os import path
 from io import TextIOWrapper
 import textwrap
 
-import argparse
-import infer_ha.utils.io as utils_io
-
 def generate_simulation_script(out : TextIOWrapper,
                                title : str,
                                simulink_model_file : str,
