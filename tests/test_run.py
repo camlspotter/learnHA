@@ -67,7 +67,7 @@ class TestLearnHA(unittest.TestCase):
         write_HA(parameters, raw)  # prints an HA model file
 
         backup_file = "data/test_output/oscillator_2_without_annotation.txt"
-        test_generated_file = os.path.join(parameters.output_directory, 'learn_HA.txt')
+        test_generated_file = os.path.join(parameters.output_directory, 'learned_HA.txt')
 
         # shallow mode comparison: where only metadata of the files are compared like the size, date modified, etc.
         # result = filecmp.cmp(backup_file, test_generated_file)
@@ -116,7 +116,7 @@ class TestLearnHA(unittest.TestCase):
         write_HA(parameters, raw) # prints an HA model file
 
         backup_file = "data/test_output/oscillator_2_with_annotation.txt"
-        test_generated_file = os.path.join(parameters.output_directory, 'learn_HA.txt')
+        test_generated_file = os.path.join(parameters.output_directory, 'learned_HA.txt')
 
         # shallow mode comparison: where only metadata of the files are compared like the size, date modified, etc.
         # result = filecmp.cmp(backup_file, test_generated_file)
@@ -165,7 +165,7 @@ class TestLearnHA(unittest.TestCase):
         write_HA(parameters, raw)
 
         backup_file = "data/test_output/bball_4.txt"
-        test_generated_file = os.path.join(parameters.output_directory, 'learn_HA.txt')
+        test_generated_file = os.path.join(parameters.output_directory, 'learned_HA.txt')
 
         # shallow mode comparison: where only metadata of the files are compared like the size, date modified, etc.
         # result = filecmp.cmp(backup_file, test_generated_file)
