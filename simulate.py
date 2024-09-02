@@ -3,16 +3,16 @@
 # pipenv run python simulate.py --simulink-model-file ../../src/test_cases/engine/learn_ha_loop/ex_sldemo_bounce_Input.slx --time-horizon 13.0 --sampling-time 0.001 --fixed-interval-data False --input-variables 'u' --output-variables 'x,v' --invariant '-9.9 <= u && u <= -9.5 && 10.2 <= x && x <= 10.5 && 15 <= v && v <= 15' --number-of-cps 'u:4' --var-types 'u:linear' -o model_simulation.txt
 
 import os
+import random
+import argparse
+from typeguard import typechecked
+from pydantic.dataclasses import dataclass
+
 from infer_ha.simulate import simulate
 from infer_ha.simulation_input import generate_simulation_input, VarType
-from infer_ha.range import Range
 from infer_ha.simulation_script import generate_simulation_script
 from infer_ha.utils.argparse_bool import argparse_bool
 import infer_ha.utils.io as utils_io
-import random
-from pydantic.dataclasses import dataclass
-from typeguard import typechecked
-import argparse
 from infer_ha.invariant import Invariant, invariant_of_string
 
 @dataclass
@@ -60,7 +60,7 @@ def get_options() -> Options:
     parser.add_argument('--number-of-cps', help='Number of control points', type=str, required=True)
     parser.add_argument('--var-types', help='Variable types', type=str, required=True)
     parser.add_argument('--output-file', '-o', help='Output filename', type=str, required=True)
-    
+
     args = vars(parser.parse_args())
 
     args['input_variables'] = [] if args['input_variables'] == "" else args['input_variables'].split(",")
@@ -100,9 +100,9 @@ sis = generate_simulation_input(rng= random.Random(),
                                 var_types= opts.var_types,
                                 input_variables= opts.input_variables,
                                 output_variables= opts.output_variables)
-                                 
+
 print(sis)
- 
+
 simulate( script_file= script_file,
           output_file= opts.output_file,
           input_variables= opts.input_variables,
