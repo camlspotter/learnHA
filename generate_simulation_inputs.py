@@ -8,6 +8,7 @@ from infer_ha.simulation_input import generate_simulation_input, VarType
 from infer_ha.range import Range
 from infer_ha.simulation_script import generate_simulation_script
 import infer_ha.utils.io as utils_io
+from infer_ha.utils.argparse_bool import argparse_bool
 import random
 from pydantic.dataclasses import dataclass
 from dataclasses import asdict
@@ -50,15 +51,6 @@ def parse_var_types(s : str) -> dict[str,VarType]:
 
 @typechecked
 def get_options() -> Options:
-    def argparse_bool(x : str):
-        match x.lower():
-            case "true":
-                return True
-            case "false":
-                return False
-            case _:
-                assert False, "invalid boolean value"
-
     parser = argparse.ArgumentParser(description="SLX model Simulator")
 
     parser.add_argument('--seed', '-s', help='Random seed', type=int, default=None, required=False)
@@ -83,7 +75,7 @@ def get_options() -> Options:
 
 opts = get_options()
 
-rng = random.Random() if opts.seed == None else random.Random(opts.seed)
+rng = random.Random() if opts.seed is None else random.Random(opts.seed)
 
 sis = [ generate_simulation_input(rng= rng,
                                   time_horizon= opts.time_horizon,

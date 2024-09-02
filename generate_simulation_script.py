@@ -19,6 +19,7 @@ from typeguard import typechecked
 import argparse
 import infer_ha.utils.io as utils_io
 from infer_ha.simulation_script import generate_simulation_script
+from infer_ha.utils.argparse_bool import argparse_bool
 
 @dataclass
 class Options:
@@ -33,15 +34,6 @@ class Options:
     
 @typechecked
 def get_options() -> Options:
-    def argparse_bool(x : str):
-        match x.lower():
-            case "true":
-                return True
-            case "false":
-                return False
-            case _:
-                assert False, "invalid boolean value"
-
     parser = argparse.ArgumentParser(description="Simulation runner builder")
     parser.add_argument('--title', help='Title', type=str, default= "DefaultTitle", required=False)
     parser.add_argument('--script-file', help='Script file destination', type=str, required=True)

@@ -3,6 +3,7 @@ import argparse
 from typing import Optional, Any
 from pydantic.dataclasses import dataclass
 from typeguard import typechecked
+from infer_ha.utils.argparse_bool import argparse_bool
 
 # @dataclass # We cannot use @dataclass with Enum: @dataclass overrides __eq__
 class ClusteringMethod(Enum):
@@ -55,15 +56,6 @@ def read_commandline_arguments():
          degree = args['ode_degree']
 
     """
-
-    def argparse_bool(x : str):
-        match x.lower():
-            case "true":
-                return True
-            case "false":
-                return False
-            case _:
-                assert False, "invalid boolean value"
 
     parser = argparse.ArgumentParser(description='Learns HA model from input--output trajectories')
     parser.add_argument('-i', '--input-filename', help='input FileName containing trajectories', type=str, required=True)

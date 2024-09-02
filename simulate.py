@@ -7,6 +7,7 @@ from infer_ha.simulate import simulate
 from infer_ha.simulation_input import generate_simulation_input, VarType
 from infer_ha.range import Range
 from infer_ha.simulation_script import generate_simulation_script
+from infer_ha.utils.argparse_bool import argparse_bool
 import infer_ha.utils.io as utils_io
 import random
 from pydantic.dataclasses import dataclass
@@ -47,15 +48,6 @@ def parse_var_types(s : str) -> dict[str,VarType]:
 
 @typechecked
 def get_options() -> Options:
-    def argparse_bool(x : str):
-        match x.lower():
-            case "true":
-                return True
-            case "false":
-                return False
-            case _:
-                assert False, "invalid boolean value"
-
     parser = argparse.ArgumentParser(description="SLX model Simulator")
     parser.add_argument('--simulink-model-file', help='SLX model file', type=str, required=True)
     parser.add_argument('-Z', '--time-horizon', help='The global time horizon of computation', type=float, required=True)
