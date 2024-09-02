@@ -77,14 +77,14 @@ def build_signal(rng : random.Random,
 def generate_input_value_ts(rng : random.Random,
                                     time_horizon : float,
                                     invariant : Invariant,
-                                    number_of_cps_dict : dict[str, int],
-                                    var_type_dict : dict[str, VarType],
+                                    number_of_cps : dict[str, int],
+                                    var_types : dict[str, VarType],
                                     input_variables : list[str]) -> dict[str, Signal]:
     return { v : build_signal(rng,
                               time_horizon,
                               invariant[v],
-                              number_of_cps_dict[v],
-                              var_type_dict[v]) for v in input_variables }
+                              number_of_cps[v],
+                              var_types[v]) for v in input_variables }
 
 def generate_output_values(rng : random.Random,
                            invariant : Invariant,
@@ -94,11 +94,11 @@ def generate_output_values(rng : random.Random,
 def generate_simulation_input(rng : random.Random,
                               time_horizon : float,
                               invariant : Invariant,
-                              number_of_cps_dict : dict[str, int],
-                              var_type_dict : dict[str, VarType],
+                              number_of_cps : dict[str, int],
+                              var_types : dict[str, VarType],
                               input_variables : list[str],
                               output_variables : list[str]) -> Simulation_input:
-    input_value_ts = generate_input_value_ts(rng, time_horizon, invariant, number_of_cps_dict, var_type_dict, input_variables)
+    input_value_ts = generate_input_value_ts(rng, time_horizon, invariant, number_of_cps, var_types, input_variables)
     initial_output_values = generate_output_values(rng, invariant, output_variables)
     return Simulation_input(input_value_ts= input_value_ts,
                             initial_output_values= initial_output_values)

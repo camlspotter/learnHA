@@ -31,28 +31,28 @@ output_variables = ['x', 'v']
 invariant = { 'u': Range(-9.9, -9.5),
               'x': Range(10.2, 10.5),
               'v': Range(15, 15) }
-number_of_cps_dict= { 'u': 4 }
-var_type_dict= { 'u': VarType.LINEAR }
-simulink_model_filename= os.path.abspath('../../src/test_cases/engine/learn_ha_loop/ex_sldemo_bounce_Input.slx')
+number_of_cps= { 'u': 4 }
+var_types= { 'u': VarType.LINEAR }
+simulink_model_file= os.path.abspath('../../src/test_cases/engine/learn_ha_loop/ex_sldemo_bounce_Input.slx')
 time_horizon= 13.0
 sampling_time = 0.001
 fixed_interval_data= False
 
-# output_filename= os.path.abspath("model_simulation.txt")
-# output_filename= os.path.abspath("model_simulation.txt")
-output_filename= os.path.abspath("model_simulation.txt")
+# output_file= os.path.abspath("model_simulation.txt")
+# output_file= os.path.abspath("model_simulation.txt")
+output_file= os.path.abspath("model_simulation.txt")
 
 try:
     os.mkdir('_test')
 except:
     pass
 
-script_filename= "_test/simulate_model.m"
+script_file= "_test/simulate_model.m"
 
-with utils_io.open_for_write(script_filename) as out:
+with utils_io.open_for_write(script_file) as out:
     generate_simulation_script(out= out,
                                title= 'Title',
-                               simulink_model_filename= simulink_model_filename,
+                               simulink_model_file= simulink_model_file,
                                time_horizon= time_horizon,
                                sampling_time= sampling_time,
                                fixed_interval_data= fixed_interval_data,
@@ -62,15 +62,15 @@ with utils_io.open_for_write(script_filename) as out:
 sis = generate_simulation_input(rng= random.Random(),
                                 time_horizon= time_horizon,
                                 invariant= invariant,
-                                number_of_cps_dict= number_of_cps_dict,
-                                var_type_dict= var_type_dict,
+                                number_of_cps= number_of_cps,
+                                var_types= var_types,
                                 input_variables= input_variables,
                                 output_variables= output_variables)
                                  
 print(sis)
  
-simulate( script_filename= script_filename,
-          output_filename= output_filename,
+simulate( script_file= script_file,
+          output_file= output_file,
           input_variables= input_variables,
           output_variables= output_variables,
           input_value_ts= sis.input_value_ts,
