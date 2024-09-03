@@ -143,7 +143,8 @@ def infer_model(list_of_trajectories : list[Trajectory], learning_parameters : O
 
     transitions = compute_transitions(learning_parameters.output_directory,
                                       P_modes, position, segmentedTrajectories, L_y, boundary_order, Y,
-                                      variableType_datastruct, number_of_segments_before_cluster,
+                                      variableType_datastruct,
+                                      number_of_segments_before_cluster,
                                       number_of_segments_after_cluster)
 
     if learning_parameters.input_variables == []:

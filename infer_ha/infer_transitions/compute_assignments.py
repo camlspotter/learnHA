@@ -1,7 +1,9 @@
 from sklearn import linear_model
+import numpy as np
 
-
-def compute_assignments(list_connection_pt, L_y, Y):
+def compute_assignments(list_connection_pt, L_y, Y) -> tuple[np.ndarray, # coeffs, 2d
+                                                             np.ndarray # intercepts, 1d
+                                                             ]:
     """
     Type Annotation function. Type annotation is performed on the assignments based on the variable's type.
 
@@ -27,12 +29,7 @@ def compute_assignments(list_connection_pt, L_y, Y):
     # print()
     # print("y_pts =", y_pts)
 
-    # lin_reg = linear_model.LinearRegression(fit_intercept=False)  # without intercepts
     lin_reg = linear_model.LinearRegression()  # with intercepts
     lin_reg = lin_reg.fit(x_pts, y_pts)
-    # print("Linear Regression Score = ", lin_reg.score(x_pts, y_pts))
-    assign_coeff = lin_reg.coef_
-    assign_intercept = lin_reg.intercept_
-    # print("Now reg.intercept_")
-    # print(lin_reg.intercept_)
-    return assign_coeff, assign_intercept
+
+    return lin_reg.coef_, lin_reg.intercept_
