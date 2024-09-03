@@ -81,8 +81,6 @@ def read_commandline_arguments():
                         type=float, default=0.01, required=False)
     parser.add_argument('--dbscan-min-samples', help='Maximal threshold for min-samples in DBSCAN clustering algorithm. Set to 2 by default',
                         type=int, default=2, required=False)
-    parser.add_argument('--size-input-variable', help='Number of input variables in the trajectories', type=int, required=True)
-    parser.add_argument('--size-output-variable', help='Number of output variables in the trajectories', type=int, required=True)
     parser.add_argument('--variable-types', help='Type Annotation for variables. Options are t1: continuous variables, '
                         ' t2: constant pool of values, t3: constant assignment. Syntax: --variable-types "x0=t1, x1=t2, x2=t3"',
                         type=str, default='', required=False)
@@ -104,10 +102,10 @@ def read_commandline_arguments():
 
     parser.add_argument('--input-variables',
                         help='Input variable names separated by commas',
-                        type=str, default="", required=False)
+                        type=str, required=True)
     parser.add_argument('--output-variables',
                         help='Output variable names separated by commas',
-                        type=str, default="", required=False)
+                        type=str, required=True)
 
     args = vars(parser.parse_args())    #  create a dict structure of the arguments
 
@@ -132,8 +130,12 @@ def read_commandline_arguments():
     # variableType_datastruct will be set in run.py
     args['variableType_datastruct'] = []
 
-    args['input_variables'] = [] if args['input_variables'] == "" else args['input_variables'].split(",")
-    args['output_variables'] = [] if args['output_variables'] == "" else args['output_variables'].split(",")
+    # XXX clean white spaces
+    args['input_variables'] = [] if args['input_variables'] == '' else args['input_variables'].split(",")
+    args['output_variables'] = [] if args['output_variables'] == '' else args['output_variables'].split(",")
+
+    args['size_input_variable'] = len(args['input_variables'])
+    args['size_output_variable'] = len(args['output_variables'])
 
     print("input_variables:", args['input_variables'])
     print("output_variables:", args['output_variables'])

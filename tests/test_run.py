@@ -47,6 +47,8 @@ class TestLearnHA(unittest.TestCase):
         ps['threshold_correlation'] = 0.89
         ps['dbscan_eps_dist'] = 0.01  # default value
         ps['dbscan_min_samples'] = 2  # default value
+        ps['input_variables'] = []
+        ps['output_variables'] = ['x0', 'x1']
         ps['size_input_variable'] = 0
         ps['size_output_variable'] = 2
         ps['variable_types'] = ''
@@ -57,8 +59,6 @@ class TestLearnHA(unittest.TestCase):
         ps['stepsize'] = 0.01
         ps['filter_last_segment'] = True
         ps['lmm_step_size'] = 5
-        ps['input_variables'] = []
-        ps['output_variables'] = []
 
         (list_of_trajectories, parameters) = load_trajectories_and_fix_parameters(ps)
 
@@ -96,6 +96,8 @@ class TestLearnHA(unittest.TestCase):
         ps['threshold_correlation'] = 0.89
         ps['dbscan_eps_dist'] = 0.01  # default value
         ps['dbscan_min_samples'] = 2  # default value
+        ps['input_variables'] = []
+        ps['output_variables'] = ['x0', 'x1']
         ps['size_input_variable'] = 0
         ps['size_output_variable'] = 2
         ps['variable_types'] = 'x0=t1,x1=t1'
@@ -106,8 +108,6 @@ class TestLearnHA(unittest.TestCase):
         ps['stepsize'] = 0.01
         ps['filter_last_segment'] = True
         ps['lmm_step_size'] = 5
-        ps['input_variables'] = []
-        ps['output_variables'] = []
 
         (list_of_trajectories, parameters) = load_trajectories_and_fix_parameters(ps)
 
@@ -145,6 +145,8 @@ class TestLearnHA(unittest.TestCase):
         ps['threshold_correlation'] = 0.8
         ps['dbscan_eps_dist'] = 0.01  # default value
         ps['dbscan_min_samples'] = 2  # default value
+        ps['input_variables'] = ['x0']
+        ps['output_variables'] = ['x1', 'x2']
         ps['size_input_variable'] = 1
         ps['size_output_variable'] = 2
         ps['variable_types'] = 'x0=t1,x1=t3'
@@ -155,8 +157,6 @@ class TestLearnHA(unittest.TestCase):
         ps['is_invariant'] = False
         ps['stepsize'] = 0.01
         ps['filter_last_segment'] = True
-        ps['input_variables'] = []
-        ps['output_variables'] = []
 
         (list_of_trajectories, parameters) = load_trajectories_and_fix_parameters(ps)
 
