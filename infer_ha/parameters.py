@@ -13,8 +13,10 @@ def load_trajectories_and_fix_parameters(parameters):
     variableType_datastruct = []  # structure that holds [var_index, var_name, var_type, pool_values]
     if len(parameters['variable_types']) >= 1:  # if user supply annotation arguments
         variableType_datastruct = process_type_annotation_parameters(parameters, system_dimension)
+
     parameters['variableType_datastruct'] = variableType_datastruct
 
+    print("variableType_datastruct", variableType_datastruct)
     ops = Options(**parameters)
 
     return (list_of_trajectories, ops)

@@ -27,7 +27,7 @@ class Options:
     size_input_variable : int
     size_output_variable : int
     variable_types : str # default=''
-    variableType_datastruct : list[Any]  # structure that holds [var_index, var_name, var_type, pool_values]
+    variableType_datastruct : list[tuple[int, str, str, list[float], float]]  # structure that holds [var_index, var_name, var_type, pool_values]
     pool_values : str # , default=''
     constant_value : str # default=''
     ode_speedup : int # , default=10
@@ -139,7 +139,7 @@ def read_commandline_arguments():
 
     return args
 
-def process_type_annotation_parameters(parameters, system_dim):
+def process_type_annotation_parameters(parameters, system_dim) -> list[tuple[int, str, str, list[float], float]]:
     """
     :param
         parameters: is a dictionary data structure having the list of commandline arguments passed by the user for the
@@ -161,7 +161,7 @@ def process_type_annotation_parameters(parameters, system_dim):
     variableType_datastruct = []  # structure that holds [var_index, var_name, var_type, pool_values, constant_value]
     # Note the structure of the data structure "variableType_datastruct" defined above
     for i in range(0, system_dim):  # create and initialize the datastruct. Here we assume variable to hold names "x0","x1", etc.
-        variableType_datastruct.append([i, "x" + str(i), "", "", ""])
+        variableType_datastruct.append([i, "x" + str(i), "", [], 0.0])
     # print ("data = ", variableType_datastruct)
     # print("v_type:",variable_types, "and pool_val:",pool_values,"end")
     # print("Length of v_type:",len(variable_types), "and Length of pool_val:",len(pool_values),"end")
@@ -210,7 +210,7 @@ def process_type_annotation_parameters(parameters, system_dim):
             for val in variableType_datastruct:
                 if varName in val:
                     index = val[0]
-                    variableType_datastruct[index][4] = varValue
+                    variableType_datastruct[index][4] = float(varValue)
 
 
     # print ("Data structure populated = ", variableType_datastruct)
@@ -222,7 +222,11 @@ def process_type_annotation_parameters(parameters, system_dim):
     # The structure variableType_datastruct will be empty is no argument is supplied
     # ******** Parsing argument variable-type and pool-values into a list *****************
 
-    return variableType_datastruct
+    @typechecked
+    def convert() -> list[tuple[int, str, str, list[float], float]]:
+        return [tuple(x) for x in variableType_datastruct]
+
+    return convert()
 
 if __name__ == '__main__':
     read_commandline_arguments()
