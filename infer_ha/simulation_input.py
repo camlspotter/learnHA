@@ -6,7 +6,7 @@ from infer_ha.range import Range
 from infer_ha.invariant import Invariant
 import json
 
-class VarType(Enum):
+class SignalType(Enum):
     FIXED_STEP = "fixed-step"
     # VAR_STEP = "var-step"
     LINEAR = "linear"
@@ -66,25 +66,25 @@ def build_signal(rng : random.Random,
                  time_horizon : float,
                  r : Range,
                  number_of_cps : int,
-                 var_type : VarType) -> Signal:
+                 signal_type : SignalType) -> Signal:
     cps = [ r.pick_random_point(rng) for _ in range(0, number_of_cps) ]
-    match var_type:
-        case VarType.FIXED_STEP:
+    match signal_type:
+        case SignalType.FIXED_STEP:
             return fixed_step_signal(time_horizon, cps)
-        case VarType.LINEAR:
+        case SignalType.LINEAR:
             return linear_signal(time_horizon, cps)
 
 def generate_input_value_ts(rng : random.Random,
                                     time_horizon : float,
                                     invariant : Invariant,
                                     number_of_cps : dict[str, int],
-                                    var_types : dict[str, VarType],
+                                    signal_types : dict[str, SignalType],
                                     input_variables : list[str]) -> dict[str, Signal]:
     return { v : build_signal(rng,
                               time_horizon,
                               invariant[v],
                               number_of_cps[v],
-                              var_types[v]) for v in input_variables }
+                              signal_types[v]) for v in input_variables }
 
 def generate_output_values(rng : random.Random,
                            invariant : Invariant,
@@ -95,10 +95,10 @@ def generate_simulation_input(rng : random.Random,
                               time_horizon : float,
                               invariant : Invariant,
                               number_of_cps : dict[str, int],
-                              var_types : dict[str, VarType],
+                              signal_types : dict[str, SignalType],
                               input_variables : list[str],
                               output_variables : list[str]) -> Simulation_input:
-    input_value_ts = generate_input_value_ts(rng, time_horizon, invariant, number_of_cps, var_types, input_variables)
+    input_value_ts = generate_input_value_ts(rng, time_horizon, invariant, number_of_cps, signal_types, input_variables)
     initial_output_values = generate_output_values(rng, invariant, output_variables)
     return Simulation_input(input_value_ts= input_value_ts,
                             initial_output_values= initial_output_values)
@@ -109,7 +109,7 @@ def test():
                                       { 'x' : Range(1, 2),
                                         'y' : Range(2, 3) },
                                       { 'x' : 4 },
-                                      { 'x' : VarType.LINEAR },
+                                      { 'x' : SignalType.LINEAR },
                                       ['x'],
                                       ['y'])
             for _ in range(0,10) ]

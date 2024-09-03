@@ -12,7 +12,7 @@ from dataclasses import asdict
 from typeguard import typechecked
 from pydantic.dataclasses import dataclass
 
-from infer_ha.simulation_input import generate_simulation_input, VarType
+from infer_ha.simulation_input import generate_simulation_input, SignalType
 import infer_ha.utils.io as utils_io
 from infer_ha.invariant import Invariant, invariant_of_string
 
@@ -25,7 +25,7 @@ class Options:
     output_variables : list[str]
     invariant : Invariant
     number_of_cps : dict[str,int]
-    var_types : dict[str,VarType]
+    signal_types : dict[str,SignalType]
     output_file : Optional[str]
 
 def parse_number_of_cps(s : str) -> dict[str,int]:
@@ -37,11 +37,11 @@ def parse_number_of_cps(s : str) -> dict[str,int]:
                 assert False, "Invalid number of control points spec: " + s
     return dict([parse_ncps(s) for s in s.split(",")])
 
-def parse_var_types(s : str) -> dict[str,VarType]:
-    def parse_vt(s : str) -> tuple[str,VarType]:
+def parse_signal_types(s : str) -> dict[str,SignalType]:
+    def parse_vt(s : str) -> tuple[str,SignalType]:
         match s.split(":"):
             case (var, vt):
-                return (var, VarType(vt))
+                return (var, SignalType(vt))
             case _:
                 assert False, "Invalid number of var type: " + s
     return dict([parse_vt(s) for s in s.split(",")])
@@ -66,7 +66,7 @@ def get_options() -> Options:
     args['output_variables'] = [] if args['output_variables'] == "" else args['output_variables'].split(",")
     args['invariant'] = invariant_of_string(args['invariant'])
     args['number_of_cps'] = parse_number_of_cps(args['number_of_cps'])
-    args['var_types'] = parse_var_types(args['var_types'])
+    args['signal_types'] = parse_signal_types(args['signal_types'])
 
     return Options(**args)
 
@@ -78,7 +78,7 @@ sis = [ generate_simulation_input(rng= rng,
                                   time_horizon= opts.time_horizon,
                                   invariant= opts.invariant,
                                   number_of_cps= opts.number_of_cps,
-                                  var_types= opts.var_types,
+                                  signal_types= opts.signal_types,
                                   input_variables= opts.input_variables,
                                   output_variables= opts.output_variables)
         for _ in range(0, opts.num_inputs) ]

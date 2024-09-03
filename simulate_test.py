@@ -2,7 +2,7 @@ import os
 import random
 
 from infer_ha.simulate import simulate
-from infer_ha.simulation_input import generate_simulation_input, VarType
+from infer_ha.simulation_input import generate_simulation_input, SignalType
 from infer_ha.range import Range
 from infer_ha.simulation_script import generate_simulation_script
 import infer_ha.utils.io as utils_io
@@ -33,7 +33,7 @@ invariant = { 'u': Range(-9.9, -9.5),
               'x': Range(10.2, 10.5),
               'v': Range(15, 15) }
 number_of_cps= { 'u': 4 }
-var_types= { 'u': VarType.LINEAR }
+signal_types= { 'u': SignalType.LINEAR }
 simulink_model_file= os.path.abspath('../../src/test_cases/engine/learn_ha_loop/ex_sldemo_bounce_Input.slx')
 time_horizon= 13.0
 sampling_time = 0.001
@@ -64,7 +64,7 @@ sis = generate_simulation_input(rng= random.Random(),
                                 time_horizon= time_horizon,
                                 invariant= invariant,
                                 number_of_cps= number_of_cps,
-                                var_types= var_types,
+                                signal_types= signal_types,
                                 input_variables= input_variables,
                                 output_variables= output_variables)
 

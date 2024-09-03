@@ -13,27 +13,9 @@ def instance_of_invariant(rng : random.Random, inv : Invariant) -> dict[str,floa
 
 variable = pp.Word(pp.alphas, pp.alphanums+"_")
 
-def test_variable():
-    for test in [
-            "x",
-            "xyz",
-            "xy123",
-            "xy_z_12_"
-    ]:
-        print(variable.parse_string(test))
-    
 inequality = \
     variable + pp.one_of("<= >=") + pp.common.number \
     ^ pp.common.number + pp.one_of("<= >=") + variable
-
-def test_inequality():
-    for test in [
-            "x <= 1",
-            "x >= 1.23",
-            ".12 >= y12",
-            "0. <= y"
-    ]:
-        print(inequality.parse_string(test))
 
 # invariant = pp.delimitedList(inequality, delim = "&&")
 
@@ -91,15 +73,3 @@ def check_invariant(inv):
 @typechecked
 def invariant_of_string(s : str) -> Invariant:
     return check_invariant(invariant.parse_string(s))
-
-def test_invariant():
-    for test in [
-            "1 <= x && x <= 1.23 && 0. <= y12 && y12 <= 2.3"
-    ]:
-        print(invariant.parse_string(test))
-        print(check_invariant(invariant.parse_string(test)))
-
-def tests():
-    test_variable()
-    test_inequality()
-    test_invariant()
