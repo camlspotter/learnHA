@@ -3,11 +3,11 @@ This module is used to parse the list of trajectories structure to construct str
 """
 import numpy as np
 from numpy.typing import NDArray
-from infer_ha.trajectories import Trajectories
+from infer_ha.trajectories import Trajectory, Trajectories
 
-def preprocess_trajectories(list_of_trajectories : list[Trajectories]) -> tuple[ list[NDArray[np.float64]],
-                                                                                 list[NDArray[np.float64]],
-                                                                                 list[tuple[int, int]] ]:
+def preprocess_trajectories(list_of_trajectories : list[Trajectory]) -> tuple[ list[NDArray[np.float64]],
+                                                                               list[NDArray[np.float64]],
+                                                                               list[tuple[int, int]] ]:
     """
     Converts list of trajectories into a single trajectory.
     We do this conversion in order to avoid discarding 2M data-points from each trajectory during our segmentation
@@ -48,9 +48,9 @@ def preprocess_trajectories(list_of_trajectories : list[Trajectories]) -> tuple[
     return t_list, y_list, position
 
 
-def convert_trajectories_to_single_list(list_of_trajectories : list[Trajectories]) -> tuple[ list[NDArray[np.float64]],
-                                                                                             list[NDArray[np.float64]],
-                                                                                             list[tuple[int, int]] ]:
+def convert_trajectories_to_single_list(list_of_trajectories : list[Trajectory]) -> tuple[ list[NDArray[np.float64]],
+                                                                                           list[NDArray[np.float64]],
+                                                                                           list[tuple[int, int]] ]:
     '''
     This function performs the actual conversion of the list of trajectories into a single trajectory.
 
@@ -116,9 +116,7 @@ def convert_trajectories_to_single_list(list_of_trajectories : list[Trajectories
 
     return t_list, y_list, position
 
-def parse_trajectories(input_filename : str) -> tuple [ list[tuple[ list[NDArray[np.float64]], list[NDArray[np.float64]] ]],
-                                                        float,
-                                                        int ]:
+def parse_trajectories(input_filename : str) -> Trajectories:
     """
     This is a special case function, because the argument input_filename is a filename which contains all
     trajectories concatenated into a single file.
@@ -221,4 +219,7 @@ def parse_trajectories(input_filename : str) -> tuple [ list[tuple[ list[NDArray
 
     system_dimension = y_list[0].shape[1]
 
-    return list_of_trajectories, stepsize, system_dimension
+    return Trajectories( trajectories= list_of_trajectories,
+                         stepsize= stepsize,
+                         dimension= system_dimension )
+
