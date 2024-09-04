@@ -145,12 +145,7 @@ def infer_model(list_of_trajectories : list[Trajectory], learning_parameters : O
                                       number_of_segments_after_cluster)
 
     assert (len(learning_parameters.input_variables) == learning_parameters.size_input_variable)
-    if learning_parameters.input_variables == []:
-        learning_parameters.input_variables = [f"x{i}" for i in range(0, learning_parameters.size_input_variable)]
-
     assert (len(learning_parameters.output_variables) == learning_parameters.size_output_variable)
-    if learning_parameters.output_variables == []:
-        learning_parameters.output_variables = [f"x{i}" for i in range(learning_parameters.size_input_variable, learning_parameters.size_input_variable + learning_parameters.size_output_variable)]
 
     print("input_variables:", learning_parameters.input_variables)
     print("output_variables:", learning_parameters.output_variables)

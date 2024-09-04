@@ -132,10 +132,8 @@ def read_commandline_arguments():
     args['variableType_datastruct'] = []
 
     # XXX clean white spaces
-    args['input_variables'] = \
-        list(infer_ha.parser.delimited_list(infer_ha.parser.variable, delim=',').parse_string(args['input_variables'], parse_all= True))
-    args['output_variables'] = \
-        list(infer_ha.parser.delimited_list(infer_ha.parser.variable, delim=',').parse_string(args['output_variables'], parse_all= True))
+    args['input_variables'] = infer_ha.parser.comma_separated_variables(args['input_variables'])
+    args['output_variables'] = infer_ha.parser.comma_separated_variables(args['output_variables'])
 
     args['size_input_variable'] = len(args['input_variables'])
     args['size_output_variable'] = len(args['output_variables'])
