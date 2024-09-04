@@ -17,10 +17,10 @@ class Pool:
 class Constant:
     constant : float
 
-VarType = Union[Continuous, Pool, Constant]
-VarTypeTbl = dict[int, VarType] # list[tuple[int, str, Optional[VarType]]]
+Annotation = Union[Continuous, Pool, Constant]
+AnnotationTbl = dict[int, Annotation] # list[tuple[int, str, Optional[Annotation]]]
 
-def expr_to_annotation(e : Expr) -> VarType:
+def expr_to_annotation(e : Expr) -> Annotation:
     def num(a : Expr) -> float:
         match a:
             case Value(v) if isinstance(v, Number):
@@ -37,10 +37,10 @@ def expr_to_annotation(e : Expr) -> VarType:
         case _:
             assert False, f"Invalid annotation: {unparse_expr(e)}"
 
-def parse_annotation(s : str) -> VarType:
+def parse_annotation(s : str) -> Annotation:
     return expr_to_annotation(parse_expr(s))
 
-def expr_to_annotation_list(e : Expr) -> dict[str, VarType]:
+def expr_to_annotation_list(e : Expr) -> dict[str, Annotation]:
     match e:
         case Dict(kvs):
             def var(k : Expr) -> str:
@@ -54,10 +54,10 @@ def expr_to_annotation_list(e : Expr) -> dict[str, VarType]:
         case _:
             assert False, f"Invalid annotation list: {unparse_expr(e)}"
 
-def parse_annotation_list(s : str) -> dict[str, VarType]:
+def parse_annotation_list(s : str) -> dict[str, Annotation]:
     return expr_to_annotation_list(parse_expr(s))
 
-def annotation_to_expr(a : VarType) -> Expr:
+def annotation_to_expr(a : Annotation) -> Expr:
     match a:
         case Continuous():
             return Variable('continuous')
@@ -68,5 +68,5 @@ def annotation_to_expr(a : VarType) -> Expr:
         case _:
             assert False, f"Invalid annotation {a}"
 
-def unparse_annotation(a : VarType) -> str:
+def unparse_annotation(a : Annotation) -> str:
     return unparse_expr(annotation_to_expr(a))

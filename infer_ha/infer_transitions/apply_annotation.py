@@ -1,9 +1,9 @@
 import numpy as np
 
-from infer_ha.annotation import Continuous, Pool, Constant, VarType, VarTypeTbl
+from infer_ha.annotation import Continuous, Pool, Constant, Annotation, AnnotationTbl
 
 def apply_annotation(Y,
-                     variable_types : VarTypeTbl,
+                     variable_types : AnnotationTbl,
                      list_connection_pt,
                      assignment_coeff : np.ndarray, # coeffs, 2d
                      assignment_intercept : np.ndarray # intercepts 1d

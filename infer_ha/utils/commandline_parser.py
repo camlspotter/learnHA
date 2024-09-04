@@ -4,7 +4,7 @@ from typing import Optional, Any
 from pydantic.dataclasses import dataclass
 from typeguard import typechecked
 from infer_ha.utils.argparse_bool import argparse_bool
-from infer_ha.annotation import Continuous, Pool, Constant, VarType, VarTypeTbl
+from infer_ha.annotation import Continuous, Pool, Constant, Annotation, AnnotationTbl
 import infer_ha.parser 
 
 # @dataclass # We cannot use @dataclass with Enum: @dataclass overrides __eq__
@@ -29,7 +29,7 @@ class Options:
     size_input_variable : int
     size_output_variable : int
     variable_types : str # default=''
-    variableType_datastruct : VarTypeTbl
+    variableType_datastruct : AnnotationTbl
     pool_values : str # , default=''
     constant_value : str # default=''
     ode_speedup : int # , default=10
@@ -143,7 +143,7 @@ def read_commandline_arguments():
 
     return args
 
-def process_type_annotation_parameters(parameters, system_dim) -> VarTypeTbl:
+def process_type_annotation_parameters(parameters, system_dim) -> AnnotationTbl:
     """
     :param
         parameters: is a dictionary data structure having the list of commandline arguments passed by the user for the
@@ -208,7 +208,7 @@ def process_type_annotation_parameters(parameters, system_dim) -> VarTypeTbl:
     # The structure variableType_datastruct will be empty is no argument is supplied
     # ******** Parsing argument variable-type and pool-values into a list *****************
 
-    def convert_( x ) -> tuple[int, VarType]:
+    def convert_( x ) -> tuple[int, Annotation]:
         [i, _var, ty, fs, f] = x
         match ty:
             case "t1":
@@ -221,7 +221,7 @@ def process_type_annotation_parameters(parameters, system_dim) -> VarTypeTbl:
                 assert False
                 
     @typechecked
-    def convert() -> VarTypeTbl:
+    def convert() -> AnnotationTbl:
         return dict([ convert_(x)
                       for x in variableType_datastruct
                       if x[2] != "" ]) # x[2] is ty
