@@ -65,13 +65,10 @@ def infer_model(list_of_trajectories : list[Trajectory], learning_parameters : O
     isInvariant = learning_parameters.is_invariant
     methods = learning_parameters.methods
     stepM = learning_parameters.lmm_step_size # 2 for engine-timing  #  the step size of Linear Multi-step Method (step M)
-    # print("stepM =", stepM)
 
     t_list, y_list, position = preprocess_trajectories(list_of_trajectories)
-    # print("position = ", position)
     # Apply Linear Multistep Method
     A, b1, b2, Y, ytuple = diff_method_backandfor(y_list, maxorder, stepsize, stepM)   # compute forward and backward version of BDF
-    # print("Initial computation done!")
 
     # ********* Debugging ***********************
     # output_derivatives(b1, b2, Y, size_of_input_variables)
@@ -96,7 +93,7 @@ def infer_model(list_of_trajectories : list[Trajectory], learning_parameters : O
     # print("position = ", position)
 
     # print("Y = ", Y)
-    print("len of drop = ", len(drop))
+    # print("len of drop = ", len(drop))
     # print("segmented_traj = ", segmented_traj)
     # print("clfs size = ", len(clfs))
 
@@ -147,9 +144,11 @@ def infer_model(list_of_trajectories : list[Trajectory], learning_parameters : O
                                       number_of_segments_before_cluster,
                                       number_of_segments_after_cluster)
 
+    assert (len(learning_parameters.input_variables) == learning_parameters.size_input_variable)
     if learning_parameters.input_variables == []:
         learning_parameters.input_variables = [f"x{i}" for i in range(0, learning_parameters.size_input_variable)]
 
+    assert (len(learning_parameters.output_variables) == learning_parameters.size_output_variable)
     if learning_parameters.output_variables == []:
         learning_parameters.output_variables = [f"x{i}" for i in range(learning_parameters.size_input_variable, learning_parameters.size_input_variable + learning_parameters.size_output_variable)]
 
