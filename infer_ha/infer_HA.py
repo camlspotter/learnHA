@@ -60,7 +60,7 @@ def infer_model(list_of_trajectories : list[Trajectory], learning_parameters : O
     boundary_order = learning_parameters.guard_degree
     ep = learning_parameters.segmentation_error_tol
     ep_backward = learning_parameters.segmentation_fine_error_tol
-    size_of_input_variables = learning_parameters.size_input_variable
+    size_of_input_variables = len(learning_parameters.input_variables)
     annotations =  learning_parameters.annotations # processed and stored in data-struct
     isInvariant = learning_parameters.is_invariant
     methods = learning_parameters.methods
@@ -143,9 +143,6 @@ def infer_model(list_of_trajectories : list[Trajectory], learning_parameters : O
                                       annotations,
                                       number_of_segments_before_cluster,
                                       number_of_segments_after_cluster)
-
-    assert (len(learning_parameters.input_variables) == learning_parameters.size_input_variable)
-    assert (len(learning_parameters.output_variables) == learning_parameters.size_output_variable)
 
     print("input_variables:", learning_parameters.input_variables)
     print("output_variables:", learning_parameters.output_variables)

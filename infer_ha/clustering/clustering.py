@@ -45,7 +45,7 @@ def select_clustering(segmented_traj, A, b1, clfs, Y, t_list, L_y, learning_para
     maxorder = learning_parameters.ode_degree
     num_mode = learning_parameters.modes
     ep = learning_parameters.segmentation_error_tol
-    size_of_input_variables = learning_parameters.size_input_variable
+    size_of_input_variables = len(learning_parameters.input_variables)
     method = learning_parameters.methods
     maximum_ode_prune_factor = learning_parameters.ode_speedup
     correl_threshold = learning_parameters.threshold_correlation

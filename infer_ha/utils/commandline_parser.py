@@ -26,8 +26,6 @@ class Options:
     threshold_correlation : float # default=0.8
     dbscan_eps_dist : float # default=0.01
     dbscan_min_samples : int # default=2
-    size_input_variable : int
-    size_output_variable : int
     variable_types : str # default=''
     annotations : AnnotationTbl
     pool_values : str # , default=''
