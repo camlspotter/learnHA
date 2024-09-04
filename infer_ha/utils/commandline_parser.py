@@ -5,6 +5,7 @@ from pydantic.dataclasses import dataclass
 from typeguard import typechecked
 from infer_ha.utils.argparse_bool import argparse_bool
 from infer_ha.annotation import Continuous, Pool, Constant, VarType, VarTypeTbl
+import infer_ha.parser 
 
 # @dataclass # We cannot use @dataclass with Enum: @dataclass overrides __eq__
 class ClusteringMethod(Enum):
@@ -131,8 +132,10 @@ def read_commandline_arguments():
     args['variableType_datastruct'] = []
 
     # XXX clean white spaces
-    args['input_variables'] = [] if args['input_variables'] == '' else args['input_variables'].split(",")
-    args['output_variables'] = [] if args['output_variables'] == '' else args['output_variables'].split(",")
+    args['input_variables'] = \
+        list(infer_ha.parser.delimited_list(infer_ha.parser.variable, delim=',').parse_string(args['input_variables'], parse_all= True))
+    args['output_variables'] = \
+        list(infer_ha.parser.delimited_list(infer_ha.parser.variable, delim=',').parse_string(args['output_variables'], parse_all= True))
 
     args['size_input_variable'] = len(args['input_variables'])
     args['size_output_variable'] = len(args['output_variables'])

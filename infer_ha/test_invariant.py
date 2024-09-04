@@ -1,5 +1,6 @@
 import unittest
 from infer_ha.invariant import *
+from infer_ha import parser
 
 class Test(unittest.TestCase):
     def test_variable(self):
@@ -9,7 +10,7 @@ class Test(unittest.TestCase):
                 "xy123",
                 "xy_z_12_"
         ]:
-            print(variable.parse_string(test))
+            print(parser.variable.parse_string(test, parse_all=True))
 
     def test_inequality(self):
         for test in [
@@ -18,7 +19,7 @@ class Test(unittest.TestCase):
                 ".12 >= y12",
                 "0. <= y"
         ]:
-            print(inequality.parse_string(test))
+            print(inequality.parse_string(test, parse_all= True))
     
 
     def test_invariant(self):
@@ -26,4 +27,4 @@ class Test(unittest.TestCase):
                 "1 <= x && x <= 1.23 && 0. <= y12 && y12 <= 2.3"
         ]:
             print(invariant.parse_string(test))
-            print(check_invariant(invariant.parse_string(test)))
+            print(check_invariant(invariant.parse_string(test, parse_all= True)))

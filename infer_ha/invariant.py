@@ -1,7 +1,8 @@
+import random
 from typeguard import typechecked
 import pyparsing as pp
 from infer_ha.range import Range
-import random
+from infer_ha import parser
 
 Invariant = dict[str,Range]  # ∧a_i <= x_i <= b_i
 
@@ -11,13 +12,9 @@ def string_of_invariant(inv : Invariant) -> str:
 def instance_of_invariant(rng : random.Random, inv : Invariant) -> dict[str,float]:
     return { k : range.pick_random_point(rng) for (k, range) in inv.items() }
 
-variable = pp.Word(pp.alphas, pp.alphanums+"_")
-
 inequality = \
-    variable + pp.one_of("<= >=") + pp.common.number \
-    ^ pp.common.number + pp.one_of("<= >=") + variable
-
-# invariant = pp.delimitedList(inequality, delim = "&&")
+    parser.variable + pp.one_of("<= >=") + pp.common.number \
+    ^ pp.common.number + pp.one_of("<= >=") + parser.variable
 
 def check_inequality(tkns):
     match tkns:
@@ -45,8 +42,9 @@ def check_and(tkns):
             assert False
         
 invariant = pp.infix_notation(
-    pp.common.number ^ variable,
+    pp.common.number ^ parser.variable,
     [ (pp.one_of("<= >="), 2, pp.opAssoc.RIGHT, check_inequality),
+
       (pp.one_of("&&"), 2, pp.opAssoc.RIGHT, check_and)
      ])
 
@@ -72,4 +70,4 @@ def check_invariant(inv):
 
 @typechecked
 def invariant_of_string(s : str) -> Invariant:
-    return check_invariant(invariant.parse_string(s))
+    return check_invariant(invariant.parse_string(s, parse_all=True))
