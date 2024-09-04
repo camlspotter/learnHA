@@ -59,7 +59,10 @@ def expr(e : ast.expr) -> Expr:
         assert False, f"Unsupported expression: {ast.unparse(e)}"
 
 def parse_expr(s : str) -> Expr:
-    return expr(ast.parse(s, mode='eval').body)
+    try:
+        return expr(ast.parse(s, mode='eval').body)
+    except SyntaxError:
+        assert False, f"Invalid Python expression: {s}"
 
 def unparse_expr(e : Expr) -> str:
     def unparse(e : Expr) -> ast.expr:
