@@ -29,7 +29,7 @@ class Options:
     size_input_variable : int
     size_output_variable : int
     variable_types : str # default=''
-    variableType_datastruct : AnnotationTbl
+    annotations : AnnotationTbl
     pool_values : str # , default=''
     constant_value : str # default=''
     ode_speedup : int # , default=10
@@ -128,8 +128,8 @@ def read_commandline_arguments():
 
     del args['clustering_method']
     
-    # variableType_datastruct will be set in run.py
-    args['variableType_datastruct'] = []
+    # annotations will be set in run.py
+    args['annotations'] = []
 
     # XXX clean white spaces
     args['input_variables'] = infer_ha.parser.comma_separated_variables(args['input_variables'])
@@ -148,12 +148,12 @@ def process_type_annotation_parameters(parameters, system_dim) -> AnnotationTbl:
     :param
         parameters: is a dictionary data structure having the list of commandline arguments passed by the user for the
         learning algorithm. This function uses the arguments 'variable_types' and 'pool_values' supplied by the user
-        to construct a specific data-structure named 'variableType_datastruct' which is used in the learning algorithm.
+        to construct a specific data-structure named 'annotations' which is used in the learning algorithm.
     :param
         system_dim: is the dimension (input + output variables) of the system whose trajectory is taken as input.
 
     :return:
-        variableType_datastruct: a specific data-structure used in the learning algorithm.
+        annotations: a specific data-structure used in the learning algorithm.
 
     """
 
@@ -164,7 +164,7 @@ def process_type_annotation_parameters(parameters, system_dim) -> AnnotationTbl:
     # ******** ******** ******** ******** ******** ******** ******** ******** ********
 
     # structure that holds [var_index, var_name, var_type, pool_values, constant_value]
-    variableType_datastruct : list[list[Any]] = [ [i, "x" + str(i), "", [], 0.0] for i in range(0, system_dim) ]
+    annotations : list[list[Any]] = [ [i, "x" + str(i), "", [], 0.0] for i in range(0, system_dim) ]
 
     if variable_types != "":  # parse only when values are supplied from command line
         for s in variable_types.split(","):
@@ -172,10 +172,10 @@ def process_type_annotation_parameters(parameters, system_dim) -> AnnotationTbl:
             varName = str_i_values[0].strip()  # trim or remove whitespaces
             varType = str_i_values[1]
             # print("Var Name: ", varName, " var type: ", varType)
-            for val in variableType_datastruct:
+            for val in annotations:
                 if varName == val[1]:
                     index = val[0]
-                    variableType_datastruct[index][2] = varType
+                    annotations[index][2] = varType
 
     if pool_values != "":  # parse only when values are supplied from command line
         for poolValue in pool_values.split(" & "):  # Eg.:  "x2={10,20,30,40}"
@@ -185,10 +185,10 @@ def process_type_annotation_parameters(parameters, system_dim) -> AnnotationTbl:
             size = len(varValues)
             varValues = varValues[1:size - 1]   # discarding parenthesis { and }
             varValues = [float(x) for x in varValues.split(",")] # created a list of the pool of values
-            for val in variableType_datastruct:
+            for val in annotations:
                 if varName == val[1]:
                     index = val[0]
-                    variableType_datastruct[index][3] = varValues
+                    annotations[index][3] = varValues
 
 
     if constant_value != "":  # parse only when values are supplied from command line
@@ -196,16 +196,16 @@ def process_type_annotation_parameters(parameters, system_dim) -> AnnotationTbl:
             str_const_each_element = constValue.split("=")  # Eg.:  "['x1', '0']"
             varName = str_const_each_element[0]  # Eg.:  'x1'
             varValue = str_const_each_element[1]  # Eg.:  '0'
-            for val in variableType_datastruct:
+            for val in annotations:
                 if varName == val[1]:
                     index = val[0]
-                    variableType_datastruct[index][4] = float(varValue)
+                    annotations[index][4] = float(varValue)
 
     '''
     See the example output after parsing variable_types ="x0=t4, x1=t3, x2=t2, x3=t1, x4=t2" and pool_values="x2={10,20,30,40} & x4={14.7,12.5}"
-    variableType_datastruct =  [[0, 'x0', 't4', ''], [1, 'x1', 't3', ''], [2, 'x2', 't2', [10.0, 20.0, 30.0]], [3, 'x3', 't1', ''], [4, 'x4', 't2', [14.7, 12.5]]]
+    annotations =  [[0, 'x0', 't4', ''], [1, 'x1', 't3', ''], [2, 'x2', 't2', [10.0, 20.0, 30.0]], [3, 'x3', 't1', ''], [4, 'x4', 't2', [14.7, 12.5]]]
     '''
-    # The structure variableType_datastruct will be empty is no argument is supplied
+    # The structure annotations will be empty is no argument is supplied
     # ******** Parsing argument variable-type and pool-values into a list *****************
 
     def convert_( x ) -> tuple[int, Annotation]:
@@ -223,7 +223,7 @@ def process_type_annotation_parameters(parameters, system_dim) -> AnnotationTbl:
     @typechecked
     def convert() -> AnnotationTbl:
         return dict([ convert_(x)
-                      for x in variableType_datastruct
+                      for x in annotations
                       if x[2] != "" ]) # x[2] is ty
 
     return convert()

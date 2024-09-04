@@ -8,7 +8,7 @@ from infer_ha.infer_transitions.compute_assignments import compute_assignments
 from infer_ha.infer_transitions.guards import getGuard_inequality
 
 
-def compute_transitions(output_dir, P_modes, position, segmentedTrajectories, L_y, boundary_order, Y, variableType_datastruct,
+def compute_transitions(output_dir, P_modes, position, segmentedTrajectories, L_y, boundary_order, Y, annotations,
                         number_of_segments_before_cluster, number_of_segments_after_cluster):
     """
     This function decides to compute or ignore mode-invariant computation based on the user's choice.
@@ -26,7 +26,7 @@ def compute_transitions(output_dir, P_modes, position, segmentedTrajectories, L_
     :param L_y: is the dimension (input + output variables) of the system whose trajectory is being parsed.
     :param boundary_order: degree of the polynomial concerning the guard's equation.
     :param Y: contains the y_list values for all the points except the first and last M points (M is the order in BDF).
-    :param variableType_datastruct: specific data structure holding user's information about type annotation values.
+    :param annotations: specific data structure holding user's information about type annotation values.
     :param number_of_segments_before_cluster: total number of segments obtained using the segmentation process and
         before applying the clustering algorithm.
     :param number_of_segments_after_cluster: total number of segments obtained after applying the clustering algorithm.
@@ -98,7 +98,7 @@ def compute_transitions(output_dir, P_modes, position, segmentedTrajectories, L_
         assignment_coeff = assign_coeff
         assignment_intercept = assign_intercept
 
-        assignment_coeff, assignment_intercept = apply_annotation(Y, variableType_datastruct, list_connection_pt, assignment_coeff, assignment_intercept)
+        assignment_coeff, assignment_intercept = apply_annotation(Y, annotations, list_connection_pt, assignment_coeff, assignment_intercept)
 
         transitions.append((src_mode, dest_mode, guard_coeff, assignment_coeff, assignment_intercept))
         # print("All Transitions are: ",transitions)

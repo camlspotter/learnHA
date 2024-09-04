@@ -10,13 +10,11 @@ def load_trajectories_and_fix_parameters(parameters):
 
     parameters['stepsize'] = trajs.stepsize
 
-    variableType_datastruct = {}  # structure that holds [var_index, var_name, var_type, pool_values]
+    annotations = {}  # structure that holds [var_index, var_name, var_type, pool_values]
     if len(parameters['variable_types']) >= 1:  # if user supply annotation arguments
-        variableType_datastruct = process_type_annotation_parameters(parameters, trajs.dimension)
+        annotations = process_type_annotation_parameters(parameters, trajs.dimension)
+    parameters['annotations'] = annotations
 
-    parameters['variableType_datastruct'] = variableType_datastruct
-
-    print("variableType_datastruct", variableType_datastruct)
     ops = Options(**parameters)
 
     return (trajs.trajectories, ops)

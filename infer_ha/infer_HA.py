@@ -61,7 +61,7 @@ def infer_model(list_of_trajectories : list[Trajectory], learning_parameters : O
     ep = learning_parameters.segmentation_error_tol
     ep_backward = learning_parameters.segmentation_fine_error_tol
     size_of_input_variables = learning_parameters.size_input_variable
-    variableType_datastruct =  learning_parameters.variableType_datastruct # processed and stored in data-struct
+    annotations =  learning_parameters.annotations # processed and stored in data-struct
     isInvariant = learning_parameters.is_invariant
     methods = learning_parameters.methods
     stepM = learning_parameters.lmm_step_size # 2 for engine-timing  #  the step size of Linear Multi-step Method (step M)
@@ -140,7 +140,7 @@ def infer_model(list_of_trajectories : list[Trajectory], learning_parameters : O
 
     transitions = compute_transitions(learning_parameters.output_directory,
                                       P_modes, position, segmentedTrajectories, L_y, boundary_order, Y,
-                                      variableType_datastruct,
+                                      annotations,
                                       number_of_segments_before_cluster,
                                       number_of_segments_after_cluster)
 
