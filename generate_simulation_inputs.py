@@ -2,7 +2,6 @@
 #
 # pipenv run python generate_simulation_inputs.py --num-inputs 100 --time-horizon 13.0 --input-variables 'u' --output-variables 'x,v' --invariant '-9.9 <= u && u <= -9.5 && 10.2 <= x && x <= 10.5 && 15 <= v && v <= 15' --number-of-cps 'u:4' --var-types 'u:linear' -o simulation_inputs.json
 
-import os
 import random
 import json
 import sys
