@@ -60,8 +60,8 @@ def read_commandline_arguments():
     parser = argparse.ArgumentParser(description='Learns HA model from input--output trajectories')
     parser.add_argument('-i', '--input-filename', help='input FileName containing trajectories', type=str, required=True)
     parser.add_argument('--output-directory', help='output directory', required=True)
-    parser.add_argument('-c', '--clustering-method', help='Clustering Algorithm. Options are: 1: dtw (default)  2: dbscan  3: piecelinear', type=int,
-                        choices=[1, 2, 3], default=1, required=False)
+    parser.add_argument('-c', '--clustering-method', help='Clustering Algorithm. Options are: dtw (default), dbscan, piecelinear', type=str,
+                        choices=['dtw', 'dbscan', 'piecelinear'], default='dtw', required=False)
 
     parser.add_argument('-d', '--ode-degree', help='Degree of polynomial in ODE. Set to 1 by default', type=int, default=1, required=False)
     parser.add_argument('-m', '--modes', help='Number of modes. Used only in piecelinear clustering algorithm. Set to 1 by default',
@@ -111,19 +111,7 @@ def read_commandline_arguments():
     # print("variable-types =", args['variable_types'])
     # print("pool_values =", args['pool_values'])
 
-    match args['clustering_method']:
-        case 1:
-            args['methods'] = ClusteringMethod.DTW
-
-        case 2:
-            args['methods'] = ClusteringMethod.DBSCAN
-
-        case 3:
-            args['methods'] = ClusteringMethod.PIECELINEAR
-
-        case _:
-            assert False, "invalid --clustering-method"
-
+    args['methods'] = ClusteringMethod(args['clustering_method'])
     del args['clustering_method']
     
     # annotations will be set in run.py
