@@ -20,21 +20,21 @@ def runLearnHA():  # Calling the implementation from project BBC4CPS
     # input_filename, output_filename, list_of_trajectories, learning_parameters = read_command_line(sys.argv)
     parameters = read_commandline_arguments()   # reads the command line values also can use -h to see help on usages
 
-    (list_of_trajectories, parameters) = load_trajectories_and_fix_parameters(parameters)
+    (list_of_trajectories, opts) = load_trajectories_and_fix_parameters(parameters)
 
-    raw = learnHA.infer_model(list_of_trajectories, parameters)
+    raw = learnHA.infer_model(list_of_trajectories, opts)
 
-    outputfilename = os.path.join(parameters.output_directory, "learned_HA.txt")
+    outputfilename = os.path.join(opts.output_directory, "learned_HA.txt")
     with utils_io.open_for_write(outputfilename) as f_out:
         print_HA(f_out, raw)
 
     ha = HA.build(raw)
-    outputfilename = os.path.join(parameters.output_directory, "learned_HA.json")
+    outputfilename = os.path.join(opts.output_directory, "learned_HA.json")
     with utils_io.open_for_write(outputfilename) as f_out:
         f_out.write(json.dumps(asdict(ha), indent=2))
 
     # ODE solver name is not given to run.py
-    outputfilename = os.path.join(parameters.output_directory, "generate_learned_modelX_slx.m")
+    outputfilename = os.path.join(opts.output_directory, "generate_learned_modelX_slx.m")
     with utils_io.open_for_write(outputfilename) as f_out:
         compile(f_out, ha, OdeSolverType.FIXED, "XXXODESOLVERXXX", "learned_model0", InvariantMode.INCLUDE_NONE)
 

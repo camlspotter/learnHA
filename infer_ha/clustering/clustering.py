@@ -13,7 +13,7 @@ from infer_ha.clustering.cluster_by_dtw import cluster_by_dtw
 from infer_ha.clustering.cluster_by_others import dbscan_cluster, merge_cluster_tol2
 from infer_ha.utils.commandline_parser import ClusteringMethod
 
-def select_clustering(segmented_traj, A, b1, clfs, Y, t_list, L_y, learning_parameters, stepM):
+def select_clustering(segmented_traj, A, b1, clfs, Y, t_list, L_y, opts, stepM):
     r"""
     A wrapper module that enables the selection of different approaches to the clustering algorithm.
 
@@ -32,7 +32,7 @@ def select_clustering(segmented_traj, A, b1, clfs, Y, t_list, L_y, learning_para
     :param Y: contains the y_list values for all the points except the first and last M points (M is the order in BDF).
     :param t_list: a single-item list whose item is a numpy.ndarray containing time-values as a concatenated list.
     :param L_y: is the dimension (input + output variables) of the system whose trajectory is being parsed.
-    :param learning_parameters: is a dictionary data structure having the list of commandline arguments passed by the
+    :param opts: is a dictionary data structure having the list of commandline arguments passed by the
         user for the learning algorithm.
     :return: The computed cluster and the coefficients of the polynomial ODE.
         P_modes: holds a list of modes. Each mode is a list of structures; we call it a segment.
@@ -42,16 +42,16 @@ def select_clustering(segmented_traj, A, b1, clfs, Y, t_list, L_y, learning_para
     """
 
     # print("Clustering segmented points ...")
-    maxorder = learning_parameters.ode_degree
-    num_mode = learning_parameters.modes
-    ep = learning_parameters.segmentation_error_tol
-    size_of_input_variables = len(learning_parameters.input_variables)
-    method = learning_parameters.methods
-    maximum_ode_prune_factor = learning_parameters.ode_speedup
-    correl_threshold = learning_parameters.threshold_correlation
-    distance_threshold = learning_parameters.threshold_distance
-    dbscan_eps_dist = learning_parameters.dbscan_eps_dist
-    dbscan_min_samples = learning_parameters.dbscan_min_samples
+    maxorder = opts.ode_degree
+    num_mode = opts.modes
+    ep = opts.segmentation_error_tol
+    size_of_input_variables = len(opts.input_variables)
+    method = opts.methods
+    maximum_ode_prune_factor = opts.ode_speedup
+    correl_threshold = opts.threshold_correlation
+    distance_threshold = opts.threshold_distance
+    dbscan_eps_dist = opts.dbscan_eps_dist
+    dbscan_min_samples = opts.dbscan_min_samples
 
     P_modes = []
     G = []

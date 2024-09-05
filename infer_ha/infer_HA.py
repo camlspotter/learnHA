@@ -18,7 +18,7 @@ from infer_ha.HA import Raw
 
 sys.setrecursionlimit(1000000)  # this is the limit
 
-def infer_model(list_of_trajectories : list[Trajectory], learning_parameters : Options) -> Raw:
+def infer_model(list_of_trajectories : list[Trajectory], opts : Options) -> Raw:
     """
     The main module to infer an HA model for the input trajectories.
 
@@ -28,8 +28,8 @@ def infer_model(list_of_trajectories : list[Trajectory], learning_parameters : O
             vector: is a list having a single item. The item is a numpy.ndarray with (rows,cols), rows indicates the number of
                 points and cols as the system's dimension. The dimension is the total number of variables in the trajectories
                 including both input and output variables.
-    :param learning_parameters: is a dictionary data structure containing all the parameters required for our learning
-                                algorithm. The arguments of the learning_parameters can also be passed as a command-line
+    :param opts: is a dictionary data structure containing all the parameters required for our learning
+                                algorithm. The arguments of the opts can also be passed as a command-line
                                 arguments. The command-line usages can be obtained using the --help command.
                                 To find the details of the arguments see the file/module "utils/commandline_parser.py"
 
@@ -55,16 +55,16 @@ def infer_model(list_of_trajectories : list[Trajectory], learning_parameters : O
 
     """
 
-    stepsize = learning_parameters.stepsize
-    maxorder = learning_parameters.ode_degree
-    boundary_order = learning_parameters.guard_degree
-    ep = learning_parameters.segmentation_error_tol
-    ep_backward = learning_parameters.segmentation_fine_error_tol
-    size_of_input_variables = len(learning_parameters.input_variables)
-    annotations =  learning_parameters.annotations # processed and stored in data-struct
-    isInvariant = learning_parameters.is_invariant
-    methods = learning_parameters.methods
-    stepM = learning_parameters.lmm_step_size # 2 for engine-timing  #  the step size of Linear Multi-step Method (step M)
+    stepsize = opts.stepsize
+    maxorder = opts.ode_degree
+    boundary_order = opts.guard_degree
+    ep = opts.segmentation_error_tol
+    ep_backward = opts.segmentation_fine_error_tol
+    size_of_input_variables = len(opts.input_variables)
+    annotations =  opts.annotations # processed and stored in data-struct
+    isInvariant = opts.is_invariant
+    methods = opts.methods
+    stepM = opts.lmm_step_size # 2 for engine-timing  #  the step size of Linear Multi-step Method (step M)
 
     t_list, y_list, position = preprocess_trajectories(list_of_trajectories)
     # Apply Linear Multistep Method
@@ -98,7 +98,7 @@ def infer_model(list_of_trajectories : list[Trajectory], learning_parameters : O
     # print("clfs size = ", len(clfs))
 
     # Instead of deleting the last segment for all models. It is better to ask user's options for deleting
-    filter_last_segment = learning_parameters.filter_last_segment  # True for delete last segment and False NOT to delete
+    filter_last_segment = opts.filter_last_segment  # True for delete last segment and False NOT to delete
     # print("filter_last_segment", filter_last_segment)
     segmentedTrajectories, segmented_traj, clfs = segmented_trajectories(clfs, segmented_traj, position, methods, filter_last_segment) # deleted the last segment in each trajectory
     # print("Segmentation done!")
@@ -113,7 +113,7 @@ def infer_model(list_of_trajectories : list[Trajectory], learning_parameters : O
     # plot_segmentation_new(segmented_traj, L_y, t_list, Y, stepM) # Trying to verify the segmentation for each segmented points
 
     number_of_segments_before_cluster = len(segmented_traj)
-    P_modes, G = select_clustering(segmented_traj, A, b1, clfs, Y, t_list, L_y, learning_parameters, stepM) # when len(res) < 2 compute P and G for the single mode
+    P_modes, G = select_clustering(segmented_traj, A, b1, clfs, Y, t_list, L_y, opts, stepM) # when len(res) < 2 compute P and G for the single mode
     # print("Fixing Dropped points ...") # I dont need to fix
     # P, Drop = dropclass(P, G, drop, A, b1, Y, ep, stepsize)  # appends the dropped point to a cluster that fits well
     # print("Total dropped points (after fixing) are: ", len(Drop))
@@ -138,24 +138,24 @@ def infer_model(list_of_trajectories : list[Trajectory], learning_parameters : O
     # '''
     # num_mode = len(P)
 
-    transitions = compute_transitions(learning_parameters.output_directory,
+    transitions = compute_transitions(opts.output_directory,
                                       P_modes, position, segmentedTrajectories, L_y, boundary_order, Y,
                                       annotations,
                                       number_of_segments_before_cluster,
                                       number_of_segments_after_cluster)
 
-    print("input_variables:", learning_parameters.input_variables)
-    print("output_variables:", learning_parameters.output_variables)
+    print("input_variables:", opts.input_variables)
+    print("output_variables:", opts.output_variables)
 
     raw = Raw(num_mode= number_of_segments_after_cluster,
               G= G,
               mode_inv= mode_inv,
               transitions= transitions,
               initial_location= init_location,
-              ode_degree= learning_parameters.ode_degree,
-              guard_degree= learning_parameters.guard_degree,
-              input_variables= learning_parameters.input_variables,
-              output_variables= learning_parameters.output_variables
+              ode_degree= opts.ode_degree,
+              guard_degree= opts.guard_degree,
+              input_variables= opts.input_variables,
+              output_variables= opts.output_variables
               )
 
     return typecheck_ha(raw)

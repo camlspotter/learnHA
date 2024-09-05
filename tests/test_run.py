@@ -16,13 +16,13 @@ import infer_ha.utils.io as utils_io
 # amit@amit-Alienware-m15-R4:~/MyPythonProjects/learningHA/learnHA$ python -m unittest discover -v
 
 
-def write_HA(parameters, raw):
-    outputfilename = os.path.join(parameters.output_directory, "learned_HA.txt")
+def write_HA(opts, raw):
+    outputfilename = os.path.join(opts.output_directory, "learned_HA.txt")
     with utils_io.open_for_write(outputfilename) as f_out:
         print_HA(f_out, raw)
 
     ha = HA.build(raw)
-    outputfilename = os.path.join(parameters.output_directory, "learned_HA.json")
+    outputfilename = os.path.join(opts.output_directory, "learned_HA.json")
     with utils_io.open_for_write(outputfilename) as f_out:
         f_out.write(json.dumps(asdict(ha), indent=2))
 
@@ -60,13 +60,13 @@ class TestLearnHA(unittest.TestCase):
         ps['filter_last_segment'] = True
         ps['lmm_step_size'] = 5
 
-        (list_of_trajectories, parameters) = load_trajectories_and_fix_parameters(ps)
+        (list_of_trajectories, opts) = load_trajectories_and_fix_parameters(ps)
 
-        raw = infer_model(list_of_trajectories, parameters)
-        write_HA(parameters, raw)  # prints an HA model file
+        raw = infer_model(list_of_trajectories, opts)
+        write_HA(opts, raw)  # prints an HA model file
 
         backup_file = "data/test_output/oscillator_2_without_annotation.txt"
-        test_generated_file = os.path.join(parameters.output_directory, 'learned_HA.txt')
+        test_generated_file = os.path.join(opts.output_directory, 'learned_HA.txt')
 
         # shallow mode comparison: where only metadata of the files are compared like the size, date modified, etc.
         # result = filecmp.cmp(backup_file, test_generated_file)
@@ -109,13 +109,13 @@ class TestLearnHA(unittest.TestCase):
         ps['filter_last_segment'] = True
         ps['lmm_step_size'] = 5
 
-        (list_of_trajectories, parameters) = load_trajectories_and_fix_parameters(ps)
+        (list_of_trajectories, opts) = load_trajectories_and_fix_parameters(ps)
 
-        raw = infer_model(list_of_trajectories, parameters)
-        write_HA(parameters, raw) # prints an HA model file
+        raw = infer_model(list_of_trajectories, opts)
+        write_HA(opts, raw) # prints an HA model file
 
         backup_file = "data/test_output/oscillator_2_with_annotation.txt"
-        test_generated_file = os.path.join(parameters.output_directory, 'learned_HA.txt')
+        test_generated_file = os.path.join(opts.output_directory, 'learned_HA.txt')
 
         # shallow mode comparison: where only metadata of the files are compared like the size, date modified, etc.
         # result = filecmp.cmp(backup_file, test_generated_file)
@@ -158,13 +158,13 @@ class TestLearnHA(unittest.TestCase):
         ps['stepsize'] = 0.01
         ps['filter_last_segment'] = True
 
-        (list_of_trajectories, parameters) = load_trajectories_and_fix_parameters(ps)
+        (list_of_trajectories, opts) = load_trajectories_and_fix_parameters(ps)
 
-        raw = infer_model(list_of_trajectories, parameters)
-        write_HA(parameters, raw)
+        raw = infer_model(list_of_trajectories, opts)
+        write_HA(opts, raw)
 
         backup_file = "data/test_output/bball_4.txt"
-        test_generated_file = os.path.join(parameters.output_directory, 'learned_HA.txt')
+        test_generated_file = os.path.join(opts.output_directory, 'learned_HA.txt')
 
         # shallow mode comparison: where only metadata of the files are compared like the size, date modified, etc.
         # result = filecmp.cmp(backup_file, test_generated_file)
