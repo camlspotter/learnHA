@@ -26,13 +26,11 @@ class Options:
     threshold_correlation : float # default=0.8
     dbscan_eps_dist : float # default=0.01
     dbscan_min_samples : int # default=2
-    variable_types : str # default=''
     annotations : AnnotationTbl
     pool_values : str # , default=''
     constant_value : str # default=''
     ode_speedup : int # , default=10
     is_invariant : bool # default=True
-    stepsize : float # set by parameters.py
     filter_last_segment : bool # default=False
     lmm_step_size : int # choices=[2, 3, 4, 5, 6], default=5
     methods : ClusteringMethod # dtw/dbscan/piecelinear
@@ -44,7 +42,7 @@ class Options:
 def check_options(d : dict[str,Any]) -> Options:
     return Options(**d)
 
-def read_commandline_arguments():
+def read_commandline_arguments() -> Options:
     """
     This function calls Python's built-in class ArgumentParser to read command line arguments that are necessary for our
     HA learning algorithm.
@@ -80,12 +78,17 @@ def read_commandline_arguments():
                         type=float, default=0.01, required=False)
     parser.add_argument('--dbscan-min-samples', help='Maximal threshold for min-samples in DBSCAN clustering algorithm. Set to 2 by default',
                         type=int, default=2, required=False)
+
+    parser.add_argument('--annotations', help='Variable annotations',
+                        type=str, default='', required= False)
+
     parser.add_argument('--variable-types', help='Type Annotation for variables. Options are t1: continuous variables, '
                         ' t2: constant pool of values, t3: constant assignment. Syntax: --variable-types "x0=t1, x1=t2, x2=t3"',
                         type=str, default='', required=False)
     parser.add_argument('--pool-values', help='set the values of type=t2. Syntax: --pool-values "x1={10, 20, 30, 40}"',
                         type=str, default='', required=False)
     parser.add_argument('--constant-value', help='set the reset value of type=t3. Syntax: --constant-value "x1=0 & x2=47.7"',
+
                         type=str, default='', required=False)
     parser.add_argument('--ode-speedup', help='Maximum number of segments to include for ODE computation. Set to 10 by default',
                         type=int, default=10, required=False)
@@ -108,7 +111,6 @@ def read_commandline_arguments():
 
     args = vars(parser.parse_args())    #  create a dict structure of the arguments
 
-    # print("variable-types =", args['variable_types'])
     # print("pool_values =", args['pool_values'])
 
     args['methods'] = ClusteringMethod(args['clustering_method'])
@@ -117,7 +119,6 @@ def read_commandline_arguments():
     # annotations will be set in run.py
     args['annotations'] = []
 
-    # XXX clean white spaces
     args['input_variables'] = infer_ha.parser.comma_separated_variables(args['input_variables'])
     args['output_variables'] = infer_ha.parser.comma_separated_variables(args['output_variables'])
 
@@ -127,10 +128,18 @@ def read_commandline_arguments():
     print("input_variables:", args['input_variables'])
     print("output_variables:", args['output_variables'])
 
-    return args
+    args['annotations'] = {}
+
+    annotations = {}  # structure that holds [var_index, var_name, var_type, pool_values]
+    if args['variable_types'] != "":  # if user supply annotation arguments
+        annotations = process_type_annotation_parameters(args)
+    args['annotations'] = annotations
+    del args['variable_types']
+
+    return Options(**args)
 
 # This must be repaced!
-def process_type_annotation_parameters(parameters, system_dim) -> AnnotationTbl:
+def process_type_annotation_parameters(parameters) -> AnnotationTbl:
     """
     :param
         parameters: is a dictionary data structure having the list of commandline arguments passed by the user for the
@@ -143,6 +152,8 @@ def process_type_annotation_parameters(parameters, system_dim) -> AnnotationTbl:
         annotations: a specific data-structure used in the learning algorithm.
 
     """
+
+    system_dim = len(parameters['input_variables']) + len(parameters['output_variables']) 
 
     # ******** Parsing the command line argument variable-type and pool-values into a list *****************
     variable_types = parameters['variable_types'] # Eg.: "x0=t4, x1=t3, x2=t4, x3=t1, x4=t2"

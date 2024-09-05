@@ -8,8 +8,8 @@ from dataclasses import asdict
 from infer_ha.infer_HA import infer_model
 from infer_ha import HA
 from infer_ha.model_printer.print_HA import print_HA
-from infer_ha.parameters import load_trajectories_and_fix_parameters
-from infer_ha.utils.commandline_parser import ClusteringMethod
+from infer_ha.utils.commandline_parser import ClusteringMethod, Options
+from infer_ha.utils.trajectories_parser import parse_trajectories
 import infer_ha.utils.io as utils_io
 
 # To execute this test from the project folder "learnHA" type the command
@@ -56,11 +56,13 @@ class TestLearnHA(unittest.TestCase):
         ps['constant_value'] = ''
         ps['ode_speedup'] = 50
         ps['is_invariant'] = True
-        ps['stepsize'] = 0.01
         ps['filter_last_segment'] = True
         ps['lmm_step_size'] = 5
+        ps['annotations'] = {}
 
-        (list_of_trajectories, opts) = load_trajectories_and_fix_parameters(ps)
+        opts = Options(**ps)
+
+        list_of_trajectories = parse_trajectories(opts.input_filename)
 
         raw = infer_model(list_of_trajectories, opts)
         write_HA(opts, raw)  # prints an HA model file
@@ -105,11 +107,13 @@ class TestLearnHA(unittest.TestCase):
         ps['constant_value'] = ''
         ps['ode_speedup'] = 50
         ps['is_invariant'] = True
-        ps['stepsize'] = 0.01
         ps['filter_last_segment'] = True
         ps['lmm_step_size'] = 5
+        ps['annotations'] = {}
 
-        (list_of_trajectories, opts) = load_trajectories_and_fix_parameters(ps)
+        opts = Options(**ps)
+
+        list_of_trajectories = parse_trajectories(opts.input_filename)
 
         raw = infer_model(list_of_trajectories, opts)
         write_HA(opts, raw) # prints an HA model file
@@ -155,10 +159,12 @@ class TestLearnHA(unittest.TestCase):
         ps['pool_values'] = ''
         ps['ode_speedup'] = 50
         ps['is_invariant'] = False
-        ps['stepsize'] = 0.01
         ps['filter_last_segment'] = True
+        ps['annotations'] = {}
 
-        (list_of_trajectories, opts) = load_trajectories_and_fix_parameters(ps)
+        opts = Options(**ps)
+
+        list_of_trajectories = parse_trajectories(opts.input_filename)
 
         raw = infer_model(list_of_trajectories, opts)
         write_HA(opts, raw)

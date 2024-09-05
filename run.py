@@ -5,8 +5,8 @@ from dataclasses import asdict
 from infer_ha import infer_HA as learnHA     #infer_model, svm_classify
 from infer_ha.model_printer.print_HA import print_HA
 from infer_ha import HA
-from infer_ha.parameters import load_trajectories_and_fix_parameters
 from infer_ha.utils.commandline_parser import read_commandline_arguments
+from infer_ha.utils.trajectories_parser import parse_trajectories
 import infer_ha.utils.io as utils_io
 from infer_ha.slx_compiler import compile, OdeSolverType, InvariantMode
 
@@ -18,9 +18,9 @@ def runLearnHA():  # Calling the implementation from project BBC4CPS
     @return:
     '''
     # input_filename, output_filename, list_of_trajectories, learning_parameters = read_command_line(sys.argv)
-    parameters = read_commandline_arguments()   # reads the command line values also can use -h to see help on usages
+    opts = read_commandline_arguments()   # reads the command line values also can use -h to see help on usages
 
-    (list_of_trajectories, opts) = load_trajectories_and_fix_parameters(parameters)
+    list_of_trajectories = parse_trajectories(opts.input_filename)
 
     raw = learnHA.infer_model(list_of_trajectories, opts)
 

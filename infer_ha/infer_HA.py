@@ -12,13 +12,13 @@ from infer_ha.segmentation.compute_derivatives import diff_method_backandfor
 from infer_ha.infer_transitions.compute_transitions import compute_transitions
 from infer_ha.clustering.utils import create_simple_modes_positions
 from infer_ha.utils.trajectories_parser import preprocess_trajectories
-from infer_ha.trajectories import Trajectory
+from infer_ha.trajectories import Trajectory, Trajectories
 from infer_ha.utils.commandline_parser import Options
 from infer_ha.HA import Raw
 
 sys.setrecursionlimit(1000000)  # this is the limit
 
-def infer_model(list_of_trajectories : list[Trajectory], opts : Options) -> Raw:
+def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
     """
     The main module to infer an HA model for the input trajectories.
 
@@ -55,7 +55,6 @@ def infer_model(list_of_trajectories : list[Trajectory], opts : Options) -> Raw:
 
     """
 
-    stepsize = opts.stepsize
     maxorder = opts.ode_degree
     boundary_order = opts.guard_degree
     ep = opts.segmentation_error_tol
@@ -66,9 +65,9 @@ def infer_model(list_of_trajectories : list[Trajectory], opts : Options) -> Raw:
     methods = opts.methods
     stepM = opts.lmm_step_size # 2 for engine-timing  #  the step size of Linear Multi-step Method (step M)
 
-    t_list, y_list, position = preprocess_trajectories(list_of_trajectories)
+    t_list, y_list, position = preprocess_trajectories(list_of_trajectories.trajectories)
     # Apply Linear Multistep Method
-    A, b1, b2, Y, ytuple = diff_method_backandfor(y_list, maxorder, stepsize, stepM)   # compute forward and backward version of BDF
+    A, b1, b2, Y, ytuple = diff_method_backandfor(y_list, maxorder, list_of_trajectories.stepsize, stepM)   # compute forward and backward version of BDF
 
     # ********* Debugging ***********************
     # output_derivatives(b1, b2, Y, size_of_input_variables)
