@@ -55,15 +55,17 @@ def select_clustering(segmented_traj, A, b1, clfs, Y, t_list, L_y, opts, stepM):
 
     P_modes = []
     G = []
-    # Choice of Clustering Algorithm
-    if len(segmented_traj) > num_mode:  # clustering is required only if segmentation finds more segments than required modes
-        if method == ClusteringMethod.PIECELINEAR:
-            print("We do not support piecelinear clustering algorithm!!", method, ClusteringMethod.PIECELINEAR, ClusteringMethod.DTW == ClusteringMethod.PIECELINEAR)
-            exit(1)
-            P_modes, G = merge_cluster_tol2(res, A, b1, num_mode, ep)  # This is Algo-2:InferByMerge function in Jin et al.
-            # Todo: note this approach does not scale well in clustering high number of segments into low modes.
 
+    # Choice of Clustering Algorithm
     match method:
+        case  ClusteringMethod.PIECELINEAR:
+            if len(segmented_traj) > num_mode:
+                # clustering is required only if segmentation finds more segments than required modes
+                print("We do not support piecelinear clustering algorithm!!", method, ClusteringMethod.PIECELINEAR, ClusteringMethod.DTW == ClusteringMethod.PIECELINEAR)
+                exit(1)
+                P_modes, G = merge_cluster_tol2(res, A, b1, num_mode, ep)  # This is Algo-2:InferByMerge function in Jin et al.
+                # Todo: note this approach does not scale well in clustering high number of segments into low modes.
+
         case ClusteringMethod.DBSCAN:
             print("Running DBSCAN clustering algorithm!!")
             print("We do not support this clustering algorithm anymore. We have now modifed the number of data structure, it requires some modification to support it again!!")
