@@ -94,10 +94,7 @@ def compute_transitions(output_dir, P_modes, position, segmentedTrajectories, L_
         '''
 
         # print("list_connection_pt = ", list_connection_pt)
-        assign_coeff, assign_intercept = compute_assignments(list_connection_pt, L_y, Y)
-        assignment_coeff = assign_coeff
-        assignment_intercept = assign_intercept
-
+        assignment_coeff, assignment_intercept = compute_assignments(list_connection_pt, L_y, Y)
         assignment_coeff, assignment_intercept = apply_annotation(Y, annotations, list_connection_pt, assignment_coeff, assignment_intercept)
 
         transitions.append((src_mode, dest_mode, guard_coeff, assignment_coeff, assignment_intercept))
