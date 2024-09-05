@@ -217,9 +217,6 @@ def parse_trajectories(input_filename : str) -> Trajectories:
     stepsize = t_list[0][2] - t_list[0][1]  # = 0.1 Computing the step-size from the sampled trajectories
     # print("\nComputed Step-size = ", stepsize)
 
-    system_dimension = y_list[0].shape[1]
-
     return Trajectories( trajectories= list_of_trajectories,
-                         stepsize= stepsize,
-                         dimension= system_dimension )
+                         stepsize= stepsize )
 

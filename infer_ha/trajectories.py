@@ -10,5 +10,3 @@ Trajectory = tuple[ list[np.ndarray], list[np.ndarray] ]
 class Trajectories:
     trajectories : list[ Trajectory ]
     stepsize : float
-    dimension : int  # == len(input_variables) + len(output_variables)
-
