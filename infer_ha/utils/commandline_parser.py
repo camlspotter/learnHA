@@ -129,6 +129,7 @@ def read_commandline_arguments():
 
     return args
 
+# This must be repaced!
 def process_type_annotation_parameters(parameters, system_dim) -> AnnotationTbl:
     """
     :param
@@ -150,7 +151,7 @@ def process_type_annotation_parameters(parameters, system_dim) -> AnnotationTbl:
     # ******** ******** ******** ******** ******** ******** ******** ******** ********
 
     # structure that holds [var_index, var_name, var_type, pool_values, constant_value]
-    annotations : list[list[Any]] = [ [i, "x" + str(i), "", [], 0.0] for i in range(0, system_dim) ]
+    raw_annotations : list[list[Any]] = [ [i, "x" + str(i), "", [], 0.0] for i in range(0, system_dim) ]
 
     if variable_types != "":  # parse only when values are supplied from command line
         for s in variable_types.split(","):
@@ -158,10 +159,10 @@ def process_type_annotation_parameters(parameters, system_dim) -> AnnotationTbl:
             varName = str_i_values[0].strip()  # trim or remove whitespaces
             varType = str_i_values[1]
             # print("Var Name: ", varName, " var type: ", varType)
-            for val in annotations:
+            for val in raw_annotations:
                 if varName == val[1]:
                     index = val[0]
-                    annotations[index][2] = varType
+                    raw_annotations[index][2] = varType
 
     if pool_values != "":  # parse only when values are supplied from command line
         for poolValue in pool_values.split(" & "):  # Eg.:  "x2={10,20,30,40}"
@@ -171,10 +172,10 @@ def process_type_annotation_parameters(parameters, system_dim) -> AnnotationTbl:
             size = len(varValues)
             varValues = varValues[1:size - 1]   # discarding parenthesis { and }
             varValues = [float(x) for x in varValues.split(",")] # created a list of the pool of values
-            for val in annotations:
+            for val in raw_annotations:
                 if varName == val[1]:
                     index = val[0]
-                    annotations[index][3] = varValues
+                    raw_annotations[index][3] = varValues
 
 
     if constant_value != "":  # parse only when values are supplied from command line
@@ -182,10 +183,10 @@ def process_type_annotation_parameters(parameters, system_dim) -> AnnotationTbl:
             str_const_each_element = constValue.split("=")  # Eg.:  "['x1', '0']"
             varName = str_const_each_element[0]  # Eg.:  'x1'
             varValue = str_const_each_element[1]  # Eg.:  '0'
-            for val in annotations:
+            for val in raw_annotations:
                 if varName == val[1]:
                     index = val[0]
-                    annotations[index][4] = float(varValue)
+                    raw_annotations[index][4] = float(varValue)
 
     '''
     See the example output after parsing variable_types ="x0=t4, x1=t3, x2=t2, x3=t1, x4=t2" and pool_values="x2={10,20,30,40} & x4={14.7,12.5}"
@@ -209,7 +210,7 @@ def process_type_annotation_parameters(parameters, system_dim) -> AnnotationTbl:
     @typechecked
     def convert() -> AnnotationTbl:
         return dict([ convert_(x)
-                      for x in annotations
+                      for x in raw_annotations
                       if x[2] != "" ]) # x[2] is ty
 
     return convert()
