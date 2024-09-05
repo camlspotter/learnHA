@@ -4,7 +4,7 @@ from typing import Optional, Any
 from pydantic.dataclasses import dataclass
 from typeguard import typechecked
 from infer_ha.utils.argparse_bool import argparse_bool
-from infer_ha.annotation import Continuous, Pool, Constant, Annotation, AnnotationTbl
+from infer_ha.annotation import Continuous, Pool, Constant, Annotation, AnnotationTbl, parse_annotation_tbl
 import infer_ha.parser 
 
 # @dataclass # We cannot use @dataclass with Enum: @dataclass overrides __eq__
@@ -116,9 +116,6 @@ def read_commandline_arguments() -> Options:
     args['methods'] = ClusteringMethod(args['clustering_method'])
     del args['clustering_method']
     
-    # annotations will be set in run.py
-    args['annotations'] = []
-
     args['input_variables'] = infer_ha.parser.comma_separated_variables(args['input_variables'])
     args['output_variables'] = infer_ha.parser.comma_separated_variables(args['output_variables'])
 
@@ -128,13 +125,16 @@ def read_commandline_arguments() -> Options:
     print("input_variables:", args['input_variables'])
     print("output_variables:", args['output_variables'])
 
-    args['annotations'] = {}
+    # annotations
+    print("annotations!", args['annotations'])
+    args['annotations'] = parse_annotation_tbl(args['input_variables'], args['output_variables'], args['annotations'])
 
     annotations = {}  # structure that holds [var_index, var_name, var_type, pool_values]
     if args['variable_types'] != "":  # if user supply annotation arguments
         annotations = process_type_annotation_parameters(args)
-    args['annotations'] = annotations
     del args['variable_types']
+
+    assert (args['annotations'] == annotations), f"Annotation error {args['annotations']} != {annotations}"
 
     return Options(**args)
 

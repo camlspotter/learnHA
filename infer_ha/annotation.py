@@ -55,7 +55,19 @@ def expr_to_annotation_list(e : Expr) -> dict[str, Annotation]:
             assert False, f"Invalid annotation list: {unparse_expr(e)}"
 
 def parse_annotation_list(s : str) -> dict[str, Annotation]:
-    return expr_to_annotation_list(parse_expr(s))
+    if s == "":
+        return {}
+    else:
+        return expr_to_annotation_list(parse_expr(s))
+
+def parse_annotation_tbl(input_variables : list[str], output_variables : list[str], s : str) -> AnnotationTbl:
+    tbl = { v : i for (i, v) in enumerate(input_variables + output_variables) }
+    annotation_list = parse_annotation_list(s)
+    try:
+        return { tbl[v] : a for (v, a) in annotation_list.items() }
+    except:
+        print("vartable is", tbl)
+        raise
 
 def annotation_to_expr(a : Annotation) -> Expr:
     match a:
