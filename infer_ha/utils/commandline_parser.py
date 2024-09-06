@@ -90,10 +90,10 @@ def read_commandline_arguments() -> Options:
 
     parser.add_argument('--input-variables',
                         help='Input variable names separated by commas',
-                        type=str, required=True)
+                        type=infer_ha.parser.comma_separated_variables, required=True)
     parser.add_argument('--output-variables',
                         help='Output variable names separated by commas',
-                        type=str, required=True)
+                        type=infer_ha.parser.comma_separated_variables, required=True)
 
     args = vars(parser.parse_args())    #  create a dict structure of the arguments
 
@@ -101,14 +101,8 @@ def read_commandline_arguments() -> Options:
 
     args['clustering_method'] = ClusteringMethod(args['clustering_method'])
     
-    args['input_variables'] = infer_ha.parser.comma_separated_variables(args['input_variables'])
-    args['output_variables'] = infer_ha.parser.comma_separated_variables(args['output_variables'])
-
     args['size_input_variable'] = len(args['input_variables'])
     args['size_output_variable'] = len(args['output_variables'])
-
-    print("input_variables:", args['input_variables'])
-    print("output_variables:", args['output_variables'])
 
     # annotations
     args['annotations'] = parse_annotation_tbl(args['input_variables'], args['output_variables'], args['annotations'])
