@@ -38,7 +38,7 @@ class TestLearnHA(unittest.TestCase):
         ps['input_filename'] = "data/test_data/simu_oscillator_2.txt"
         ps['output_directory'] = "_test/oscillator_2_withoutAnnotate"
 
-        ps['methods'] = ClusteringMethod.DTW
+        ps['clustering_method'] = ClusteringMethod.DTW
 
         ps['ode_degree'] = 1
         ps['modes'] = 4
@@ -86,7 +86,7 @@ class TestLearnHA(unittest.TestCase):
         ps['input_filename'] = "data/test_data/simu_oscillator_2.txt"
         ps['output_directory'] = "_test/oscillator_2_withAnnotate"
 
-        ps['methods'] = ClusteringMethod.DTW
+        ps['clustering_method'] = ClusteringMethod.DTW
 
         ps['ode_degree'] = 1
         ps['modes'] = 4
@@ -134,7 +134,7 @@ class TestLearnHA(unittest.TestCase):
         ps['input_filename'] = "data/test_data/simu_bball_4.txt"
         ps['output_directory'] = "_test/bball_4"
 
-        ps['methods'] = ClusteringMethod.DTW
+        ps['clustering_method'] = ClusteringMethod.DTW
 
         ps['ode_degree'] = 1
         ps['modes'] = 1

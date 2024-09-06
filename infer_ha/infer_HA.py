@@ -62,7 +62,7 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
     size_of_input_variables = len(opts.input_variables)
     annotations =  opts.annotations # processed and stored in data-struct
     isInvariant = opts.is_invariant
-    methods = opts.methods
+    clustering_method = opts.clustering_method
     stepM = opts.lmm_step_size # 2 for engine-timing  #  the step size of Linear Multi-step Method (step M)
 
     t_list, y_list, position = preprocess_trajectories(list_of_trajectories.trajectories)
@@ -78,8 +78,8 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
     # Segment and fit
     # res, drop, clfs = segment_and_fit(A, b1, b2, ytuple,ep) #Amit: uses the simple relative-difference between forward and backward BDF presented in the paper, Algorithm-1.
     # res, drop, clfs, res_modified = segment_and_fit_Modified_two(A, b1, b2, ytuple,ep)
-    # res, drop, clfs, res_modified = two_fold_segmentation_new(A, b1, b2, ytuple, size_of_input_variables, methods, ep)
-    segmented_traj, clfs, drop = two_fold_segmentation(A, b1, b2, ytuple, Y, size_of_input_variables, methods, stepM, ep, ep_backward)
+    # res, drop, clfs, res_modified = two_fold_segmentation_new(A, b1, b2, ytuple, size_of_input_variables, method, ep)
+    segmented_traj, clfs, drop = two_fold_segmentation(A, b1, b2, ytuple, Y, size_of_input_variables, clustering_method, stepM, ep, ep_backward)
     print("Number of segments =", len(segmented_traj))
     L_y = len(y_list[0][0])  # Number of dimensions
 
@@ -99,7 +99,7 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
     # Instead of deleting the last segment for all models. It is better to ask user's options for deleting
     filter_last_segment = opts.filter_last_segment  # True for delete last segment and False NOT to delete
     # print("filter_last_segment", filter_last_segment)
-    segmentedTrajectories, segmented_traj, clfs = segmented_trajectories(clfs, segmented_traj, position, methods, filter_last_segment) # deleted the last segment in each trajectory
+    segmentedTrajectories, segmented_traj, clfs = segmented_trajectories(clfs, segmented_traj, position, clustering_method, filter_last_segment) # deleted the last segment in each trajectory
     # print("Segmentation done!")
     # print("segmentedTrajectories = ", segmentedTrajectories)
     # plot_data_values(segmentedTrajectories, Y, L_y)

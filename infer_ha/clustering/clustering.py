@@ -46,7 +46,7 @@ def select_clustering(segmented_traj, A, b1, clfs, Y, t_list, L_y, opts, stepM):
     num_mode = opts.modes
     ep = opts.segmentation_error_tol
     size_of_input_variables = len(opts.input_variables)
-    method = opts.methods
+    method = opts.clustering_method
     maximum_ode_prune_factor = opts.ode_speedup
     correl_threshold = opts.threshold_correlation
     distance_threshold = opts.threshold_distance
