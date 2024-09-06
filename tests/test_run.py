@@ -12,6 +12,7 @@ from infer_ha.utils.commandline_parser import ClusteringMethod, Options
 from infer_ha.utils.trajectories_parser import parse_trajectories
 from infer_ha.annotation import Continuous, Constant
 import infer_ha.utils.io as utils_io
+from infer_ha.annotation import Continuous, Constant
 
 # To execute this test from the project folder "learnHA" type the command
 # amit@amit-Alienware-m15-R4:~/MyPythonProjects/learningHA/learnHA$ python -m unittest discover -v
@@ -52,9 +53,6 @@ class TestLearnHA(unittest.TestCase):
         ps['output_variables'] = ['x0', 'x1']
         ps['size_input_variable'] = 0
         ps['size_output_variable'] = 2
-        ps['variable_types'] = ''
-        ps['pool_values'] = ''
-        ps['constant_value'] = ''
         ps['ode_speedup'] = 50
         ps['is_invariant'] = True
         ps['filter_last_segment'] = True
@@ -103,9 +101,6 @@ class TestLearnHA(unittest.TestCase):
         ps['output_variables'] = ['x0', 'x1']
         ps['size_input_variable'] = 0
         ps['size_output_variable'] = 2
-        ps['variable_types'] = 'x0=t1,x1=t1'
-        ps['pool_values'] = ''
-        ps['constant_value'] = ''
         ps['ode_speedup'] = 50
         ps['is_invariant'] = True
         ps['filter_last_segment'] = True
@@ -154,8 +149,6 @@ class TestLearnHA(unittest.TestCase):
         ps['output_variables'] = ['x1', 'x2']
         ps['size_input_variable'] = 1
         ps['size_output_variable'] = 2
-        ps['variable_types'] = 'x0=t1,x1=t3'
-        ps['constant_value'] = 'x1=0'
         ps['lmm_step_size'] = 5
         ps['pool_values'] = ''
         ps['ode_speedup'] = 50

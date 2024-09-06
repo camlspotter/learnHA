@@ -27,8 +27,6 @@ class Options:
     dbscan_eps_dist : float # default=0.01
     dbscan_min_samples : int # default=2
     annotations : AnnotationTbl
-    pool_values : str # , default=''
-    constant_value : str # default=''
     ode_speedup : int # , default=10
     is_invariant : bool # default=True
     filter_last_segment : bool # default=False
@@ -78,18 +76,8 @@ def read_commandline_arguments() -> Options:
                         type=float, default=0.01, required=False)
     parser.add_argument('--dbscan-min-samples', help='Maximal threshold for min-samples in DBSCAN clustering algorithm. Set to 2 by default',
                         type=int, default=2, required=False)
-
     parser.add_argument('--annotations', help='Variable annotations',
                         type=str, default='', required= False)
-
-    parser.add_argument('--variable-types', help='Type Annotation for variables. Options are t1: continuous variables, '
-                        ' t2: constant pool of values, t3: constant assignment. Syntax: --variable-types "x0=t1, x1=t2, x2=t3"',
-                        type=str, default='', required=False)
-    parser.add_argument('--pool-values', help='set the values of type=t2. Syntax: --pool-values "x1={10, 20, 30, 40}"',
-                        type=str, default='', required=False)
-    parser.add_argument('--constant-value', help='set the reset value of type=t3. Syntax: --constant-value "x1=0 & x2=47.7"',
-
-                        type=str, default='', required=False)
     parser.add_argument('--ode-speedup', help='Maximum number of segments to include for ODE computation. Set to 10 by default',
                         type=int, default=10, required=False)
     # Beware! argparse's type=bool is broken
@@ -126,15 +114,7 @@ def read_commandline_arguments() -> Options:
     print("output_variables:", args['output_variables'])
 
     # annotations
-    print("annotations!", args['annotations'])
     args['annotations'] = parse_annotation_tbl(args['input_variables'], args['output_variables'], args['annotations'])
-
-    annotations = {}  # structure that holds [var_index, var_name, var_type, pool_values]
-    if args['variable_types'] != "":  # if user supply annotation arguments
-        annotations = process_type_annotation_parameters(args)
-    del args['variable_types']
-
-    assert (args['annotations'] == annotations), f"Annotation error {args['annotations']} != {annotations}"
 
     return Options(**args)
 
