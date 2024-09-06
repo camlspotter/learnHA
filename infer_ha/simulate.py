@@ -7,7 +7,7 @@ def simulate(script_file : str,
              input_variables : list[str],
              output_variables : list[str],
              input_value_ts : dict[str, list[tuple[float, float]]],
-             initial_output_values : dict[str, float]):
+             initial_output_values : dict[str, float]) -> None:
 
     assert path.isabs(output_file), \
         "simulate: output_file cannot be relative: " \

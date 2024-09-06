@@ -49,14 +49,14 @@ def getGuard_inequality(output_dir, srcData, destData, L_y, boundary_order, Y):
     x_p = []
     x_n = []
 
-    output_filename = os.path.join(output_dir, "data_scale") # This file is also used for SVM scaling
+    output_filename = os.path.join(output_dir, "guard_data_scale") # This file is also used for SVM scaling
     x, y, x_gs = create_data(output_filename, srcData, destData, L_y, Y)
     data_length = len(srcData)  # or len(destData)
     # print("data size for SVM =", data_length)
     # ******* scaling data ************
     # print('Before Storing data in file for conversion to csr_matrix')
     # print(x)
-    y, x = svm_read_problem(os.path.join(output_dir, 'data_scale'), return_scipy = True)  # y: ndarray, x: csr_matrix
+    y, x = svm_read_problem(output_filename, return_scipy = True)  # y: ndarray, x: csr_matrix
     # print('After scaling data')
     # print(x)
     # print('label y is ', y)
@@ -144,7 +144,7 @@ def getGuard_inequality(output_dir, srcData, destData, L_y, boundary_order, Y):
 
     m = svm_model_training(x, y, boundary_order, c_value_optimal, coef_optimal, gamma_value_optimal)
 
-    svm_save_model(os.path.join(output_dir, "svm_model_file"), m)
+    svm_save_model(os.path.join(output_dir, "guard_svm_model_file"), m)
     guard_coeff = get_coeffs(L_y, m, gamma_value_optimal, order=boundary_order)  # this gives the hyperplane coefficients
 
     # print("guard_coeff is ", guard_coeff)

@@ -3,22 +3,23 @@ This module contains our approach to clustering using the DTW algorithm.
 
 """
 
-import csv
-
-import numpy as np
 from scipy.spatial.distance import euclidean
 from fastdtw import fastdtw         # https://pypi.org/project/fastdtw/
-from sklearn import metrics
 from sklearn import linear_model
-
 from infer_ha.clustering.utils import get_signal_data, compute_correlation, \
     create_simple_modes_positions_for_ODE_with_pruned_segments
-# from infer_ha.clustering.utils import create_simple_modes_positions_for_ODE
 from infer_ha.utils.util_functions import matrowex
-from ..helpers.plotDebug import print_segmented_trajectories, print_P_modes
-from ..helpers import plotDebug as plotdebug
+import numpy as np
+from numpy.typing import NDArray
+# from infer_ha.clustering.utils import create_simple_modes_positions_for_ODE
+# from ..helpers.plotDebug import print_segmented_trajectories, print_P_modes
+# from ..helpers import plotDebug as plotdebug
+from infer_ha.segmentation.segmentation import Segment
 
-def get_desired_ODE_coefficients(P_modes, A, b1, maximum_ode_prune_factor):
+def get_desired_ODE_coefficients(P_modes : list[list[Segment]],
+                                 A : NDArray[np.float64],
+                                 b1 : NDArray[np.float64],
+                                 maximum_ode_prune_factor) -> list[NDArray[np.float64]]:
     r"""
     ODE inference.
     This function computes the coefficients of the polynomial ODE for each cluster/mode. Note during ODE coefficient
@@ -45,11 +46,12 @@ def get_desired_ODE_coefficients(P_modes, A, b1, maximum_ode_prune_factor):
 
 
     # P = create_simple_modes_positions_for_ODE(P_modes)  # for ODE inference we use segment excluding boundary points
-    P = create_simple_modes_positions_for_ODE_with_pruned_segments(P_modes, maximum_ode_prune_factor) # for ODE inference we use segments
+    # for ODE inference we use segments
+    P = create_simple_modes_positions_for_ODE_with_pruned_segments(P_modes, maximum_ode_prune_factor)
         # excluding boundary points. The number of segments in each mode is decided by the prune factor for performance.
 
     # print("Sort clusters based on Data-size and take the first num_mode clusters")
-    length_and_modepts = [(len(P[i]), P[i]) for i in range(0, len(P))]  # create a list of 2-tuple
+    length_and_modepts = [(len(p_i), p_i) for p_i in P]  # create a list of 2-tuple
     # length_and_modepts.sort(reverse=True)  # this data is sorted from highest number of points in the cluster to lowest
     # print("DTW: Total clusters = ", len(length_and_modepts))
 
@@ -59,38 +61,32 @@ def get_desired_ODE_coefficients(P_modes, A, b1, maximum_ode_prune_factor):
     # now we removed from the argument passing num_mode as user decided argument
     #  ***************************************************************
 
-    mode_pts = []
-    # print ("length_and_modepts = ",length_and_modepts) # *** this value can be less than num_mode ***
-    # Fixing when the number of segments returned by DTW is less than user's num_mode input
-    if len(length_and_modepts) < num_mode:  # This will execute only if we pass num_mode as argument
-        num_mode = len(length_and_modepts)
+    mode_pts = [ mode_ptsi for (_datasize, mode_ptsi) in length_and_modepts ]
 
-    for i in range(0, num_mode):  # Now since num_mode is assumed to be <= len(length_and_modepts), so first num_mode of data is considered as outputs
-        datasize, mode_ptsi = length_and_modepts[i]
-        # print("i = ", i, "data size =", datasize)
-        mode_pts.append(mode_ptsi)
     # Fit each cluster again
-    clfs = []
-    # print("Computing Linear Regression(ODE) for the combined Cluster")
-    for i in range(num_mode):  # For this considered outputs coefficients are computed again
+    def fit(pt):
         clf = linear_model.LinearRegression(fit_intercept=False)
-        # print("x = ", matrowex(A, mode_pts[i]), "  y = ", matrowex(b1, mode_pts[i]))
-        # print("mode_pts = ", mode_pts[i])
-        # print("i =", i)
-        clf.fit(matrowex(A, mode_pts[i]), matrowex(b1, mode_pts[i]))
-        clfs.append(clf)
+        clf.fit(matrowex(A, pt), matrowex(b1, pt))
+        return clf
+
+    clfs = [ fit(pt) for pt in mode_pts ]
 
     # P = mode_pts    # we do not want to return simple-segmented-modes
-    G = []
-    for i in range(len(clfs)):
-        G.append(clfs[i].coef_)
+    G = [clf.coef_ for clf in clfs]
 
-    # return P, G
-    # return P_modes, G
     return G
 
-def cluster_by_dtw(segmented_traj, A, b1, Y, t_list, L_y, correl_threshold, distance_threshold,
-                   size_of_input_variables, stepM, maximum_ode_prune_factor=50):
+def cluster_by_dtw(segmented_traj : list[Segment],
+                   A : NDArray[np.float64],
+                   b1 : NDArray[np.float64],
+                   Y : NDArray[np.float64],
+                   t_list : list[NDArray[np.float64]],
+                   L_y : int,
+                   correl_threshold : float,
+                   distance_threshold : float,
+                   size_of_input_variables : int,
+                   stepM : int,
+                   maximum_ode_prune_factor=50) -> tuple[list[list[Segment]], list[NDArray[np.float64]]]:
     r"""
     This function contains our approach to clustering using the DTW algorithm.
 
@@ -118,7 +114,8 @@ def cluster_by_dtw(segmented_traj, A, b1, Y, t_list, L_y, correl_threshold, dist
         G: is a list containing the list of the coefficients of the polynomial ODE.
     """
 
-    P = []  # holds a list of modes and each mode is a list of segments and a mode is a list of segment
+    # holds a list of modes and each mode is a list of segments and a mode is a list of segment
+    P : list[list[Segment]] = []
             # Thus P = [mode-1, mode-2, ... , mode-n]
             # and mode-1 = [ segment-1, ... , segment-n]
             # and segment-1 = ([start_ode, end_ode], [start_exact, end_exact], [p1, ..., p_n])
@@ -137,7 +134,9 @@ def cluster_by_dtw(segmented_traj, A, b1, Y, t_list, L_y, correl_threshold, dist
     # *********************************************************************************
 
     # ******************************************************************
-    res = segmented_traj  # to keep the OLD implementation's variable
+    # to keep the OLD implementation's variable
+    res = segmented_traj  
+
     # ******************************************************************
     count = len(res)
 
@@ -150,15 +149,16 @@ def cluster_by_dtw(segmented_traj, A, b1, Y, t_list, L_y, correl_threshold, dist
     # ***************************************
     f_ode1 = f_ode
     t_ode1 = t_ode  # t_ode is used only for plotting for debugging
-    res1 = res    # makes a copy of the segmented_traj for working
+    # makes a copy of the segmented_traj for working
+    res1 = res
     res2 = res1
     i = 0    # j = 0
     myClusterCount = 0
-    while (i < count):
+    while i < count:
         j = i + 1
         mode = [res1[i]]  # to hold list of segments per mode; initialize the first segmented_traj
         delete_position = []
-        while (j < count):  #  runs once for each f_ode_[i]
+        while j < count:  #  runs once for each f_ode_[i]
             # print("i=", i, " :f_ode[i] is ", f_ode[i])
             # print(" and j=", j, "  :f_ode[j] is ", f_ode[j])
             dataSize = len(f_ode[i])
@@ -169,16 +169,12 @@ def cluster_by_dtw(segmented_traj, A, b1, Y, t_list, L_y, correl_threshold, dist
             distance1, path = fastdtw(f_ode[i], f_ode[j], radius=dataSize, dist=euclidean)
             distance = distance1 / (len(f_ode[i]) + len(f_ode[j]))
             correlValue = compute_correlation(path, f_ode[i], f_ode[j])
-            if distance < min_distance:
-                min_distance = distance
-            if distance > max_distance:
-                max_distance = distance
-            if correlValue < min_correl:
-                min_correl = correlValue
-            if correlValue > max_correl:
-                max_correl = correlValue
-            length_seg_i = len(t_ode[i]) - 1
-            length_seg_j = len(t_ode[j]) - 1
+            min_distance = min(distance, min_distance)
+            max_distance = max(distance, max_distance)
+            min_correl = min(correlValue, min_correl)
+            max_correl = max(correlValue, max_correl)
+            # length_seg_i = len(t_ode[i]) - 1
+            # length_seg_j = len(t_ode[j]) - 1
 
             # Debugging ******************
             # rowValue = [i, j, t_ode[i][0], t_ode[i][length_seg_i], t_ode[j][0], t_ode[j][length_seg_j], distance, correlValue, myClusterCount]
@@ -208,7 +204,6 @@ def cluster_by_dtw(segmented_traj, A, b1, Y, t_list, L_y, correl_threshold, dist
                 mode.append(res1[j])
                 delete_position.append(j)
 
-
             j = j + 1
 
         P.append(mode)  # creating the list of modes, with each mode as a list of segments
@@ -235,5 +230,3 @@ def cluster_by_dtw(segmented_traj, A, b1, Y, t_list, L_y, correl_threshold, dist
     G = get_desired_ODE_coefficients(P, A, b1, maximum_ode_prune_factor)
 
     return P, G
-
-

@@ -6,7 +6,7 @@ class Range:
     min : float
     max : float
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         assert self.min <= self.max, "Invalid range"
 
     def contains(self, x : float) -> bool:

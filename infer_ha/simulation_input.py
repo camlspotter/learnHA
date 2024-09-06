@@ -103,7 +103,7 @@ def generate_simulation_input(rng : random.Random,
     return Simulation_input(input_value_ts= input_value_ts,
                             initial_output_values= initial_output_values)
 
-def test():
+def test() -> None:
     sis = [ generate_simulation_input(random.Random(),
                                       10.0,
                                       { 'x' : Range(1, 2),
@@ -114,4 +114,3 @@ def test():
                                       ['y'])
             for _ in range(0,10) ]
     print(json.dumps(list(map(asdict, sis))))
-    

@@ -1,5 +1,5 @@
 import ast
-from typing import Any, Union, cast
+from typing import Union, cast
 from pydantic import ConfigDict
 from pydantic.dataclasses import dataclass
 
@@ -10,7 +10,7 @@ class App:
 
 @dataclass(config=ConfigDict(arbitrary_types_allowed=True))
 class Value:
-    value: Any
+    value: Union[int,float]
 
 @dataclass
 class List:

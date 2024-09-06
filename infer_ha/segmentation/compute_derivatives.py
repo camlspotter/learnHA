@@ -2,8 +2,9 @@
 This module computes the derivatives
 """
 
+from typing import cast
 import numpy as np
-
+from numpy.typing import NDArray
 from infer_ha.utils import generator as generate # generate_complete_polynomial
 
 
@@ -77,7 +78,14 @@ def BDF_forward_version(stepM, stepsize, y_points, index):
 
 
 
-def diff_method_backandfor(y_list, order, stepsize, stepM):
+def diff_method_backandfor(y_list : list[NDArray[np.float64]],
+                           order : int,
+                           stepsize : float,
+                           stepM) -> tuple[ NDArray[np.float64],
+                                            NDArray[np.float64],
+                                            NDArray[np.float64],
+                                            NDArray[np.float64],
+                                            list[tuple[int,int]] ]:
     r"""Using multi-step backwards differentiation formula (BDF) to calculate the
     coefficient matrix. We have concatenated all the trajectories into a single list because this helped us discard fewer data than
     considering trajectories as a list of independent trajectories. This is because, for the first M points (M the
@@ -166,13 +174,25 @@ def diff_method_backandfor(y_list, order, stepsize, stepM):
             final_b2_mat = b2_matrix
             final_y_mat = y_matrix
         else:
+            assert not (final_A_mat is None)
+            final_A_mat = cast(NDArray[np.float64], final_A_mat)
+
             l1 = final_A_mat.shape[0]
             final_A_mat = np.r_[final_A_mat, A_matrix]
+
+            assert not (final_A_mat is None)
+            final_A_mat = cast(NDArray[np.float64], final_A_mat)
+
             l2 = final_A_mat.shape[0]
             final_b1_mat = np.r_[final_b1_mat, b1_matrix]
             final_b2_mat = np.r_[final_b2_mat, b2_matrix]
             final_y_mat = np.r_[final_y_mat, y_matrix]
             ytuple.append((l1, l2))
+
+    assert not (final_A_mat is None)
+    assert not (final_b1_mat is None)
+    assert not (final_b2_mat is None)
+    assert not (final_y_mat is None)
 
     return final_A_mat, final_b1_mat, final_b2_mat, final_y_mat, ytuple
 

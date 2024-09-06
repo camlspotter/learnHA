@@ -5,12 +5,17 @@ We use a straightforward approach to compute each variable's bound values (Min, 
 A more complex approach can be implemented and tested in this module.
 """
 
+import numpy as np
+from numpy.typing import NDArray
 from operator import itemgetter
 
 from infer_ha.clustering.utils import create_simple_modes_positions
+from infer_ha.segmentation.segmentation import Segment
 
-
-def compute_mode_invariant(L_y, P_modes, Y, invariant_enabled : bool):
+def compute_mode_invariant(L_y : int,
+                           P_modes : list[list[Segment]],
+                           Y : NDArray[np.float64],
+                           invariant_enabled : bool) -> list[list[tuple[float, float]]]:
     """
     This function decides to compute or ignore mode-invariant computation based on the user's choice.
 
@@ -41,7 +46,9 @@ def compute_mode_invariant(L_y, P_modes, Y, invariant_enabled : bool):
     return mode_inv
 
 
-def compute_invariant (L_y, P_modes, Y):
+def compute_invariant (L_y : int,
+                       P_modes : list[list[Segment]],
+                       Y : NDArray[np.float64]) -> list[list[tuple[float,float]]]:
     """
     This function computes the invariant for each mode/cluster.
 
@@ -59,9 +66,9 @@ def compute_invariant (L_y, P_modes, Y):
 
     P = create_simple_modes_positions(P_modes)
 
-    x_pts = []
+    x_pts : list[dict[int, float]] = []
     #for each mode i
-    invariant = []
+    invariant : list[tuple[float,float]] = []
     mode_inv = []
     '''
     Example:
@@ -111,4 +118,3 @@ def compute_invariant (L_y, P_modes, Y):
 
     # print("Mode-invariants =", mode_inv)
     return mode_inv
-

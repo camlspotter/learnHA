@@ -10,7 +10,7 @@ def generate_simulation_script(out : TextIOWrapper,
                                fixed_interval_data : bool,
                                input_variables : list[str],
                                output_variables : list[str]
-                               ):
+                               ) -> None:
     """
     - simulink_model_file: is the simulink model filename that has the automaton design
     Note: input-port in the simulink model must be assigned names as "x0In", "x1In", etc. Moreover, list of input and output variables must be supplied in the command-line.

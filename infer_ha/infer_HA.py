@@ -5,7 +5,7 @@ This is the main module for inferring an HA model.
 import sys  # This is used for command line arguments
 from typeguard import typechecked
 
-from infer_ha.segmentation.segmentation import two_fold_segmentation, segmented_trajectories
+from infer_ha.segmentation.segmentation import two_fold_segmentation, segmented_trajectories, Segment
 from infer_ha.clustering.clustering import select_clustering
 from infer_ha.infer_invariants.invariants import compute_mode_invariant
 from infer_ha.segmentation.compute_derivatives import diff_method_backandfor
@@ -50,7 +50,7 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
             guard_coeff: is a list containing the coefficient of the guard equation (polynomial)
             assignment_coeff: is a list containing the coefficient of the assignment equations (from linear regression)
             assignment_intercept: is a list containing the intercepts of the assignment equations (linear regression)
-        position: is a list containing positions of the input list_of_trajectories. This structure is required for printing
+        positions: is a list containing positions of the input list_of_trajectories. This structure is required for printing
             the HA model. Particularly, to get the starting positions of input trajectories for identifying initial mode(s).
 
     """
@@ -65,9 +65,11 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
     clustering_method = opts.clustering_method
     stepM = opts.lmm_step_size # 2 for engine-timing  #  the step size of Linear Multi-step Method (step M)
 
-    t_list, y_list, position = preprocess_trajectories(list_of_trajectories.trajectories)
+    t_list, y_list, positions = preprocess_trajectories(list_of_trajectories.trajectories)
+
     # Apply Linear Multistep Method
-    A, b1, b2, Y, ytuple = diff_method_backandfor(y_list, maxorder, list_of_trajectories.stepsize, stepM)   # compute forward and backward version of BDF
+    # compute forward and backward version of BDF
+    A, b1, b2, Y, ytuple = diff_method_backandfor(y_list, maxorder, list_of_trajectories.stepsize, stepM)
 
     # ********* Debugging ***********************
     # output_derivatives(b1, b2, Y, size_of_input_variables)
@@ -81,7 +83,9 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
     # res, drop, clfs, res_modified = two_fold_segmentation_new(A, b1, b2, ytuple, size_of_input_variables, method, ep)
     segmented_traj, clfs, drop = two_fold_segmentation(A, b1, b2, ytuple, Y, size_of_input_variables, clustering_method, stepM, ep, ep_backward)
     print("Number of segments =", len(segmented_traj))
+
     L_y = len(y_list[0][0])  # Number of dimensions
+    assert L_y == len(opts.input_variables) + len(opts.output_variables)
 
     # analyse_variable_index = 2  # zero-based indexing. 0 for refrigeration-cycle. and 2 for engine-timing-system. 3 for AFC
     # analyse_output(segmented_traj, b1, b2, Y, t_list, L_y, size_of_input_variables, stepM, analyse_variable_index)
@@ -89,7 +93,7 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
     # ********* Plotting/Visualizing various points for debugging *************************
     # plot_segmentation_new(segmented_traj, L_y, t_list, Y, stepM) # Trying to verify the segmentation for each segmented points
     # print_segmented_trajectories(segmented_traj)
-    # print("position = ", position)
+    # print("positions = ", positions)
 
     # print("Y = ", Y)
     # print("len of drop = ", len(drop))
@@ -99,7 +103,7 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
     # Instead of deleting the last segment for all models. It is better to ask user's options for deleting
     filter_last_segment = opts.filter_last_segment  # True for delete last segment and False NOT to delete
     # print("filter_last_segment", filter_last_segment)
-    segmentedTrajectories, segmented_traj, clfs = segmented_trajectories(clfs, segmented_traj, position, clustering_method, filter_last_segment) # deleted the last segment in each trajectory
+    segmentedTrajectories, segmented_traj, clfs = segmented_trajectories(clfs, segmented_traj, positions, clustering_method, filter_last_segment) # deleted the last segment in each trajectory
     # print("Segmentation done!")
     # print("segmentedTrajectories = ", segmentedTrajectories)
     # plot_data_values(segmentedTrajectories, Y, L_y)
@@ -118,12 +122,13 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
     # print("Total dropped points (after fixing) are: ", len(Drop))
     number_of_segments_after_cluster = len(P_modes)
     [init_location] = get_initial_location(P_modes)
-    # print("P_modes = ", P_modes)
 
     # *************** Trying to plot points ***********************************
     # plotdebug.plot_dropped_points(t_list, L_y, Y, Drop)
     # plot_after_clustering(t_list, L_y, P_modes, Y, stepM)
+
     mode_inv = compute_mode_invariant(L_y, P_modes, Y, isInvariant)
+
     # *************** Trying to plot the clustered points ***********************************
     # print("Number of num_mode= ", num_mode)
     # print("Number of Clusters, len(P)=", len(P))
@@ -138,7 +143,7 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
     # num_mode = len(P)
 
     transitions = compute_transitions(opts.output_directory,
-                                      P_modes, position, segmentedTrajectories, L_y, boundary_order, Y,
+                                      P_modes, positions, segmentedTrajectories, L_y, boundary_order, Y,
                                       annotations,
                                       number_of_segments_before_cluster,
                                       number_of_segments_after_cluster)
@@ -163,7 +168,7 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
 def typecheck_ha( raw : Raw ) -> Raw:
     return raw
 
-def get_initial_location(P_modes) -> list[int]:
+def get_initial_location(P_modes : list[list[Segment]]) -> list[int]:
     """
     At the moment we are printing only the mode-ID where the first/starting trajectory is contained in.
     Finding other initial modes, require searching segmented trajectories and identifying the probable initial positions

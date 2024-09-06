@@ -3,12 +3,27 @@ Contains modules related to the segmentation process
 
 """
 
+import numpy as np
+from numpy.typing import NDArray
 from sklearn import linear_model
 
 from infer_ha.utils.util_functions import rel_diff, matrowex
 from infer_ha.utils.commandline_parser import ClusteringMethod
 
-def two_fold_segmentation(A, b1, b2, ytuple, Y, size_of_input_variables, method, stepM, ep_FwdBwd=0.01, ep_backward=0.1):
+Segment = tuple[ tuple[int,int], tuple[int,int], list[int] ]
+
+def two_fold_segmentation(A : NDArray[np.float64],
+                          b1 : NDArray[np.float64],
+                          b2 : NDArray[np.float64],
+                          ytuple : list[tuple[int,int]],
+                          Y : NDArray[np.float64],
+                          size_of_input_variables : int,
+                          method : ClusteringMethod,
+                          stepM : float,
+                          ep_FwdBwd=0.01,
+                          ep_backward=0.1) -> tuple[list[Segment],
+                                                    list[NDArray[np.float64]],
+                                                    list[int]]:
     r"""
     Main idea: (Step-1) We compare backward and forward derivatives at each point of the trajectories. Near the boundary
     of these points, their relative difference will be high. Now, we record these boundary points as the first set of
@@ -62,16 +77,11 @@ def two_fold_segmentation(A, b1, b2, ytuple, Y, size_of_input_variables, method,
     """
 
     # lowDifference = ep_backward #bball=0.9 is good  # rest set 0.01     In the paper, \Epsilon_{Bwd}
-    next_low = 0
-    segment = tuple()   # a segment to hold ([start_ode, end_ode], [start_exact, end_exact], [p_1, ... , p_n])
-    segment_positions = []    # to hold the last item of the segment tuple
-    segmented_traj = []
-    # print("input size =", size_of_input_variables, "  output size =", size_of_output_variables)
-    # print("len(ytuple) =", len(ytuple))
-    # print("ytuple =", ytuple)
+    # next_low = 0 # not used
+    segmented_traj : list[Segment] = []
     max_id = 0  # declaring this variable, so that it can be used to create drop
-    for i in range(0, len(ytuple)):
-        (l1, l2) = ytuple[i]
+
+    for (l1, l2) in ytuple:
         cur_pos = l1  # start position
         max_id = l2 - 1  # end position of the entire data.
         low = cur_pos
@@ -92,6 +102,7 @@ def two_fold_segmentation(A, b1, b2, ytuple, Y, size_of_input_variables, method,
                 else:
                     # print("pos:", high, "  diff-val:", diff_val)
                     break
+
             # I have here low and high but I want high to take some extra near the actual-boundary
             near_high = high - 1   # This is the boundary end-point. upto (high - 1) points lie in the current segment where as high hits the guard condition.
             good_high = high - 1  # this will be improved
@@ -165,17 +176,17 @@ def two_fold_segmentation(A, b1, b2, ytuple, Y, size_of_input_variables, method,
             good_low = next_good_low
             near_low = high     # next boundary start-point
 
-    all_pts = set()
+    all_pts : set[int] = set()
     for seg_element in segmented_traj:
         lst_positions = seg_element[2]  # access the third item of the tuple
         all_pts = all_pts.union(set(lst_positions))
     drop = list(set(range(max_id)) - all_pts)  # set(range(max_id)): creates set from 0 to max_id. operation - all_pts (all_pts contains the segemented set)
 
     # Fit each segment
-    clfs = []
+    clfs : list[NDArray[np.float64]] = []
 
-    # cluster_by_DTW = True
-    if method != ClusteringMethod.DTW:  # for DTW we do not need clfs computation at this stage, but for dbscan/linearpiece we need
+    if method != ClusteringMethod.DTW:
+        # for DTW we do not need clfs computation at this stage, but for dbscan/linearpiece we need
         # print ("len of segmented_traj", len(segmented_traj))
         for seg_element in segmented_traj:
             lst = seg_element[2]  # access the third item of the tuple
@@ -194,7 +205,13 @@ def two_fold_segmentation(A, b1, b2, ytuple, Y, size_of_input_variables, method,
     return segmented_traj, clfs, drop
 
 
-def segmented_trajectories(clfs, segmented_traj, position, method, filter_last_segment : bool):
+def segmented_trajectories(clfs : list[NDArray[np.float64]],
+                           segmented_traj : list[Segment],
+                           positions : list[tuple[int,int]],
+                           method : ClusteringMethod,
+                           filter_last_segment : bool) -> tuple[list[list[list[int]]],
+                                                                list[Segment],
+                                                                list[NDArray[np.float64]]]:
     """
     Perform segmentation of trajectories to create data structure containing segment positions. This process helps in
     keeping track of the connected segments. This information is later used to infer transitions of an HA.
@@ -212,7 +229,7 @@ def segmented_trajectories(clfs, segmented_traj, position, method, filter_last_s
             (2) second, a list of two values for recording start and end points for learning guard and assignment using
             the exact point of a jump
             (3) third, a list of values representing the position of points of the trajectories.
-    :param position: is a list of position data structure. Each position is a pair (start, end) position of a trajectory.
+    :param positions: is a list of position data structure. Each position is a pair (start, end) position of a trajectory.
         For instance, the first item of the list is [0, 100] means that the trajectory has 101 points. The second item
         as [101, 300], meaning the second trajectory has 200 points. Note that all the trajectories are concatenated.
     :param method: clustering method selected by the user (options dtw, dbscan, etc.)
@@ -227,9 +244,7 @@ def segmented_trajectories(clfs, segmented_traj, position, method, filter_last_s
 
     """
 
-    # print("len(position) =", len(position))
-
-    total_trajectories = len(position) # gives the total number of trajectories supplied as input
+    total_trajectories = len(positions) # gives the total number of trajectories supplied as input
     total_segments = len(segmented_traj)  # total segments after segmentation process
     found_single_segment_per_trajecotry = 0 # not found so deletion is required.
     if total_segments == total_trajectories:    # meaning each trajectory has a single segment (continuous single mode system)
@@ -238,11 +253,10 @@ def segmented_trajectories(clfs, segmented_traj, position, method, filter_last_s
 
     # We create a list of segments positions of the form [start, pre-end, end] for each segment.
 
-    seg = []  # contain start and end position for each segment
     segments_per_traj = []  # contain list of all start and end position for each trajectory. Note each trajectory has the overall start and end position value
     segmentedTrajectories = []  # contain list of all segments of all the trajectories.
     traj_id = 1
-    seg = position[traj_id - 1]  # starting trajectory=0
+    seg = positions[traj_id - 1]  # starting trajectory=0
     start_trajectory_pos = seg[0]
     end_trajectory_pos = seg[1]
     traj_segs : list[int] = []
@@ -272,7 +286,7 @@ def segmented_trajectories(clfs, segmented_traj, position, method, filter_last_s
             segments_per_traj = []
             traj_id += 1
             # print("traj_id =", traj_id)
-            seg = position[traj_id - 1]  # starting trajectory=0
+            seg = positions[traj_id - 1]  # starting trajectory=0
             start_trajectory_pos = seg[0]
             end_trajectory_pos = seg[1]
             segments_per_traj.append(traj_segs)  # previously created seg
@@ -350,7 +364,16 @@ def segment_and_fit(A, b1, b2, ytuple, ep=0.01):
 
     return res, drop, clfs
 
-def two_fold_segmentation_new(A, b1, b2, ytuple, size_of_input_variables, method, ep=0.01):
+def two_fold_segmentation_new(A : NDArray[np.float64],
+                              b1 : NDArray[np.float64],
+                              b2 : NDArray[np.float64],
+                              ytuple : list[tuple[int,int]],
+                              size_of_input_variables : int,
+                              method : ClusteringMethod,
+                              ep=0.01) -> tuple[list[list[int]],
+                                                list[int],
+                                                list[NDArray[np.float64]],
+                                                list[list[int]]]:
     r"""
     Main idea: (Step-1) We compare backward and forward derivatives at each point of the trajectories. Near the boundary
     of these points, their relative difference will be high. We compute the backward derivatives and compare them with
@@ -402,7 +425,7 @@ def two_fold_segmentation_new(A, b1, b2, ytuple, size_of_input_variables, method
     relDiff_backward = 0.0
     relDiff_foward = 0.0
     next_low = 0
-    res = []
+    res : list[list[int]] = []
     res_modified = []
     # print("input size =", size_of_input_variables, "  output size =", size_of_output_variables)
     print("len(ytuple) =", len(ytuple))
@@ -413,9 +436,9 @@ def two_fold_segmentation_new(A, b1, b2, ytuple, size_of_input_variables, method
         low = cur_pos
         # start_low = cur_pos
         while True:
-            high = cur_pos
-            position_diffValue = []
-            highest_pos = []
+            high : int = cur_pos
+            position_diffValue : list[tuple[int,float]] = []
+            # highest_pos = [] # not used
             while high < max_id:
                 # print("b1[high]:",b1[high], "   and b1[high,2] =", b1[high,2], "   and b1[high, 1:] =", b1[high, 1:])
                 # diff_val = rel_diff(b1[high,2], b2[high,2])  # print("pos:",high,"  diff-val:",diff_val)
@@ -434,17 +457,15 @@ def two_fold_segmentation_new(A, b1, b2, ytuple, size_of_input_variables, method
                 relDiff_backward = rel_diff(b1[high, size_of_input_variables:], b1[(high - 1), size_of_input_variables:]) # compute relative difference between current and previous
 
                 if diff_val >= ep:  # high difference.    This will detect all boundary points
-                    position_diffValue.append([high, relDiff_backward]) # recording position and diff-value
+                    position_diffValue.append((high, relDiff_backward)) # recording position and diff-value
                     high += 1
                 else:  # low difference so same segment
                     break
             if len(position_diffValue) != 0:
                 arr_len = len(position_diffValue)
                 next_low_search = 0
-                for index in range(0, len(position_diffValue)):
-                    value_position = position_diffValue[index][0]
-                    value_backward = position_diffValue[index][1]
-                    if (value_backward >= lowDifference): # found the exact change-point or the boundary point
+                for (value_position, value_backward) in position_diffValue:
+                    if value_backward >= lowDifference: # found the exact change-point or the boundary point
                         good_high = value_position  # this is the point where difference found
                         good_high = value_position - 1 # Thus -1 point is the last point in the segment before jump-reset
                         next_low = value_position
@@ -461,12 +482,12 @@ def two_fold_segmentation_new(A, b1, b2, ytuple, size_of_input_variables, method
             # low = high  # next_low   ignoring (Step 2)
             low = next_low  # consider (Step 2). Note irrespective of all possibilities we assume next_low till high all points lie in the next segment
 
-    all_pts = set()
+    all_pts : set[int] = set()
     for lst in res:
         all_pts = all_pts.union(set(lst))
     drop = list(set(range(max_id)) - all_pts)  # set(range(max_id)): creates set from 0 to max_id. operation - all_pts (all_pts contains the segemented set)
 
-    all_pts_modified = set()
+    all_pts_modified : set[int] = set()
     for lst in res_modified:
         all_pts_modified = all_pts_modified.union(set(lst))
     drop = list(set(range(max_id)) - all_pts_modified)  # set(range(max_id)): creates set from 0 to max_id. operation - all_pts (all_pts contains the segemented set)

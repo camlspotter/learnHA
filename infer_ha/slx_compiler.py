@@ -41,7 +41,7 @@ class HA(HybridAutomaton):
         return infer_ha.invariant.string_of_invariant({ f"x{self.variable_rev_dict[k]}" : r for (k,r) in inv.items() })
 
 # Adds variable-index tables
-def extend_HA(ha_orig : HybridAutomaton):
+def extend_HA(ha_orig : HybridAutomaton) -> HA:
     d = ha_orig.__dict__
     d['variable_dict'] = {} # reinitialized by __post_init__
     d['variable_rev_dict'] = {} # reinitialized by __post_init__
@@ -122,8 +122,8 @@ def printDefinition(out : TextIOWrapper,
         ch.ExecuteAtInitialization = true;
         """)[1:-1])
 
-def addMatlabFunction(out):
-    out.write(txtwrap.dedent(
+def addMatlabFunction(out : TextIOWrapper) -> None:
+    out.write(textwrap.dedent(
         """
         %% Adding a Matlab Function that generates random number in the range -2 to +2
         
@@ -146,7 +146,7 @@ def addMatlabFunction(out):
         function1.Script=str;
         """)[1:-1])
 
-def addLocations(out, ha : HA) -> None:
+def addLocations(out : TextIOWrapper, ha : HA) -> None:
     out.write("\n\n%% Adding Locations or States with ODE\n")
  
     pos_x : int = 30
@@ -192,7 +192,7 @@ def addLocations(out, ha : HA) -> None:
  
         pos_x = pos_x + width + state_gap
 
-def addTransitions(out,
+def addTransitions(out : TextIOWrapper,
                    ha : HA,
                    invariant_mode : InvariantMode) -> None:
     out.write("\n\n%% Adding Transition for each Locations or States\n")
@@ -317,7 +317,8 @@ def addTransitions(out,
         number_of_loop_trans += 1 # every location has a loop-transition that represents an invariant #XXX WHOT!?
         pos_x += width + state_gap      #Next Location/State 's Position
 
-def addDefaultTransition(out, ha : HA) -> None:
+
+def addDefaultTransition(out : TextIOWrapper, ha : HA) -> None:
     init_mode = ha.init_mode
 
     # x1 = a1; x2 = a2; ... for output variables
@@ -347,14 +348,14 @@ def generateInitialValues(ha : HA) -> str:
     init_str += "}"
     return init_str
 
-def variableCreation(out, ha : HA) -> None:
+def variableCreation(out : TextIOWrapper, ha : HA) -> None:
     out.write("\n\n%% *** Variable Declaration Block ****\n")
     inputVariableCreation(out, ha)
     outputVariableCreation(out, ha)
     localVariableCreation(out, ha)
     parameterVariableCreation(out, ha)
 
-def addInputComponents(out,
+def addInputComponents(out : TextIOWrapper,
                        ha : HA,
                        simulink_model_name : str) -> None:
     out.write("\n%% *** Adding Input  components ****\n")
@@ -379,7 +380,7 @@ def addInputComponents(out,
         y_pos += next_height;
         portNo += 1
 
-def addOutputComponents(out,
+def addOutputComponents(out : TextIOWrapper,
                         ha : HA,
                         simulink_model_name : str) -> None:
     # The number of output components is equal to the number of variables. Not anymore now they are separate.
@@ -426,7 +427,7 @@ def addOutputComponents(out,
         y_pos += next_height;
         portNo += 1
 
-def addLoopTransitions(out,
+def addLoopTransitions(out : TextIOWrapper,
                        sourceLoc : int,
                        number_loop_trans : int,
                        pos_x : int,
@@ -463,7 +464,7 @@ def addLoopTransitions(out,
     #completeLoopTransitions(out);
 
 
-def inputVariableCreation(out, ha : HA) -> None:
+def inputVariableCreation(out : TextIOWrapper, ha : HA) -> None:
     out.write("\n%% *** Input Variable Declaration ****\n")
     portNo = 1
     for var in ha.input_variables:
@@ -478,7 +479,7 @@ def inputVariableCreation(out, ha : HA) -> None:
         out.write("\n")
         portNo += 1
 
-def outputVariableCreation(out, ha : HA) -> None:
+def outputVariableCreation(out : TextIOWrapper, ha : HA) -> None:
     out.write("\n%% *** Output Variable Declaration ****\n")
 
     portNo = 1 # Assuming the order is maintained
@@ -494,7 +495,7 @@ def outputVariableCreation(out, ha : HA) -> None:
         out.write("\n")
         portNo += 1
 
-def localVariableCreation(out, ha : HA) -> None:
+def localVariableCreation(out : TextIOWrapper, ha : HA) -> None:
     out.write("\n\n %% *** Local Variable Declaration ****\n")
 
     for var in ha.output_variables:
@@ -505,7 +506,7 @@ def localVariableCreation(out, ha : HA) -> None:
         out.write(f"{var_id}.UpdateMethod = 'Continuous';\n")
         out.write("\n")
 
-def parameterVariableCreation(out, ha : HA) -> None:
+def parameterVariableCreation(out : TextIOWrapper, ha : HA) -> None:
     out.write("\n\n%% *** Parameter Variable Declaration ****\n")
 
     for (index, var) in ha.variable_dict.items():

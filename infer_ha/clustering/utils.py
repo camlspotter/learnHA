@@ -1,7 +1,14 @@
-
 import numpy as np
+from numpy.typing import NDArray
+from infer_ha.segmentation.segmentation import Segment
 
-def get_signal_data(segmented_traj, Y, b1, L_y, t_list, size_of_input_variables, stepM):
+def get_signal_data(segmented_traj : list[Segment],
+                    Y : NDArray[np.float64],
+                    b1 : NDArray[np.float64],
+                    L_y : int,
+                    t_list : list[NDArray[np.float64]],
+                    size_of_input_variables : int,
+                    stepM : int) -> tuple[list[list[list[float]]],list[list[float]]]:
     """
     This is a pre-processing function to obtain the actual signal points of the segmented trajectories.
 
@@ -26,7 +33,7 @@ def get_signal_data(segmented_traj, Y, b1, L_y, t_list, size_of_input_variables,
     # print("len of res=", len(res))
     for seg_element in segmented_traj:
 
-        segData = seg_element[2]  # access the third item of the tuple that has only the data positions
+        (_, _, segData) = seg_element  # access the third item of the tuple that has only the data positions
         # ToDo: instead of taking the exact points, for better ODE comparison use segment excluding boundary-points
 
         time_data = []
@@ -138,7 +145,7 @@ def compute_correlation(path, signal1, signal2):
     return correlation_value
 
 
-def create_simple_modes_positions(P_modes):
+def create_simple_modes_positions(P_modes : list[list[Segment]]) -> list[list[int]]:
     """
       This function transforms/creates a simple data structure from P_modes. The structure is a list of modes.
       Each mode in the list holding only the position values of data points as a single concatenated list. Unlike the
@@ -152,19 +159,15 @@ def create_simple_modes_positions(P_modes):
           exact list (including both start_exact and end_exact).
       """
 
-    P = []
-    for mode in P_modes:
-        # mode : list[tuple[tuple[int, int], tuple[int, int], list[int]]]
-        data_pos = []
-        for (_, _, poss) in mode:
-            # make a simple mode
-            data_pos.extend(poss)    # merge/extend only the positions of the segment
-        P.append(data_pos)
+    P = [ [ pos
+            for (_ , _, poss) in mode
+            for pos in poss ]
+          for mode in P_modes ]
 
     return P
 
 
-def create_simple_modes_positions_for_ODE(P_modes):
+def create_simple_modes_positions_for_ODE(P_modes : list[list[Segment]]) -> list[list[int]]:
     """
       This function transforms/creates a "simple data" structure from P_modes. This simple structure is a list of modes.
       Each mode in the list holding only the position values of data points as a single concatenated list. Unlike the
@@ -191,7 +194,8 @@ def create_simple_modes_positions_for_ODE(P_modes):
 
     return P
 
-def create_simple_modes_positions_for_ODE_with_pruned_segments(P_modes, maximum_ode_prune_factor):
+def create_simple_modes_positions_for_ODE_with_pruned_segments(P_modes : list[list[Segment]],
+                                                               maximum_ode_prune_factor : float) -> list[list[int]]:
     """
      This function transforms/creates a "simple data" structure from P_modes. This simple structure is a list of modes.
      Each mode in the list holding only the position values of data points as a single concatenated list. Unlike the
@@ -226,7 +230,7 @@ def create_simple_modes_positions_for_ODE_with_pruned_segments(P_modes, maximum_
     return P
 
 
-def create_simple_per_segmented_positions(segmented_traj):
+def create_simple_per_segmented_positions(segmented_traj : list[Segment]) -> list[list[int]] :
     """
     This function transforms/creates a simple list structure from segmented_traj. This simple list consists of positions.
     Each item of the list holds only the position values of data points after segmentation.
@@ -255,7 +259,7 @@ def create_simple_per_segmented_positions(segmented_traj):
 
     return res
 
-def create_simple_per_segmented_positions_exact(segmented_traj):
+def create_simple_per_segmented_positions_exact(segmented_traj : list[Segment]) -> list[list[int]]:
     """
     This function transforms/creates a simple list structure from segmented_traj. This simple list consists of positions.
     Each item of the list holds only the position values of data points after segmentation.
