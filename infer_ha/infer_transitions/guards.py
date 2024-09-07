@@ -209,10 +209,11 @@ def get_coeffs(L_y, svm_model, gamma_value_optimal, order=1):
         g += svc[i][0]
         # print("g is ", g)
         coef_index = 0
-        for term in coeff_expansion:
+        for (coeff, term_) in coeff_expansion:
             term_index = 0
             sv_product = 1
             g_power = 0
+            term = [coeff] + term_  # XXX He used a hetero list and we recover it !!!!!!!!!!!!!!!!!!
             for each_var_power in term:
                 flag = term_index in sv[i]
                 # print("sv[i]:", sv[i])

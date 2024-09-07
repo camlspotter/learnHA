@@ -70,9 +70,11 @@ def makeCompatibleCoefficient(p_coeff, boundary_degree):
     coeff_expansion = myUtil.multinomial(dim_p_coeff + 1, boundary_degree)  # this coeff_expansion include multinomial coefficients
     # print("coeff_expansion is ", coeff_expansion)
 
+    # XXX This is awful
     newCoeff = [0] * int(len(coeff_expansion))
     term_index = 0
-    for term in coeff_expansion:
+    for (coeff, term_) in coeff_expansion:
+        term = [coeff] + term_  # XXX He used hetero list and we recover it here!!!!!!!!!!!!!!!!!!!!!
         prod = 1
         for index in range(0, len(term)):
             if index == 0:  # this is for coefficient
@@ -87,6 +89,21 @@ def makeCompatibleCoefficient(p_coeff, boundary_degree):
         # print("prod =", prod)
         newCoeff[term_index] = prod
         term_index += 1
+
+    # Rewrite of the above but not quite sure
+    newCoeff2 = []
+    term_index = 0
+    for (coeff, term) in coeff_expansion:
+        prod = coeff
+        for (index, termi) in enumerate(term):
+            # for the rest of the values in term
+            if index < len(p_coeff):   
+                prod = prod * pow(p_coeff[index], termi)
+        newCoeff2.append[term_index] = prod
+    newCoeff2 = newCoeff2 + [0] * max(0, len(coeff_expansion) - len(newCoeff2))
+
+    assert newCoeff == newCoeff2
+
     # print("newCoeff =", newCoeff)
     l = len(newCoeff) - 1
     newCoeff = newCoeff[:l] # discarding the last term which is 1 in the kernel expression (gamma.U.V + 1)^2

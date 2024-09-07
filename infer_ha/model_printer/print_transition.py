@@ -16,12 +16,11 @@ def print_transition(f_out, transitions, system_dim, boundary_order):
     # I have to loop through transitions to access all the transitions
     # **** Computing the polynomial expression for guard ****
     coeff_expansion = myUtil.multinomial(system_dim+1, boundary_order)    # same formula as in getcoeff Function in SVM
-    # coeff_expansion = myUtil.multinomial(L_y, boundary_order)    # todo: testing
-    # print ("coeff_expansion = ", coeff_expansion)
     gExp = [""] * int(len(coeff_expansion))
     # gExp = [""] * int(len(coeff_expansion)+1)   #todo testing
     coef_index = 0
-    for term in coeff_expansion:
+    for (coeff, term_) in coeff_expansion:
+        term = [coeff] + term_ # XXX He used hetero list and we recover it here !!!!!!!!!!!!
         number_of_var_per_term = 0
         term_index = 0
         aa = ""

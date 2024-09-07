@@ -68,18 +68,11 @@ def multinomial(vars, powers):
     """
     comb_list = permut(powers, vars)
     # print(comb_list)
-    combine_list = []
-    for data in comb_list:
-        val = compute_coeff(data)
-        combine_list.append([val] + data)
-        # print("Coefficient = ", val)
-        # print(combine_list)
-
-    return combine_list
+    return [ (compute_coeff(data), data) for data in comb_list ]
 
 
 if __name__ == "__main__":
     dim = 3+1
     degree = 2
-    combine_list = multinomial(dim,degree)
+    combine_list = multinomial(dim, degree)
     print(combine_list)
