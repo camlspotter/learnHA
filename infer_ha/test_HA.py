@@ -6,7 +6,6 @@ class Test(unittest.TestCase):
         assert str(build_guard(["a", "b", "c"], [1,2,3,4])) == "{'a': 1, 'b': 2, 'c': 3, '1': 4}", "build_guard bug"
 
     def test_build_assigment(self):
-        # XXX Should I cnovert np.float64 to float ?
         assert (str(build_assignment(["a", "b", "c"], np.array([1.0,2.1,3.2]), 4.3 ))
                 == "{'a': np.float64(1.0), 'b': np.float64(2.1), 'c': np.float64(3.2), '1': 4.3}"), "build_assignment bug"
 

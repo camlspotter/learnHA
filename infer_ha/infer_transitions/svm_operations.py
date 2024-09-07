@@ -4,9 +4,16 @@ This module performs operations related to SVM and HA's guard creation.
 """
 # from libsvm.svm import svm_problem, svm_parameter  # direct calling created wrong object on svm_problem()
 # from libsvm.svmutil import svm_train
-from libsvm.svmutil import *
+import numpy as np
+from numpy.typing import NDArray
+from libsvm.svmutil import svm_problem, svm_parameter, svm_train, svm_parameter, svm_train
 
-def svm_model_training(x, y, boundary_order, c_value_optimal, coef_optimal, gamma_value_optimal):
+def svm_model_training(x : NDArray[np.float64],
+                       y : NDArray[np.float64],
+                       boundary_order : int,
+                       c_value_optimal : float,
+                       coef_optimal : float,
+                       gamma_value_optimal : float) -> NDArray[np.float64]:
     """
     Implementation of SVM training operation with the given hyperparameter(s).
 

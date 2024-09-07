@@ -1,3 +1,5 @@
+from typing import Any
+
 def permut(n: int, k: int) -> list[list[int]]:
     """
     Author: Amit Gurung
@@ -9,7 +11,7 @@ def permut(n: int, k: int) -> list[list[int]]:
     res = []
     myres : list[list[int]] = []
 
-    def backtrack(start, comb):
+    def backtrack(start : int, comb : list[int]) -> None:
         sumEle = 0
         for x in range(0, len(comb)):
             sumEle += comb[x]
@@ -43,7 +45,7 @@ def factorial(i : int) -> int:
     return fact
 
 
-def compute_coeff(list_data):
+def compute_coeff(list_data : list[int]) -> float:
     """
     Author: Amit Gurung
     :param list_data:
@@ -58,7 +60,7 @@ def compute_coeff(list_data):
     return coefficient_val
 
 
-def multinomial(vars, powers):
+def multinomial(vars : int, powers : int) -> list[tuple[float, list[int]]]:
     """
     Author: Amit Gurung
     :param vars: number of terms or variables

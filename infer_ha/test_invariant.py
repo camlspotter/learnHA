@@ -19,12 +19,12 @@ class Test(unittest.TestCase):
                 ".12 >= y12",
                 "0. <= y"
         ]:
-            print(inequality.parse_string(test, parse_all= True))
+            print(parser.inequality.parse_string(test, parse_all= True))
     
 
     def test_invariant(self):
         for test in [
                 "1 <= x && x <= 1.23 && 0. <= y12 && y12 <= 2.3"
         ]:
-            print(invariant.parse_string(test))
-            print(check_invariant(invariant.parse_string(test, parse_all= True)))
+            print(parser.invariant.parse_string(test))
+            print(parser.check_invariant(parser.invariant.parse_string(test, parse_all= True)))

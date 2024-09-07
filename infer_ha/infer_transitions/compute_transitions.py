@@ -6,10 +6,26 @@ from infer_ha.infer_transitions.apply_annotation import apply_annotation
 from infer_ha.infer_transitions.connecting_points import create_connecting_points
 from infer_ha.infer_transitions.compute_assignments import compute_assignments
 from infer_ha.infer_transitions.guards import getGuard_inequality
+from infer_ha.segmentation.segmentation import Segment
+from infer_ha.types import MATRIX
+from infer_ha.annotation import AnnotationTbl
 
-
-def compute_transitions(output_dir, P_modes, position, segmentedTrajectories, L_y, boundary_order, Y, annotations,
-                        number_of_segments_before_cluster, number_of_segments_after_cluster):
+def compute_transitions(output_dir : str,
+                        P_modes : list[list[Segment]],
+                        position : list[tuple[int,int]],
+                        segmentedTrajectories : list[list[list[int]]],
+                        L_y : int,
+                        boundary_order : int,
+                        Y : MATRIX,
+                        annotations : AnnotationTbl,
+                        number_of_segments_before_cluster : int,
+                        number_of_segments_after_cluster : int) -> list[tuple[int,          # src
+                                                                              int,          # dest
+                                                                              list[float],  # guard coeffs [ci], defines the guard:  x1 * c1 + x2 * c2 + .. + 1 * cn <= 0
+                                                                              MATRIX, # assignment coeffs. 2D
+                                                                              MATRIX # assignment intercepts. 1D
+                                                                              # x'j = x1 * cj1 + x2 * cj2 + .. + xn *cjn + ij
+                                                                              ]]:
     """
     This function decides to compute or ignore mode-invariant computation based on the user's choice.
 
@@ -42,7 +58,10 @@ def compute_transitions(output_dir, P_modes, position, segmentedTrajectories, L_
     # print("len(data_points) =",len(data_points))
     # print("data_points=", data_points)
 
-    transitions = []
+    transitions : list[tuple[int,int, 
+                             list[float],
+                             MATRIX,
+                             MATRIX]] = []
 
     # If a model is a single-mode system for instance, lets say our segmentation identifies a full trajectory as a
     # single mode. And this is true for all input trajectories (say init-size 10 and all 10 trajectories are learned
@@ -102,7 +121,7 @@ def compute_transitions(output_dir, P_modes, position, segmentedTrajectories, L_
 
     return transitions
 
-def normalize_guard(coeffs):
+def normalize_guard(coeffs : list[float]) -> list[float]:
     coeff0_abs = abs(coeffs[0])  # first column coefficient, can be used to divide on both sides to normalize. Taking only value not sign
     if coeff0_abs != 0:
         coeffs = [ c / coeff0_abs for c in coeffs ]

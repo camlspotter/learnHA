@@ -2,9 +2,11 @@
 Connecting points for inferring transitions
 """
 from infer_ha.clustering.utils import create_simple_modes_positions
+from infer_ha.segmentation.segmentation import Segment
 
-
-def create_connecting_points(P_modes, position, segmentedTrajectories):
+def create_connecting_points(P_modes : list[list[Segment]],
+                             position : list[tuple[int,int]],
+                             segmentedTrajectories : list[list[list[int]]]) -> list[tuple[int, int, list[tuple[int, int, int]]]]:
     """
     Determine connecting points from the segmented trajectories concerning clusters. Our idea is to establish
     connections by determining segments' start and end positions/points on either mode (src and dest modes). We plan to
@@ -35,7 +37,7 @@ def create_connecting_points(P_modes, position, segmentedTrajectories):
     traj_size = len(position)
     # print("len(position)/traj_size = ", traj_size)
     # Below computes connecting points when the number of clusters > 1. But not for single mode system
-    data_points = []  # Structure containing [src, dest, list of connecting-points]
+    data_points : list[tuple[int,int,list[tuple[int,int,int]]]] = []  # Structure containing [src, dest, list of connecting-points]
     for i in range(0, cluster_len):
         for j in range(i, cluster_len):  # modified j in range(i, cluster_len) from i+1
             # Code for Forward-Transitions
@@ -55,9 +57,9 @@ def create_connecting_points(P_modes, position, segmentedTrajectories):
                             # print ("Store. (end,start)=(", end_posi,",",start_posi,") in transition(i,j)=(", i, ",",j,") \n")
                             # data_points.append([i, j, [end_posi, start_posi]])
                             # Now we apppend 3 points, data_points_per_trans.append([end_posi, start_posi])
-                            data_points_per_trans.append([pre_end_posi, end_posi, start_posi])
+                            data_points_per_trans.append((pre_end_posi, end_posi, start_posi))
             if len(data_points_per_trans) > 0:
-                data_points.append([i, j, data_points_per_trans])
+                data_points.append((i, j, data_points_per_trans))
                 # print("[src, dest, total-points] = [", i, " , ", j, " , ", len(data_points_per_trans), "]")
 
             # Code for Backward-Transitions
@@ -76,9 +78,9 @@ def create_connecting_points(P_modes, position, segmentedTrajectories):
                                 # print("Store. (end,start)=(", end_posi, ",", start_posi,") in transition(j,i)=(", j, ",", i, ") \n")
                                 # data_points.append([j, i, [end_posi, start_posi]])
                                 # now we have 3points: data_points_per_trans.append([end_posi, start_posi])
-                                data_points_per_trans.append([pre_end_posi, end_posi, start_posi])
+                                data_points_per_trans.append((pre_end_posi, end_posi, start_posi))
                 if len(data_points_per_trans) > 0:
-                    data_points.append([j, i, data_points_per_trans])
+                    data_points.append((j, i, data_points_per_trans))
                     # print("[src, dest, total-points] = [", j, " , ", i, " , ", len(data_points_per_trans), "]")
     # print("\nLength of data points = ", len(data_points))
     # print("data points are ", data_points)

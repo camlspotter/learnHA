@@ -1,14 +1,16 @@
 import numpy as np
 from numpy.typing import NDArray
+from typing import cast, Any
 from infer_ha.segmentation.segmentation import Segment
+from infer_ha.types import MATRIX
 
 def get_signal_data(segmented_traj : list[Segment],
-                    Y : NDArray[np.float64],
-                    b1 : NDArray[np.float64],
+                    Y : MATRIX,
+                    b1 : MATRIX,
                     L_y : int,
-                    t_list : list[NDArray[np.float64]],
+                    t_list : list[MATRIX],
                     size_of_input_variables : int,
-                    stepM : int) -> tuple[list[list[list[float]]],list[list[float]]]:
+                    stepM : int) -> tuple[list[list[list[float]]], list[list[float]]]:
     """
     This is a pre-processing function to obtain the actual signal points of the segmented trajectories.
 
@@ -50,7 +52,7 @@ def get_signal_data(segmented_traj : list[Segment],
     return f_ode, t_ode
 
 
-def check_correlation_compatible(M1, M2):
+def check_correlation_compatible(M1 : MATRIX, M2 : MATRIX) -> tuple[MATRIX, MATRIX]:
     """
     Checks if the numpy array M1 and M2 are compatible for the computation of np.corrcoef() function. There can be cases
     when no variance, for any variable, in the data (rows of M1 or M2 in our case) exits. In such a case calling the
@@ -63,39 +65,44 @@ def check_correlation_compatible(M1, M2):
     :return: the modified values of M1 and M2 that is compatible for computing np.corrcoef() function.
     """
 
-    dim = len(M1[1])    # any row will have the same dimension
+    # XXX Here, variables go between list and ndarray freely and very hard to make it typed.
+
+    dim = len(M1[1])    # any row will have the same dimension # XXX why not 0?
     # print("dim =", dim)
-    newData = []
-    data = []
+    newData : list | MATRIX = []
+    data : list | MATRIX = []
     for i in range(0, dim):
-        d1 = M1[:, i]
+        d1 : Any = M1[:, i]  # XXX not sure
         standard_deviation = round(np.std(d1), 10)  # rounding for very small standard deviation value
-        # print("standard_deviation=",standard_deviation)
-        if (standard_deviation != 0):
+        # XXX This code is fishy...
+        if standard_deviation != 0:
             data = np.vstack(d1)
-        if (len(newData) == 0):
+        if len(newData) == 0:
             newData = data
-        elif (len(newData) != 0) and (standard_deviation != 0):
+        elif standard_deviation != 0:
             newData = np.column_stack((newData, data))
-    M1 = newData
+            
+    M1 = cast(MATRIX, newData)
 
     newData = []
     data = []
     for i in range(0, dim):
-        d1 = M2[:, i]
+        d1 = M2[:, i]  # XXX not sure
         standard_deviation = round(np.std(d1), 10)
-        if (standard_deviation != 0):
+        # XXX This code is fishy...
+        if standard_deviation != 0:
             data = np.vstack(d1)
-        if (len(newData) == 0):
+        if len(newData) == 0:
             newData = data
-        elif (len(newData) != 0) and (standard_deviation != 0):
+        elif standard_deviation != 0:
             newData = np.column_stack((newData, data))
-    M2 = newData
+
+    M2 = cast(MATRIX, newData)
 
     return M1, M2
 
 
-def compute_correlation(path, signal1, signal2):
+def compute_correlation(path : list[float], signal1 : list[list[float]], signal2 : list[list[float]]) -> int:
     """
     This function computes the minimum correlation values of all the variables in the two input signals. The data values
     for computing the correlation are obtained from the two signals (signal1 and signal2). The path gives the
@@ -113,14 +120,14 @@ def compute_correlation(path, signal1, signal2):
     path1 = np.array(path)
     # print("type=", type(path1))
     # print("len of path=", len(path), "    len of path1=", len(path1))
-    M1 = []
+    M1_ = []
     for id in path1[:, 0]:
-        M1.append(signal1[id])
-    M2 = []
+        M1_.append(signal1[id])
+    M2_ = []
     for id in path1[:, 1]:
-        M2.append(signal2[id])
-    M1 = np.array(M1)
-    M2 = np.array(M2)
+        M2_.append(signal2[id])
+    M1 : MATRIX = np.array(M1_)
+    M2 : MATRIX = np.array(M2_)
 
     M1, M2 = check_correlation_compatible(M1, M2)
 

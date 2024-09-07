@@ -1,9 +1,18 @@
+from typing import cast, Any
 import numpy as np
+from numpy.typing import NDArray
 import os
+from infer_ha.types import MATRIX
 from infer_ha.utils import misc_math_functions as myUtil
 from infer_ha.utils import io
 
-def create_data(output_filename, srcData, destData, L_y, Y):
+def create_data(output_filename : str,
+                srcData : list[int],
+                destData : list[int],
+                L_y : int,
+                Y : NDArray[np.float64]) -> tuple[ list[dict[int, MATRIX]],
+                                                   list[int],
+                                                   list[list[MATRIX]] ]:
     """
     Implementation of an equal number of positive and negative data and the size of these data are not very high. It is
     equal to the number of connecting points.
@@ -53,7 +62,7 @@ def create_data(output_filename, srcData, destData, L_y, Y):
     return x, y, x_gs
 
 
-def makeCompatibleCoefficient(p_coeff, boundary_degree):
+def makeCompatibleCoefficient(p_coeff : MATRIX, boundary_degree : int) -> list[float]:
     """
     Computes new coefficient expression of the form (p_coeff)^boundary_degree.
     Note since SVM consider kernel of the form (gamma.U.V + 1)^boundary_degree, so we have to use the same formula for
@@ -67,39 +76,39 @@ def makeCompatibleCoefficient(p_coeff, boundary_degree):
     """
     # newCoeff = []
     dim_p_coeff = len(p_coeff)
-    coeff_expansion = myUtil.multinomial(dim_p_coeff + 1, boundary_degree)  # this coeff_expansion include multinomial coefficients
+    coeff_expansion : list[tuple[float, list[int]]] = myUtil.multinomial(dim_p_coeff + 1, boundary_degree)  # this coeff_expansion include multinomial coefficients
     # print("coeff_expansion is ", coeff_expansion)
 
     # XXX This is awful
-    newCoeff = [0] * int(len(coeff_expansion))
+    newCoeff = [0.0] * int(len(coeff_expansion))
     term_index = 0
     for (coeff, term_) in coeff_expansion:
         term = [coeff] + term_  # XXX He used hetero list and we recover it here!!!!!!!!!!!!!!!!!!!!!
-        prod = 1
+        prod = 1.0
         for index in range(0, len(term)):
             if index == 0:  # this is for coefficient
-                prod = term[index]
+                prod = cast(int,term[index])
             elif index <= len(p_coeff):   # for the rest of the values in term but upto index of p_coeff. <= because we do -1
                 if term[index] != 0:
                     # print("term[index] =", term[index])
                     # print("index-1 =", index-1)
                     # print("p_coeff[index-1] =", p_coeff[index-1])
-                    prod = prod * pow(p_coeff[index-1], term[index])  # term[index] here is either 1 or 2. Length of p_coeff is one less
+                    prod = prod * pow(p_coeff[index-1], cast(float, term[index]))  # term[index] here is either 1 or 2. Length of p_coeff is one less
                     # print("prod =", prod)
         # print("prod =", prod)
         newCoeff[term_index] = prod
         term_index += 1
 
+    coeff_expansion = cast(list[tuple[float, list[int]]], coeff_expansion)
     # Rewrite of the above but not quite sure
-    newCoeff2 = []
-    term_index = 0
-    for (coeff, term) in coeff_expansion:
+    newCoeff2 : list[float] = []
+    for (coeff, term_) in coeff_expansion:
         prod = coeff
-        for (index, termi) in enumerate(term):
+        for (index, termi) in enumerate(term_):
             # for the rest of the values in term
             if index < len(p_coeff):   
-                prod = prod * pow(p_coeff[index], termi)
-        newCoeff2.append[term_index] = prod
+                prod = prod * pow(p_coeff[index], cast(float, termi))
+        newCoeff2.append(prod)
     newCoeff2 = newCoeff2 + [0] * max(0, len(coeff_expansion) - len(newCoeff2))
 
     assert newCoeff == newCoeff2
@@ -110,7 +119,7 @@ def makeCompatibleCoefficient(p_coeff, boundary_degree):
     # print("newCoeff without last term =", newCoeff)
     return newCoeff
 
-def inverse_scale(guard_coeff, scale_param, L_y, boundary_degree):
+def inverse_scale(guard_coeff : list[float], scale_param : dict[str,Any], L_y : int, boundary_degree : int) -> list[float]:
     """
     Implementation of an equal number of positive and negative data and the size of these data are not very high. It is
     equal to the number of connecting points.
@@ -133,8 +142,8 @@ def inverse_scale(guard_coeff, scale_param, L_y, boundary_degree):
     '''
     # print("scale_param is ", scale_param)
     # print("Scaled guard_coeff is ", guard_coeff)
-    p_coeff = scale_param['coef']
-    p_offset = scale_param['offset']
+    p_coeff : MATRIX = scale_param['coef']
+    p_offset : MATRIX = scale_param['offset']
     # print("p_offset is ", p_offset)
     # print("p_coeff is ", p_coeff)
     # print("L_y+1 is ", L_y+1)
@@ -168,14 +177,13 @@ def inverse_scale(guard_coeff, scale_param, L_y, boundary_degree):
         term2 = np.dot(a,p_offset) + b
 
         coef_size = L_y + 1
-        coef = [0] * coef_size
+        coef = [0.] * coef_size
         for i in range(0, L_y):
             coef[i] = term1[i]
         coef[L_y] = term2
         # print("Inverse Scaled guard_coeff is ", coef)
-        guard_coeff = coef
         # ********* Inverse Scaling Result ************
-        return guard_coeff
+        return coef
 
 
     if boundary_degree >= 2:
@@ -198,6 +206,7 @@ def inverse_scale(guard_coeff, scale_param, L_y, boundary_degree):
             coef[i] = term1[i]
         coef[coef_size] = term2
         # print("Inverse Scaled guard_coeff is ", coef)
-        guard_coeff = coef
         # ********* Inverse Scaling Result ************
-        return guard_coeff
+        return coef
+
+    assert False

@@ -2,6 +2,7 @@
 This module computes guard equations using Support Vector Machine (SVM) with polynomial kernel.
 
 """
+from typing import Any
 from sklearn import preprocessing
 import numpy as np
 
@@ -16,8 +17,14 @@ from libsvm.svmutil import svm_save_model, svm_predict
 from infer_ha.utils.util_functions import rel_diff
 from infer_ha.clustering.gridSearch_fromSKLearn import gridSearchStart
 from infer_ha.utils import misc_math_functions as myUtil
+from infer_ha.types import MATRIX
 
-def getGuard_inequality(output_dir, srcData, destData, L_y, boundary_order, Y):
+def getGuard_inequality(output_dir : str,
+                        srcData : list[int],
+                        destData : list[int],
+                        L_y : int,
+                        boundary_order : int,
+                        Y : MATRIX) -> list[float]:
     """
     Implementation of an equal number of positive and negative data and the size of these data are not very high. It is
     equal to the number of connecting points.
@@ -42,20 +49,13 @@ def getGuard_inequality(output_dir, srcData, destData, L_y, boundary_order, Y):
 
     """
 
-    accl = []
-    guard_coeff = []
-    y = []  # classes
-    x = []  # data
-    x_p = []
-    x_n = []
-
     output_filename = os.path.join(output_dir, "guard_data_scale") # This file is also used for SVM scaling
-    x, y, x_gs = create_data(output_filename, srcData, destData, L_y, Y)
+    _x, _y, x_gs = create_data(output_filename, srcData, destData, L_y, Y)
     data_length = len(srcData)  # or len(destData)
     # print("data size for SVM =", data_length)
     # ******* scaling data ************
     # print('Before Storing data in file for conversion to csr_matrix')
-    # print(x)
+    # print(_x)
     y, x = svm_read_problem(output_filename, return_scipy = True)  # y: ndarray, x: csr_matrix
     # print('After scaling data')
     # print(x)
@@ -108,10 +108,10 @@ def getGuard_inequality(output_dir, srcData, destData, L_y, boundary_order, Y):
     # #********* Grid Search for hyperparameter tuning *************
     # For skiping small relative difference has higher priority than length of data. Therefore, that code appears first
 
-    if (data_length <= 5):    # 5 because GridSearch here is using 5-Fold cross validation
+    if data_length <= 5:    # 5 because GridSearch here is using 5-Fold cross validation
         skipGridSearch = True
 
-    if skipGridSearch == True:
+    if skipGridSearch:
         c_value_optimal = c_value
         # if c_value==1:  # not the default value which indicates small relative_difference encountered
         #     c_value_optimal = 1
@@ -158,7 +158,10 @@ def getGuard_inequality(output_dir, srcData, destData, L_y, boundary_order, Y):
 
 
 
-def get_coeffs(L_y, svm_model, gamma_value_optimal, order=1):
+def get_coeffs(L_y : int,
+               svm_model : Any, # svm model object
+               gamma_value_optimal : float,
+               order : int =1) -> list[float]:
     """
     Implementation of an equal number of positive and negative data and the size of these data are not very high. It is
     equal to the number of connecting points.
@@ -201,7 +204,7 @@ def get_coeffs(L_y, svm_model, gamma_value_optimal, order=1):
     # Similarly, this is done in the calling module run.py to construct/print the guard equation.
     coeff_expansion = myUtil.multinomial(L_y + 1, order)  # this coeff_expansion include multinomial coefficients
     # print("coeff_expansion is ", coeff_expansion)
-    list_a = [0] * int(len(coeff_expansion))
+    list_a = [0.] * int(len(coeff_expansion))
     # print("list_a is ", list_a)
     # print("svc[i][0] is ", svc[0][0])
     for i in range(nsv):
@@ -211,8 +214,8 @@ def get_coeffs(L_y, svm_model, gamma_value_optimal, order=1):
         coef_index = 0
         for (coeff, term_) in coeff_expansion:
             term_index = 0
-            sv_product = 1
-            g_power = 0
+            sv_product = 1.0
+            g_power = 0.0
             term = [coeff] + term_  # XXX He used a hetero list and we recover it !!!!!!!!!!!!!!!!!!
             for each_var_power in term:
                 flag = term_index in sv[i]
@@ -224,7 +227,7 @@ def get_coeffs(L_y, svm_model, gamma_value_optimal, order=1):
                     # print("aa=",aa)
 
                 # if term_index != (len(term) - 1):  # ignoring the last term since gamma is not associated with it
-                if (term_index != (len(term) - 1) and term_index != 0): # ignore 1st term which is coefficient term and last term
+                if term_index != (len(term) - 1) and term_index != 0: # ignore 1st term which is coefficient term and last term
                     g_power += each_var_power
                 # else: # for the last term, which is 1
                 #     aa = 1  # so that ^each_var_power will also be 1
@@ -246,5 +249,3 @@ def get_coeffs(L_y, svm_model, gamma_value_optimal, order=1):
     list_a[len(coeff_expansion) - 1] = g  # replacing the last computed value of list_a by this g
     # print("After list_a is ", list_a)
     return list_a
-
-

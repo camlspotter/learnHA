@@ -142,4 +142,3 @@ def parse_trajectories(input_filename : str) -> Trajectories:
 
     return Trajectories( trajectories= list_of_trajectories,
                          stepsize= stepsize )
-

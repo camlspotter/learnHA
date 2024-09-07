@@ -3,6 +3,7 @@ This module contains our approach to clustering using the DTW algorithm.
 
 """
 
+from typing import Any
 from scipy.spatial.distance import euclidean
 from fastdtw import fastdtw         # https://pypi.org/project/fastdtw/
 from sklearn import linear_model
@@ -15,11 +16,12 @@ from numpy.typing import NDArray
 # from ..helpers.plotDebug import print_segmented_trajectories, print_P_modes
 # from ..helpers import plotDebug as plotdebug
 from infer_ha.segmentation.segmentation import Segment
+from infer_ha.types import MATRIX
 
 def get_desired_ODE_coefficients(P_modes : list[list[Segment]],
-                                 A : NDArray[np.float64],
-                                 b1 : NDArray[np.float64],
-                                 maximum_ode_prune_factor) -> list[NDArray[np.float64]]:
+                                 A : MATRIX,
+                                 b1 : MATRIX,
+                                 maximum_ode_prune_factor : float) -> list[MATRIX]:
     r"""
     ODE inference.
     This function computes the coefficients of the polynomial ODE for each cluster/mode. Note during ODE coefficient
@@ -64,7 +66,7 @@ def get_desired_ODE_coefficients(P_modes : list[list[Segment]],
     mode_pts = [ mode_ptsi for (_datasize, mode_ptsi) in length_and_modepts ]
 
     # Fit each cluster again
-    def fit(pt):
+    def fit(pt : list[int]) -> Any:  # = LinearRegression
         clf = linear_model.LinearRegression(fit_intercept=False)
         clf.fit(matrowex(A, pt), matrowex(b1, pt))
         return clf
@@ -72,21 +74,21 @@ def get_desired_ODE_coefficients(P_modes : list[list[Segment]],
     clfs = [ fit(pt) for pt in mode_pts ]
 
     # P = mode_pts    # we do not want to return simple-segmented-modes
-    G = [clf.coef_ for clf in clfs]
+    G : list[MATRIX] = [clf.coef_ for clf in clfs]
 
     return G
 
 def cluster_by_dtw(segmented_traj : list[Segment],
-                   A : NDArray[np.float64],
-                   b1 : NDArray[np.float64],
-                   Y : NDArray[np.float64],
-                   t_list : list[NDArray[np.float64]],
+                   A : MATRIX,
+                   b1 : MATRIX,
+                   Y : MATRIX,
+                   t_list : list[MATRIX],
                    L_y : int,
                    correl_threshold : float,
                    distance_threshold : float,
                    size_of_input_variables : int,
                    stepM : int,
-                   maximum_ode_prune_factor=50) -> tuple[list[list[Segment]], list[NDArray[np.float64]]]:
+                   maximum_ode_prune_factor : int=50) -> tuple[list[list[Segment]], list[MATRIX]]:
     r"""
     This function contains our approach to clustering using the DTW algorithm.
 
@@ -120,9 +122,12 @@ def cluster_by_dtw(segmented_traj : list[Segment],
             # and mode-1 = [ segment-1, ... , segment-n]
             # and segment-1 = ([start_ode, end_ode], [start_exact, end_exact], [p1, ..., p_n])
     # *******************************************************************************************
-    # f_ode, t_ode = get_signal_data(segmented_traj, Y, L_y, t_list, size_of_input_variables, stepM)  # get the segmented signal from trajectory.
-    f_ode, t_ode = get_signal_data(segmented_traj, Y, b1, L_y, t_list, size_of_input_variables,
-                                   stepM)  # get the segmented signal from trajectory.
+    # get the segmented signal from trajectory.
+    ft : tuple[ list[list[list[float]]],
+                list[list[float]] ] = get_signal_data(segmented_traj, Y, b1, L_y, t_list,
+                                                      size_of_input_variables, stepM)
+    (f_ode, t_ode) = ft
+
     # print("f_ode is ", f_ode)
     # *******************************************************************************************
 

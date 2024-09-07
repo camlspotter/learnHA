@@ -141,7 +141,7 @@ def generate_simulation_script(out : TextIOWrapper,
     writematrix(result_matrix, result_filename, 'Delimiter', 'tab');
     """))
 
-def addFilteringCode(out):
+def addFilteringCode(out : TextIOWrapper) -> None:
     """
       Addon code called from create_runScript_for_simu_engine() to perform Data Filtering
       Filtering: Extract simulation data based on fixed timestep values and discard the data obtained due to variable Solver used in the Simulink model.

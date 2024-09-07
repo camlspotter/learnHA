@@ -1,9 +1,10 @@
 from sklearn import linear_model
 import numpy as np
+from infer_ha.types import MATRIX
 
-def compute_assignments(list_connection_pt, L_y, Y) -> tuple[np.ndarray, # coeffs, 2d
-                                                             np.ndarray # intercepts, 1d
-                                                             ]:
+def compute_assignments(list_connection_pt : list[tuple[int,int,int]], L_y : int, Y : MATRIX) -> tuple[MATRIX, # coeffs, 2d
+                                                                                              MATRIX # intercepts, 1d
+                                                                                              ]:
     """
     Type Annotation function. Type annotation is performed on the assignments based on the variable's type.
 

@@ -9,21 +9,22 @@ from sklearn import linear_model
 
 from infer_ha.utils.util_functions import rel_diff, matrowex
 from infer_ha.utils.commandline_parser import ClusteringMethod
+from infer_ha.types import MATRIX
 
 Segment = tuple[ tuple[int,int], tuple[int,int], list[int] ]
 
-def two_fold_segmentation(A : NDArray[np.float64],
-                          b1 : NDArray[np.float64],
-                          b2 : NDArray[np.float64],
+def two_fold_segmentation(A : MATRIX,
+                          b1 : MATRIX,
+                          b2 : MATRIX,
                           ytuple : list[tuple[int,int]],
-                          Y : NDArray[np.float64],
+                          Y : MATRIX,
                           size_of_input_variables : int,
                           method : ClusteringMethod,
                           stepM : float,
-                          ep_FwdBwd=0.01,
-                          ep_backward=0.1) -> tuple[list[Segment],
-                                                    list[NDArray[np.float64]],
-                                                    list[int]]:
+                          ep_FwdBwd : float =0.01,
+                          ep_backward : float =0.1) -> tuple[list[Segment],
+                                                             list[MATRIX],
+                                                             list[int]]:
     r"""
     Main idea: (Step-1) We compare backward and forward derivatives at each point of the trajectories. Near the boundary
     of these points, their relative difference will be high. Now, we record these boundary points as the first set of
@@ -126,7 +127,7 @@ def two_fold_segmentation(A : NDArray[np.float64],
 
                 if diff_val >= ep_FwdBwd:  # high difference.    This will detect and store all boundary points
                     # position_diffValue.append([high, relDiff_backward, relDiff_forward, relDiff_data_value]) # recording position and diff-value
-                    position_diffValue.append([high, relDiff_backward, relDiff_forward])  # recording position and diff-value
+                    position_diffValue.append((high, relDiff_backward, relDiff_forward))  # recording position and diff-value
                     high += 1
                 else:  # low difference so same segment
                     break
@@ -183,7 +184,7 @@ def two_fold_segmentation(A : NDArray[np.float64],
     drop = list(set(range(max_id)) - all_pts)  # set(range(max_id)): creates set from 0 to max_id. operation - all_pts (all_pts contains the segemented set)
 
     # Fit each segment
-    clfs : list[NDArray[np.float64]] = []
+    clfs : list[MATRIX] = []
 
     if method != ClusteringMethod.DTW:
         # for DTW we do not need clfs computation at this stage, but for dbscan/linearpiece we need
@@ -205,13 +206,13 @@ def two_fold_segmentation(A : NDArray[np.float64],
     return segmented_traj, clfs, drop
 
 
-def segmented_trajectories(clfs : list[NDArray[np.float64]],
+def segmented_trajectories(clfs : list[MATRIX],
                            segmented_traj : list[Segment],
                            positions : list[tuple[int,int]],
                            method : ClusteringMethod,
                            filter_last_segment : bool) -> tuple[list[list[list[int]]],
                                                                 list[Segment],
-                                                                list[NDArray[np.float64]]]:
+                                                                list[MATRIX]]:
     """
     Perform segmentation of trajectories to create data structure containing segment positions. This process helps in
     keeping track of the connected segments. This information is later used to infer transitions of an HA.
@@ -321,7 +322,11 @@ The list of functions that can be removed and currently not in use are:
     segment_and_fit
     two_fold_segmentation_new: Nearly no dropping of points 
 """
-def segment_and_fit(A, b1, b2, ytuple, ep=0.01):
+def segment_and_fit(A : MATRIX,
+                    b1 : MATRIX,
+                    b2 : MATRIX,
+                    ytuple : list[tuple[int,int]],
+                    ep : float =0.01) -> tuple[list[list[int]], list[int] ,list[MATRIX]]:
     # Segmentation
     # This function is used to implement the simple segmentation Algorithm-1 in the paper by Jin et al.
     res = []
@@ -341,7 +346,7 @@ def segment_and_fit(A, b1, b2, ytuple, ep=0.01):
             if high - low >= 5:
                 res.append(list(range(low, high)))
             cur_pos = high
-    all_pts = set()
+    all_pts : set[int] = set()
     for lst in res:
         all_pts = all_pts.union(set(lst))
     drop = list(set(range(max_id)) - all_pts)   # set(range(max_id)): creates set from 0 to max_id. operation - all_pts (all_pts contains the segemented set)
@@ -364,16 +369,16 @@ def segment_and_fit(A, b1, b2, ytuple, ep=0.01):
 
     return res, drop, clfs
 
-def two_fold_segmentation_new(A : NDArray[np.float64],
-                              b1 : NDArray[np.float64],
-                              b2 : NDArray[np.float64],
+def two_fold_segmentation_new(A : MATRIX,
+                              b1 : MATRIX,
+                              b2 : MATRIX,
                               ytuple : list[tuple[int,int]],
                               size_of_input_variables : int,
                               method : ClusteringMethod,
-                              ep=0.01) -> tuple[list[list[int]],
-                                                list[int],
-                                                list[NDArray[np.float64]],
-                                                list[list[int]]]:
+                              ep : float=0.01) -> tuple[list[list[int]],
+                                                        list[int],
+                                                        list[MATRIX],
+                                                        list[list[int]]]:
     r"""
     Main idea: (Step-1) We compare backward and forward derivatives at each point of the trajectories. Near the boundary
     of these points, their relative difference will be high. We compute the backward derivatives and compare them with

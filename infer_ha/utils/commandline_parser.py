@@ -110,7 +110,7 @@ def read_commandline_arguments() -> Options:
     return Options(**args)
 
 # This must be repaced!
-def process_type_annotation_parameters(parameters) -> AnnotationTbl:
+def process_type_annotation_parameters(parameters : dict[str,Any]) -> AnnotationTbl:
     """
     :param
         parameters: is a dictionary data structure having the list of commandline arguments passed by the user for the
@@ -177,7 +177,7 @@ def process_type_annotation_parameters(parameters) -> AnnotationTbl:
     # The structure annotations will be empty is no argument is supplied
     # ******** Parsing argument variable-type and pool-values into a list *****************
 
-    def convert_( x ) -> tuple[int, Annotation]:
+    def convert_( x : list[Any]) -> tuple[int, Annotation]:
         [i, _var, ty, fs, f] = x
         match ty:
             case "t1":

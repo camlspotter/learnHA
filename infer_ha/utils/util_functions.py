@@ -5,14 +5,15 @@ Contains all the helper functions used in the project infer_ha
 
 
 import numpy as np
+from numpy.typing import NDArray
 import math
 
-def mat_norm(A):
+def mat_norm(A : NDArray[np.float64]) -> float:
     ''' This is Euclidean norm '''
     return math.sqrt(np.square(A).sum())
 
 
-def rel_diff(A, B):
+def rel_diff(A : NDArray[np.float64], B : NDArray[np.float64]) -> float:
     """
     Computes a relative difference between A and B data structure
     @param A: can be a matrix (list of list) or numpy array.
@@ -28,11 +29,9 @@ def rel_diff(A, B):
         return mat_norm(A - B) / (mat_norm(A) + mat_norm(B))
 
 
-def matrowex(matr, l):
+def matrowex(matr : NDArray[np.float64], l : list[int]) -> NDArray[np.float64]:
     """Pick some rows of a matrix to form a new matrix."""
-    rows = []
-    for i in range(0, len(l)): # to
-        rows.append(matr[l[i]])
+    rows = [matr[l[i]] for i in range(0, len(l))]
     return np.array(rows)
 
 

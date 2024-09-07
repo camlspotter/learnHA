@@ -1,18 +1,17 @@
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.svm import SVC
-
 from sklearn.model_selection import GridSearchCV
+from infer_ha.types import MATRIX
 
 # defining parameter range
 # param_grid = {'C': [0.1, 1, 10, 100, 1000],
 #               'gamma': [1, 0.1, 0.01, 0.001, 0.0001],
 #               'kernel': ['poly']}
 
-from random import seed
-from random import randrange
+# from random import seed
+# from random import randrange
 
-
-def gridSearchStart(x, y, param_grid):
+def gridSearchStart(x : MATRIX, y : list[int], param_grid : dict[str,object]) -> tuple[int, float, int]: #XXXobject?
     grid = GridSearchCV(SVC(), param_grid, refit = True, verbose = 0)   #verbose option 0 to 3
     # fitting the model for grid search
     # print("x=",x)

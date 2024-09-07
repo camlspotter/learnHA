@@ -1,7 +1,8 @@
 import numpy as np 
+from numpy.typing import NDArray
 import time
 
-def generator_items(m, n):
+def generator_items(m : int, n : int) -> NDArray[np.float64]:
     """@m : the number of variables
        @n : the order
     """
@@ -19,7 +20,7 @@ def generator_items(m, n):
         A = np.r_[A,D]
     return A
 
-def generate_complete_polynomial(m,n):
+def generate_complete_polynomial(m : int, n : int) -> NDArray[np.float64]:
     """
     @m: number of variables
     @n: maximum order.
@@ -28,7 +29,6 @@ def generate_complete_polynomial(m,n):
     array([2, 0], [1, 1], [0, 2], [1, 0], [0, 1], [0, 0]).
 
     """
-    A = None
     for i in range(0, n+1):
         g = generator_items(m,n-i)
         if i == 0:

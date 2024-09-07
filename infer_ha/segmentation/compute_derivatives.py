@@ -6,9 +6,9 @@ from typing import cast
 import numpy as np
 from numpy.typing import NDArray
 from infer_ha.utils import generator as generate # generate_complete_polynomial
+from infer_ha.types import MATRIX
 
-
-def BDF_backward_version(stepM, stepsize, y_points, index):
+def BDF_backward_version(stepM : int, stepsize : float, y_points : MATRIX, index : int) -> float:
     """
     Computes an approximate derivatives using backwards differentiation formula (BDF) derived from Linear Multi-step
     Method (LMM) with the step size as M. This function computes the backward version of BDF.
@@ -42,7 +42,7 @@ def BDF_backward_version(stepM, stepsize, y_points, index):
     return backward_derivative
 
 
-def BDF_forward_version(stepM, stepsize, y_points, index):
+def BDF_forward_version(stepM : int, stepsize : float, y_points : MATRIX, index : int) -> float:
     """
     Computes an approximate derivatives using backwards differentiation formula (BDF) derived from Linear Multi-step
     Method (LMM) with the step size as M. This function computes the forward version of BDF.
@@ -78,14 +78,14 @@ def BDF_forward_version(stepM, stepsize, y_points, index):
 
 
 
-def diff_method_backandfor(y_list : list[NDArray[np.float64]],
+def diff_method_backandfor(y_list : list[MATRIX],
                            order : int,
                            stepsize : float,
-                           stepM) -> tuple[ NDArray[np.float64],
-                                            NDArray[np.float64],
-                                            NDArray[np.float64],
-                                            NDArray[np.float64],
-                                            list[tuple[int,int]] ]:
+                           stepM : int) -> tuple[ MATRIX,
+                                                  MATRIX,
+                                                  MATRIX,
+                                                  MATRIX,
+                                                  list[tuple[int,int]] ]:
     r"""Using multi-step backwards differentiation formula (BDF) to calculate the
     coefficient matrix. We have concatenated all the trajectories into a single list because this helped us discard fewer data than
     considering trajectories as a list of independent trajectories. This is because, for the first M points (M the
@@ -175,13 +175,13 @@ def diff_method_backandfor(y_list : list[NDArray[np.float64]],
             final_y_mat = y_matrix
         else:
             assert not (final_A_mat is None)
-            final_A_mat = cast(NDArray[np.float64], final_A_mat)
+            final_A_mat = cast(MATRIX, final_A_mat)
 
             l1 = final_A_mat.shape[0]
             final_A_mat = np.r_[final_A_mat, A_matrix]
 
             assert not (final_A_mat is None)
-            final_A_mat = cast(NDArray[np.float64], final_A_mat)
+            final_A_mat = cast(MATRIX, final_A_mat)
 
             l2 = final_A_mat.shape[0]
             final_b1_mat = np.r_[final_b1_mat, b1_matrix]

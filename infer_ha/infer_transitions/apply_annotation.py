@@ -1,14 +1,15 @@
 import numpy as np
 
 from infer_ha.annotation import Continuous, Pool, Constant, Annotation, AnnotationTbl
+from infer_ha.types import MATRIX
 
-def apply_annotation(Y,
+def apply_annotation(Y : MATRIX,
                      variable_types : AnnotationTbl,
-                     list_connection_pt,
-                     assignment_coeff : np.ndarray, # coeffs, 2d
-                     assignment_intercept : np.ndarray # intercepts 1d
-                     ) -> tuple[ np.ndarray, # coeffs, 2d
-                                 np.ndarray ]: # intercepts 1d
+                     list_connection_pt : list[tuple[int,int,int]],
+                     assignment_coeff : MATRIX, # coeffs, 2d
+                     assignment_intercept : MATRIX # intercepts 1d
+                     ) -> tuple[ MATRIX, # coeffs, 2d
+                                 MATRIX ]: # intercepts 1d
     """
     Type Annotation function. Type annotation is performed on the assignments based on the variable's type.
 
