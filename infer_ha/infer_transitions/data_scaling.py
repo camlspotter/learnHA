@@ -79,39 +79,14 @@ def makeCompatibleCoefficient(p_coeff : MATRIX, boundary_degree : int) -> list[f
     coeff_expansion : list[tuple[float, list[int]]] = myUtil.multinomial(dim_p_coeff + 1, boundary_degree)  # this coeff_expansion include multinomial coefficients
     # print("coeff_expansion is ", coeff_expansion)
 
-    # XXX This is awful
-    newCoeff = [0.0] * int(len(coeff_expansion))
-    term_index = 0
-    for (coeff, term_) in coeff_expansion:
-        term = [coeff] + term_  # XXX He used hetero list and we recover it here!!!!!!!!!!!!!!!!!!!!!
-        prod = 1.0
-        for index in range(0, len(term)):
-            if index == 0:  # this is for coefficient
-                prod = cast(int,term[index])
-            elif index <= len(p_coeff):   # for the rest of the values in term but upto index of p_coeff. <= because we do -1
-                if term[index] != 0:
-                    # print("term[index] =", term[index])
-                    # print("index-1 =", index-1)
-                    # print("p_coeff[index-1] =", p_coeff[index-1])
-                    prod = prod * pow(p_coeff[index-1], cast(float, term[index]))  # term[index] here is either 1 or 2. Length of p_coeff is one less
-                    # print("prod =", prod)
-        # print("prod =", prod)
-        newCoeff[term_index] = prod
-        term_index += 1
-
-    coeff_expansion = cast(list[tuple[float, list[int]]], coeff_expansion)
-    # Rewrite of the above but not quite sure
-    newCoeff2 : list[float] = []
-    for (coeff, term_) in coeff_expansion:
+    # I see this same code in data_scaling.py, guards.py and print_transition.py
+    def get_prod(coeff : float, term : list[int]) -> float:
         prod = coeff
-        for (index, termi) in enumerate(term_):
-            # for the rest of the values in term
-            if index < len(p_coeff):   
-                prod = prod * pow(p_coeff[index], cast(float, termi))
-        newCoeff2.append(prod)
-    newCoeff2 = newCoeff2 + [0] * max(0, len(coeff_expansion) - len(newCoeff2))
-
-    assert newCoeff == newCoeff2
+        for (index, termi) in enumerate(term):
+            if index < len(p_coeff):
+                prod *= pow(p_coeff[index], cast(float, termi))
+        return prod
+    newCoeff = [ get_prod(coeff, term) for (coeff, term) in coeff_expansion ]
 
     # print("newCoeff =", newCoeff)
     l = len(newCoeff) - 1

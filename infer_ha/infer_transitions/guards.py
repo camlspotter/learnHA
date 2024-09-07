@@ -204,47 +204,22 @@ def get_coeffs(L_y : int,
     # Similarly, this is done in the calling module run.py to construct/print the guard equation.
     coeff_expansion = myUtil.multinomial(L_y + 1, order)  # this coeff_expansion include multinomial coefficients
     # print("coeff_expansion is ", coeff_expansion)
-    list_a = [0.] * int(len(coeff_expansion))
-    # print("list_a is ", list_a)
-    # print("svc[i][0] is ", svc[0][0])
+
+    list_a : list[float] = [0.] * len(coeff_expansion)
     for i in range(nsv):
-        # print("i here is ", i)
-        g += svc[i][0]
-        # print("g is ", g)
-        coef_index = 0
-        for (coeff, term_) in coeff_expansion:
-            term_index = 0
+        for (coeff_index, (coeff, term)) in enumerate(coeff_expansion):
             sv_product = 1.0
             g_power = 0.0
-            term = [coeff] + term_  # XXX He used a hetero list and we recover it !!!!!!!!!!!!!!!!!!
-            for each_var_power in term:
-                flag = term_index in sv[i]
-                # print("sv[i]:", sv[i])
-                if flag == False:
-                    aa = 0.0
+            for (term_index, each_var_power) in enumerate(term):
+                term_index_for_sv = term_index + 1 # in sv it is shifted
+                if term_index == len(term) - 1: # The last is constant
+                    aa = 1
                 else:
-                    aa = sv[i][term_index]
-                    # print("aa=",aa)
-
-                # if term_index != (len(term) - 1):  # ignoring the last term since gamma is not associated with it
-                if term_index != (len(term) - 1) and term_index != 0: # ignore 1st term which is coefficient term and last term
+                    aa = sv[i][term_index_for_sv] if term_index_for_sv in sv[i] else 0.0
                     g_power += each_var_power
-                # else: # for the last term, which is 1
-                #     aa = 1  # so that ^each_var_power will also be 1
+                sv_product *= aa ** each_var_power
+            list_a[coeff_index] += svc[i][0] * (gamma ** g_power) * coeff * sv_product
 
-                if (term_index == len(term) - 1):
-                    aa = 1 # so that ^each_var_power will also be 1
-
-                if term_index == 0:
-                    coef_val = each_var_power # only the 1st term is the computed coefficient value
-                else:
-                    sv_product *= (aa ** each_var_power)  # so now term_index is starting from 1 which is required for SV, as it starts indexing from 1
-
-                term_index += 1
-
-            list_a[coef_index] += svc[i][0] * (gamma ** g_power) * coef_val * sv_product
-            coef_index += 1
-    # print("g is ", g)
     # print("Before list_a is ", list_a)
     list_a[len(coeff_expansion) - 1] = g  # replacing the last computed value of list_a by this g
     # print("After list_a is ", list_a)

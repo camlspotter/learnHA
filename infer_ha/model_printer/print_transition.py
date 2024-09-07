@@ -20,7 +20,9 @@ def print_transition(f_out, transitions, system_dim, boundary_order):
     # gExp = [""] * int(len(coeff_expansion)+1)   #todo testing
     coef_index = 0
     for (coeff, term_) in coeff_expansion:
-        term = [coeff] + term_ # XXX He used hetero list and we recover it here !!!!!!!!!!!!
+        # He used hetero list and we recover it here !!!!!!!!!!!!
+        # Awful but no point to fix it since this printer is obsolete.
+        term = [coeff] + term_ 
         number_of_var_per_term = 0
         term_index = 0
         aa = ""
