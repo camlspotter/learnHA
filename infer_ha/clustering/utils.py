@@ -8,7 +8,7 @@ def get_signal_data(segmented_traj : list[Segment],
                     Y : MATRIX,
                     b1 : MATRIX,
                     L_y : int,
-                    t_list : list[MATRIX],
+                    t : MATRIX,
                     size_of_input_variables : int,
                     stepM : int) -> tuple[list[list[list[float]]], list[list[float]]]:
     """
@@ -23,7 +23,7 @@ def get_signal_data(segmented_traj : list[Segment],
             (3) third the list of values represent the positions of points of the trajectories.
     :param Y: contains the y_list values for all the points except the first and last M points (M is the order in BDF).
     :param L_y: is the dimension (input + output variables) of the system whose trajectory is being parsed.
-    :param t_list: a single-item list whose item is a numpy.ndarray containing time-values as a concatenated list.
+    :param t: a numpy.ndarray containing time-values as a concatenated list.
     :param size_of_input_variables: total number of input variables in the given trajectories.
     :return: The segmented signal's actual data points (f_ode) and the corresponding time values (t_ode).
             The time values t_ode is only used for debugging purposes, mainly for plotting.
@@ -45,7 +45,7 @@ def get_signal_data(segmented_traj : list[Segment],
             signalData.append([Y[pos_id, dim] for dim in range(size_of_input_variables, L_y)])  # ignore input-variables. * Y contain the actual data-points
             # signalData.append([b1[pos_id, dim] for dim in range(size_of_input_variables, L_y)])  # ignore input-variables. * b1 contain the backward derivatives
 
-            time_data.append(t_list[0][pos_id + stepM])  # since Y values are after leaving 5 point from start and -5 at the end
+            time_data.append(t[pos_id + stepM])  # since Y values are after leaving 5 point from start and -5 at the end
         f_ode.append(signalData)
         t_ode.append(time_data)  # computing time only for plotting reason
 

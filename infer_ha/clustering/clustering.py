@@ -21,7 +21,7 @@ def select_clustering(segmented_traj : list[Segment],
                       b1 : NDArray[np.float64],
                       clfs : list[NDArray[np.float64]],
                       Y : NDArray[np.float64],
-                      t_list : list[NDArray[np.float64]],
+                      t : NDArray[np.float64],
                       L_y : int,
                       opts : Options,
                       stepM : int) -> tuple[list[list[Segment]], list[NDArray[np.float64]]]:
@@ -41,7 +41,7 @@ def select_clustering(segmented_traj : list[Segment],
     :param clfs: is a list. Each item of the list clfs is a list that holds the coefficients (obtained using linear
         regression) of the ODE of each segment of the segmented trajectories.
     :param Y: contains the y_list values for all the points except the first and last M points (M is the order in BDF).
-    :param t_list: a single-item list whose item is a numpy.ndarray containing time-values as a concatenated list.
+    :param t: a numpy.ndarray containing time-values as a concatenated list.
     :param L_y: is the dimension (input + output variables) of the system whose trajectory is being parsed.
     :param opts: is a dictionary data structure having the list of commandline arguments passed by the
         user for the learning algorithm.
@@ -83,7 +83,7 @@ def select_clustering(segmented_traj : list[Segment],
 
         case ClusteringMethod.DTW:
             # print("Running clustering using  DTW algorithm!!")
-            P_modes, G = cluster_by_dtw(segmented_traj, A, b1, Y, t_list, L_y, correl_threshold,
+            P_modes, G = cluster_by_dtw(segmented_traj, A, b1, Y, t, L_y, correl_threshold,
                                         distance_threshold, size_of_input_variables, stepM, maximum_ode_prune_factor) # t_list only used for debugging using plot
             print("Total Clusters after DTW algorithm = ", len(P_modes))
 

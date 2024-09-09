@@ -82,7 +82,7 @@ def cluster_by_dtw(segmented_traj : list[Segment],
                    A : MATRIX,
                    b1 : MATRIX,
                    Y : MATRIX,
-                   t_list : list[MATRIX],
+                   t : MATRIX,
                    L_y : int,
                    correl_threshold : float,
                    distance_threshold : float,
@@ -103,7 +103,7 @@ def cluster_by_dtw(segmented_traj : list[Segment],
          function (or the mapping function) as mention in Jin et al. paper.
     :param b1: the derivatives of each point computed using the backward version of BDF.
     :param Y: contains the y_list values for all the points except the first and last M points (M is the order in BDF).
-    :param t_list: a single-item list whose item is a numpy.ndarray containing time-values as a concatenated list.
+    :param t: a numpy.ndarray containing time-values as a concatenated list.
     :param L_y: is the dimension (input + output variables) of the system whose trajectory is being parsed.
     :param correl_threshold: threshold value for correlation for DTW comparison of two segmented trajectories.
     :param distance_threshold: threshold value for distance for DTW comparison of two segmented trajectories.
@@ -124,7 +124,7 @@ def cluster_by_dtw(segmented_traj : list[Segment],
     # *******************************************************************************************
     # get the segmented signal from trajectory.
     ft : tuple[ list[list[list[float]]],
-                list[list[float]] ] = get_signal_data(segmented_traj, Y, b1, L_y, t_list,
+                list[list[float]] ] = get_signal_data(segmented_traj, Y, b1, L_y, t,
                                                       size_of_input_variables, stepM)
     (f_ode, t_ode) = ft
 

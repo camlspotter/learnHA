@@ -5,22 +5,14 @@ from typing import Optional, TypeVar, Callable, Iterator
 from pydantic.dataclasses import dataclass
 from pydantic import ConfigDict
 
-Trajectory = tuple[ list[np.ndarray], list[np.ndarray] ]
+Trajectory = tuple[ np.ndarray,  # time part of timeseries. 1D array
+                    np.ndarray ] # values part of timeseries 2D array
 
 # config is required to carry np.ndarray in pydantic's dataclass
 @dataclass(config=ConfigDict(arbitrary_types_allowed=True))
 class Trajectories:
     trajectories : list[ Trajectory ]
     stepsize : float
-
-A = TypeVar('A')
-
-def find_iterator(pred: Callable[[A], bool], xs : Iterator[A]) -> Optional[A]:
-    def filter(i : Iterator[A]) -> Iterator[A]:
-        for x in i:
-            if pred(x):
-                yield x
-    return next(filter(xs), None)
 
 def parse_trajectories(path : str) -> Trajectories:
     '''
@@ -41,17 +33,16 @@ def parse_trajectories(path : str) -> Trajectories:
 
         tvs_group : list[list[tuple[float, list[float]]]] = [ tvs_list[start:end] for (start, end) in ranges ]
 
-        # XXX Why singleton lists!?
-        trajectories : list[Trajectory] = [ ( [np.array([t for (t, _) in tvs])],
-                                              [np.array([vs for (_, vs) in tvs])] )
-                                            for tvs in tvs_group ]
+        trajectories : list[Trajectory] = [ ( np.array([t for (t, _) in tvs]),
+                                               np.array([vs for (_, vs) in tvs]) )
+                                             for tvs in tvs_group ]
 
         stepsize = tvs_group[0][1][0] - tvs_group[0][0][0] # diff of the first 2 times in the first tvs
 
         return Trajectories(trajectories, stepsize)
 
-def preprocess_trajectories(list_of_trajectories : list[Trajectory]) -> tuple[ list[NDArray[np.float64]],
-                                                                               list[NDArray[np.float64]],
+def preprocess_trajectories(list_of_trajectories : list[Trajectory]) -> tuple[ NDArray[np.float64],
+                                                                               NDArray[np.float64],
                                                                                list[tuple[int, int]] ]:
     '''
     This function performs the actual conversion of the list of trajectories into a single trajectory.
@@ -71,7 +62,7 @@ def preprocess_trajectories(list_of_trajectories : list[Trajectory]) -> tuple[ l
         ranges: the ranges of the Trajectories in the lists.
     '''
 
-    sizes = [ len(ts) for traj in list_of_trajectories for ts in traj[0] ]
+    sizes = [ len(ts) for traj in list_of_trajectories for ts in [traj[0]] ]
 
     position : list[tuple[int,int]] = []
     for (i,size) in enumerate(sizes):
@@ -79,7 +70,7 @@ def preprocess_trajectories(list_of_trajectories : list[Trajectory]) -> tuple[ l
         position.append((last_position + 1, last_position + size))
 
     # XXX Why does this returns singleton lists?
-    t_list = [np.concatenate([ ts for traj in list_of_trajectories for ts in traj[0] ])]
-    y_list = [np.vstack([ ys for traj in list_of_trajectories for ys in traj[1] ])]
+    t = np.concatenate([ traj[0] for traj in list_of_trajectories ])
+    y = np.vstack([ traj[1] for traj in list_of_trajectories ])
 
-    return t_list, y_list, position
+    return t, y, position

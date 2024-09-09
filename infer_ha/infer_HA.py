@@ -64,10 +64,10 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
     clustering_method = opts.clustering_method
     stepM = opts.lmm_step_size # 2 for engine-timing  #  the step size of Linear Multi-step Method (step M)
 
-    t_list : list[MATRIX]
-    y_list : list[MATRIX]
+    t : MATRIX
+    y : MATRIX
     positions : list[tuple[int, int]]
-    t_list, y_list, positions = preprocess_trajectories(list_of_trajectories.trajectories)
+    t, y, positions = preprocess_trajectories(list_of_trajectories.trajectories)
 
     # Apply Linear Multistep Method
     # compute forward and backward version of BDF
@@ -76,8 +76,8 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
     b1 : MATRIX
     b2 : MATRIX
     Y : MATRIX
-    ytupe : list[tuple[int,int]]
-    A, b1, b2, Y, ytuple = diff_method_backandfor(y_list, maxorder, list_of_trajectories.stepsize, stepM)
+    ytuple : list[tuple[int,int]]
+    A, b1, b2, Y, ytuple = diff_method_backandfor(y, maxorder, list_of_trajectories.stepsize, stepM)
 
     # ********* Debugging ***********************
     # output_derivatives(b1, b2, Y, size_of_input_variables)
@@ -99,10 +99,10 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
     L_y = len(opts.input_variables) + len(opts.output_variables)
 
     # analyse_variable_index = 2  # zero-based indexing. 0 for refrigeration-cycle. and 2 for engine-timing-system. 3 for AFC
-    # analyse_output(segmented_traj, b1, b2, Y, t_list, L_y, size_of_input_variables, stepM, analyse_variable_index)
+    # analyse_output(segmented_traj, b1, b2, Y, t, L_y, size_of_input_variables, stepM, analyse_variable_index)
 
     # ********* Plotting/Visualizing various points for debugging *************************
-    # plot_segmentation_new(segmented_traj, L_y, t_list, Y, stepM) # Trying to verify the segmentation for each segmented points
+    # plot_segmentation_new(segmented_traj, L_y, t, Y, stepM) # Trying to verify the segmentation for each segmented points
     # print_segmented_trajectories(segmented_traj)
     # print("positions = ", positions)
 
@@ -122,17 +122,17 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
     # plot_data_values(segmentedTrajectories, Y, L_y)
     # print()
     # ********* Plotting/Visualizing various points for debugging *************************
-    # plot_guard_points(segmentedTrajectories, L_y, t_list, Y, stepM) # pre-end and end points of each segment
-    # plotdebug.plot_reset_points(segmentedTrajectories_modified, L_y, t_list, Y, stepM) # plotting Reset or Start points
-    # plotdebug.plot_segmentation(res, L_y, t_list, Y, stepM) # Trying to verify the segmentation for each segmented points
+    # plot_guard_points(segmentedTrajectories, L_y, t, Y, stepM) # pre-end and end points of each segment
+    # plotdebug.plot_reset_points(segmentedTrajectories_modified, L_y, t, Y, stepM) # plotting Reset or Start points
+    # plotdebug.plot_segmentation(res, L_y, t, Y, stepM) # Trying to verify the segmentation for each segmented points
 
-    # plot_segmentation_new(segmented_traj, L_y, t_list, Y, stepM) # Trying to verify the segmentation for each segmented points
+    # plot_segmentation_new(segmented_traj, L_y, t, Y, stepM) # Trying to verify the segmentation for each segmented points
 
     number_of_segments_before_cluster = len(segmented_traj)
 
     P_modes : list[list[Segment]]
     G : list[MATRIX]
-    P_modes, G = select_clustering(segmented_traj, A, b1, clfs, Y, t_list, L_y, opts, stepM) # when len(res) < 2 compute P and G for the single mode
+    P_modes, G = select_clustering(segmented_traj, A, b1, clfs, Y, t, L_y, opts, stepM) # when len(res) < 2 compute P and G for the single mode
 
     # print("Fixing Dropped points ...") # I dont need to fix
     # P, Drop = dropclass(P, G, drop, A, b1, Y, ep, stepsize)  # appends the dropped point to a cluster that fits well
@@ -143,8 +143,8 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
     [init_location] = get_initial_location(P_modes)
 
     # *************** Trying to plot points ***********************************
-    # plotdebug.plot_dropped_points(t_list, L_y, Y, Drop)
-    # plot_after_clustering(t_list, L_y, P_modes, Y, stepM)
+    # plotdebug.plot_dropped_points(t, L_y, Y, Drop)
+    # plot_after_clustering(t, L_y, P_modes, Y, stepM)
 
     mode_inv : list[list[tuple[float, float]]]
     mode_inv = compute_mode_invariant(L_y, P_modes, Y, isInvariant)
