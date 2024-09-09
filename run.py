@@ -6,7 +6,7 @@ from infer_ha import infer_HA as learnHA     #infer_model, svm_classify
 from infer_ha.model_printer.print_HA import print_HA
 from infer_ha import HA
 from infer_ha.utils.commandline_parser import read_commandline_arguments
-from infer_ha.utils.trajectories_parser import parse_trajectories
+from infer_ha.trajectories import parse_trajectories
 import infer_ha.utils.io as utils_io
 from infer_ha.slx_compiler import compile, OdeSolverType, InvariantMode
 

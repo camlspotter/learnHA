@@ -9,8 +9,7 @@ from infer_ha.infer_HA import infer_model
 from infer_ha import HA
 from infer_ha.model_printer.print_HA import print_HA
 from infer_ha.utils.commandline_parser import ClusteringMethod, Options
-from infer_ha.utils.trajectories_parser import parse_trajectories
-from infer_ha.annotation import Continuous, Constant
+from infer_ha.trajectories import parse_trajectories
 import infer_ha.utils.io as utils_io
 from infer_ha.annotation import Continuous, Constant
 
