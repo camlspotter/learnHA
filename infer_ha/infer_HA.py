@@ -11,8 +11,7 @@ from infer_ha.infer_invariants.invariants import compute_mode_invariant
 from infer_ha.segmentation.compute_derivatives import diff_method_backandfor
 from infer_ha.infer_transitions.compute_transitions import compute_transitions
 from infer_ha.clustering.utils import create_simple_modes_positions
-from infer_ha.utils.trajectories_parser import preprocess_trajectories
-from infer_ha.trajectories import Trajectory, Trajectories
+from infer_ha.trajectories import Trajectory, Trajectories, preprocess_trajectories
 from infer_ha.utils.commandline_parser import Options
 from infer_ha.HA import Raw
 from infer_ha.types import MATRIX
