@@ -53,7 +53,6 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
             assignment_intercept: is a list containing the intercepts of the assignment equations (linear regression)
         positions: is a list containing positions of the input list_of_trajectories. This structure is required for printing
             the HA model. Particularly, to get the starting positions of input trajectories for identifying initial mode(s).
-
     """
 
     maxorder = opts.ode_degree

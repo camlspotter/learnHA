@@ -70,7 +70,7 @@ def compute_transitions(output_dir : str,
     # Therefore, we need to handle it carefully
     # Fixing separately for single-mode system like Bouncing Ball or single-mode systems without transition.
     # E.g. in the case of bouncing ball all segments are clustered into One.
-    if (number_of_segments_after_cluster == 1) and (number_of_segments_before_cluster >= 1):
+    if number_of_segments_after_cluster == 1 and number_of_segments_before_cluster >= 1:
         tot_input_trajectories = len(position)
         # print("Total initial simulation=", tot_input_trajectories)
         if tot_input_trajectories == number_of_segments_before_cluster:

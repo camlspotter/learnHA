@@ -62,7 +62,7 @@ class TestLearnHA(unittest.TestCase):
         opts = Options(**ps)
 
         list_of_trajectories = parse_trajectories(opts.input_filename)
-
+        
         raw = infer_model(list_of_trajectories, opts)
         write_HA(opts, raw)  # prints an HA model file
 
