@@ -51,7 +51,7 @@ def print_transition(f_out, transitions, system_dim, boundary_order):
     # print("Expression is ", gExp)
 
     for tr in range(0, len(transitions)):
-        (src, dest, guard_coeff, assign_coeffs, intercepts) = transitions[tr]
+        (src, dest, guard_coeff, assignment) = transitions[tr]
 
         trans_detail = "Transition-ID " + str(tr) + "\n"
         trans_detail += "Trans-Src-Dest " + str(src + 1) + " => " + str(dest + 1) + "\n"
@@ -59,4 +59,4 @@ def print_transition(f_out, transitions, system_dim, boundary_order):
 
         # **** Printing Guard and Assignment *****
         print_guard(f_out, guard_coeff, gExp)
-        print_assignment(f_out, assign_coeffs, intercepts)
+        print_assignment(f_out, assignment)

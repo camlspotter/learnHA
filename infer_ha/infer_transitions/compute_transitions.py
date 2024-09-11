@@ -7,7 +7,7 @@ from infer_ha.infer_transitions.connecting_points import create_connecting_point
 from infer_ha.infer_transitions.compute_assignments import compute_assignments
 from infer_ha.infer_transitions.guards import getGuard_inequality
 from infer_ha.segmentation.segmentation import Segment
-from infer_ha.types import MATRIX
+from infer_ha.types import MATRIX, Assignment
 from infer_ha.annotation import AnnotationTbl
 
 def compute_transitions(output_dir : str,
@@ -22,8 +22,7 @@ def compute_transitions(output_dir : str,
                         number_of_segments_after_cluster : int) -> list[tuple[int,          # src
                                                                               int,          # dest
                                                                               list[float],  # guard coeffs [ci], defines the guard:  x1 * c1 + x2 * c2 + .. + 1 * cn <= 0
-                                                                              MATRIX, # assignment coeffs. 2D
-                                                                              MATRIX # assignment intercepts. 1D
+                                                                              Assignment
                                                                               # x'j = x1 * cj1 + x2 * cj2 + .. + xn *cjn + ij
                                                                               ]]:
     """
@@ -60,8 +59,7 @@ def compute_transitions(output_dir : str,
 
     transitions : list[tuple[int,int, 
                              list[float],
-                             MATRIX,
-                             MATRIX]] = []
+                             Assignment]] = []
 
     # If a model is a single-mode system for instance, lets say our segmentation identifies a full trajectory as a
     # single mode. And this is true for all input trajectories (say init-size 10 and all 10 trajectories are learned
@@ -113,10 +111,10 @@ def compute_transitions(output_dir : str,
         '''
 
         # print("list_connection_pt = ", list_connection_pt)
-        assignment_coeff, assignment_intercept = compute_assignments(list_connection_pt, L_y, Y)
-        assignment_coeff, assignment_intercept = apply_annotation(Y, annotations, list_connection_pt, assignment_coeff, assignment_intercept)
+        assignment : Assignment = compute_assignments(list_connection_pt, L_y, Y)
+        assignment = apply_annotation(Y, annotations, list_connection_pt, assignment)
 
-        transitions.append((src_mode, dest_mode, guard_coeff, assignment_coeff, assignment_intercept))
+        transitions.append((src_mode, dest_mode, guard_coeff, assignment))
         # print("All Transitions are: ",transitions)
 
     return transitions

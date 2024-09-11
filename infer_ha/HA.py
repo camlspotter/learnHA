@@ -5,6 +5,7 @@ from pydantic import ConfigDict
 import numpy as np
 from infer_ha.invariant import Invariant
 from infer_ha.range import Range
+import infer_ha.types
 
 # Some magic is required to include np.ndarray in dataclass
 @dataclass(config=ConfigDict(arbitrary_types_allowed=True))
@@ -15,8 +16,7 @@ class Raw:
     transitions : list[tuple[int,          # src
                              int,          # dest
                              list[float],  # guard coeffs [ci], defines the guard:  x1 * c1 + x2 * c2 + .. + 1 * cn <= 0
-                             np.ndarray,   # assignment coeffs. 2D
-                             np.ndarray    # assignment intercepts. 1D
+                             infer_ha.types.Assignment
                              # x'j = x1 * cj1 + x2 * cj2 + .. + xn *cjn + ij
                              ]]
     initial_location : int
@@ -54,7 +54,8 @@ def build_assignment(vars : list[str], coeffs : np.ndarray, intercept : float) -
     d["1"] = intercept
     return d
 
-def build_assignments(vars : list[str], output_vars : list[str], coeffs : np.ndarray, intercepts : np.ndarray) -> dict[str,Assignment]:
+def build_assignments(vars : list[str], output_vars : list[str], assignment : infer_ha.types.Assignment) -> dict[str,Assignment]:
+    (coeffs, intercepts) = assignment
     (nvs1, nvs2) = coeffs.shape
     (nvs3,) = intercepts.shape  # syntax for 1 element tuple
     assert nvs1 == nvs2
@@ -68,13 +69,12 @@ def build_Transition(id : int,
                      trans : tuple[int,
                                    int,
                                    list[float],
-                                   np.ndarray,
-                                   np.ndarray
+                                   infer_ha.types.Assignment
                                    ]) -> Transition:
-    (src, dst, guard_coeffs, assignment_coeffs, assignment_intercepts) = trans
+    (src, dst, guard_coeffs, assignment) = trans
 
     guard = build_guard(vars, guard_coeffs)
-    assignments = build_assignments(vars, output_vars, assignment_coeffs, assignment_intercepts)
+    assignments = build_assignments(vars, output_vars, assignment)
     return Transition(id= id,
                       src= src,
                       dst= dst,

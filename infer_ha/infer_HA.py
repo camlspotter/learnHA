@@ -16,7 +16,7 @@ from infer_ha.clustering.utils import create_simple_modes_positions
 from infer_ha.trajectories import Trajectory, Trajectories, preprocess_trajectories
 from infer_ha.utils.commandline_parser import Options
 from infer_ha.HA import Raw
-from infer_ha.types import MATRIX
+from infer_ha.types import MATRIX, Assignment
 from infer_ha.plot import plot_timeseries_multi
 
 sys.setrecursionlimit(1000000)  # this is the limit
@@ -176,8 +176,7 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
     transitions : list[tuple[int, # src
                              int, # dest
                              list[float],  # guard coeffs [ci], defines the guard:  x1 * c1 + x2 * c2 + .. + 1 * cn <= 0
-                             MATRIX, # assignment coeffs. 2D
-                             MATRIX # assignment intercepts. 1D
+                             Assignment # assignment coeffs. 2D and assignment intercepts. 1D
                              # x'j = x1 * cj1 + x2 * cj2 + .. + xn *cjn + ij
                              ]]
     transitions = compute_transitions(opts.output_directory,

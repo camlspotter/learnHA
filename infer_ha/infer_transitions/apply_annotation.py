@@ -1,15 +1,14 @@
 import numpy as np
 
 from infer_ha.annotation import Continuous, Pool, Constant, Annotation, AnnotationTbl
-from infer_ha.types import MATRIX
+from infer_ha.types import MATRIX, Assignment
+from infer_ha.infer_transitions.compute_assignments import Assignment
 
 def apply_annotation(Y : MATRIX,
                      variable_types : AnnotationTbl,
                      list_connection_pt : list[tuple[int,int,int]],
-                     assignment_coeff : MATRIX, # coeffs, 2d
-                     assignment_intercept : MATRIX # intercepts 1d
-                     ) -> tuple[ MATRIX, # coeffs, 2d
-                                 MATRIX ]: # intercepts 1d
+                     assignment : Assignment
+                     ) -> Assignment:
     """
     Type Annotation function. Type annotation is performed on the assignments based on the variable's type.
 
@@ -38,6 +37,8 @@ def apply_annotation(Y : MATRIX,
 
 
     """
+    
+    (assignment_coeff, assignment_intercept) = assignment
 
     size = len(assignment_coeff[0])
 

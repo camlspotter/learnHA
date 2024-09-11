@@ -1,5 +1,5 @@
 
-def print_assignment(f_out, assign_coeffs, intercepts):
+def print_assignment(f_out, assignment):
     """
 
     :param f_out: file pointer where the output is printed.
@@ -7,6 +7,7 @@ def print_assignment(f_out, assign_coeffs, intercepts):
     :param intercepts: is the polynomial expression obtained from the function myUtil.multinomial().
 
     """
+    (assign_coeffs, intercepts) = assignment
     # **** Printing Jump-Reset equations ***** Todo: poly of degree n
     trans_assign = "reset:\n"
     for dim in range(0,
