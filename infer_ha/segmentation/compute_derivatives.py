@@ -163,6 +163,7 @@ def diff_method_backandfor(y : MATRIX,
     # print("b1_matrix =", b1_matrix)
     # print("b2_matrix =", b2_matrix)
 
+    # XXX the first element of the tuple is always 0!
     ytuple.append((0, A_matrix.shape[0]))       #shape[0] is the rows of A_matrix
     final_A_mat = A_matrix
     final_b1_mat = b1_matrix

@@ -11,7 +11,9 @@ from infer_ha.utils.util_functions import rel_diff, matrowex
 from infer_ha.utils.commandline_parser import ClusteringMethod
 from infer_ha.types import MATRIX
 
-Segment = tuple[ tuple[int,int], tuple[int,int], list[int] ]
+Segment = tuple[ tuple[int,int], # start and end points for learning ODE
+                 tuple[int,int], # start and end points for learning guard and assignment
+                 list[int] ]     # the positions of points of the trajectories
 
 def two_fold_segmentation(A : MATRIX,
                           b1 : MATRIX,
@@ -22,9 +24,9 @@ def two_fold_segmentation(A : MATRIX,
                           method : ClusteringMethod,
                           stepM : float,
                           ep_FwdBwd : float =0.01,
-                          ep_backward : float =0.1) -> tuple[list[Segment],
-                                                             list[MATRIX],
-                                                             list[int]]:
+                          ep_backward : float =0.1) -> tuple[list[Segment], # segments
+                                                             list[MATRIX],  # clfs
+                                                             list[int]]:    # drop
     r"""
     Main idea: (Step-1) We compare backward and forward derivatives at each point of the trajectories. Near the boundary
     of these points, their relative difference will be high. Now, we record these boundary points as the first set of
@@ -83,6 +85,7 @@ def two_fold_segmentation(A : MATRIX,
     max_id = 0  # declaring this variable, so that it can be used to create drop
 
     for (l1, l2) in ytuple:
+        assert l1 == 0 # XXX It is fixed to be 0!
         cur_pos = l1  # start position
         max_id = l2 - 1  # end position of the entire data.
         low = cur_pos
@@ -247,10 +250,10 @@ def segmented_trajectories(clfs : list[MATRIX],
 
     total_trajectories = len(positions) # gives the total number of trajectories supplied as input
     total_segments = len(segmented_traj)  # total segments after segmentation process
-    found_single_segment_per_trajecotry = 0 # not found so deletion is required.
-    if total_segments == total_trajectories:    # meaning each trajectory has a single segment (continuous single mode system)
-        # a simple example is "circle" model or a five-dimensional system in XSpeed or SpaceEx
-        found_single_segment_per_trajecotry = 1    # found single-segment-per-trajectory, so do not delete segment
+
+    # found single-segment-per-trajectory or not,
+    # meaning each trajectory has a single segment (continuous single mode system), or not.
+    found_single_segment_per_trajectory = total_segments == total_trajectories
 
     # We create a list of segments positions of the form [start, pre-end, end] for each segment.
 
@@ -280,7 +283,7 @@ def segmented_trajectories(clfs : list[MATRIX],
             # that is, no segments will overlap.
             del_res_indices.append(del_index - 1)   # stores the previous index for deletion
             # delete when single_segment_per_trajectory not Found and user selected the option filter_last_segment
-            if (found_single_segment_per_trajecotry == 0) and filter_last_segment:
+            if not found_single_segment_per_trajectory and filter_last_segment:
                 segments_per_traj = segments_per_traj[ : -1]    # deletes the last segment before creating segmented-trajectories
             segmentedTrajectories.append(segments_per_traj)
 
@@ -296,7 +299,7 @@ def segmented_trajectories(clfs : list[MATRIX],
 
     del_res_indices.append(del_index - 1)  # stores the previous index for deletion
     # delete when single_segment_per_trajectory not Found and user selected the option filter_last_segment
-    if (found_single_segment_per_trajecotry == 0) and filter_last_segment:
+    if not found_single_segment_per_trajectory and filter_last_segment:
         segments_per_traj = segments_per_traj[ : -1]   # deletes the last segment before creating segmented-trajectories
     segmentedTrajectories.append(segments_per_traj)  # the last segmented trajectory
     # ************************************ End of segmentation ******************************************
@@ -305,7 +308,7 @@ def segmented_trajectories(clfs : list[MATRIX],
 
     # cluster_by_DTW = True
     # delete when single_segment_per_trajectory not Found and user selected the option filter_last_segment
-    if (found_single_segment_per_trajecotry == 0) and filter_last_segment:
+    if not found_single_segment_per_trajectory and filter_last_segment:
         for pos in reversed(del_res_indices):
             segmented_traj.pop(pos)
             if method != ClusteringMethod.DTW:
@@ -332,6 +335,7 @@ def segment_and_fit(A : MATRIX,
     res = []
     for i in range(0, len(ytuple)):
         (l1, l2) = ytuple[i]
+        assert l1 == 0 # XXX it is fixed to 0!
         cur_pos = l1    # start position
         max_id = l2    # end position of the entire data
         while True:

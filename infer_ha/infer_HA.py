@@ -67,8 +67,8 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
     clustering_method = opts.clustering_method
     stepM = opts.lmm_step_size # 2 for engine-timing  #  the step size of Linear Multi-step Method (step M)
 
-    t : MATRIX
-    y : MATRIX
+    t : MATRIX # times, 1D 
+    y : MATRIX # values, 2D
     positions : list[tuple[int, int]]
     t, y, positions = preprocess_trajectories(list_of_trajectories.trajectories)
 
@@ -99,6 +99,7 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
     # res, drop, clfs = segment_and_fit(A, b1, b2, ytuple,ep) #Amit: uses the simple relative-difference between forward and backward BDF presented in the paper, Algorithm-1.
     # res, drop, clfs, res_modified = segment_and_fit_Modified_two(A, b1, b2, ytuple,ep)
     # res, drop, clfs, res_modified = two_fold_segmentation_new(A, b1, b2, ytuple, size_of_input_variables, method, ep)
+
     segmented_traj : list[Segment]
     clfs : list[MATRIX]
     drop : list[int]
@@ -106,6 +107,7 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
                                                        clustering_method, stepM, ep, ep_backward)
     print("Number of segments =", len(segmented_traj))
 
+    # L_y: length (nrows) of y
     L_y = len(opts.input_variables) + len(opts.output_variables)
 
     # analyse_variable_index = 2  # zero-based indexing. 0 for refrigeration-cycle. and 2 for engine-timing-system. 3 for AFC
@@ -123,7 +125,6 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
 
     # Instead of deleting the last segment for all models. It is better to ask user's options for deleting
     filter_last_segment = opts.filter_last_segment  # True for delete last segment and False NOT to delete
-    # print("filter_last_segment", filter_last_segment)
 
     segmentedTrajectories : list[list[list[int]]]
     segmentedTrajectories, segmented_traj, clfs = segmented_trajectories(clfs, segmented_traj, positions, clustering_method, filter_last_segment) # deleted the last segment in each trajectory

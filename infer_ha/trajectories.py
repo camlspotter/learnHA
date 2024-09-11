@@ -5,8 +5,21 @@ from typing import Optional, TypeVar, Callable, Iterator
 from pydantic.dataclasses import dataclass
 from pydantic import ConfigDict
 
+# Timeseries.
+# 
+# The first element of the tuple is a 1D array of timestamps. The timestamps
+# are assumed to be an arithmetic sequence starts from 0.
+# 
+# The second element of the tuple is a 2D matrix of values.  Its number of 
+# the columns must be equal to the length of the timestamp array.
+
 Trajectory = tuple[ np.ndarray,  # time part of timeseries. 1D array
                     np.ndarray ] # values part of timeseries 2D array
+
+# Trajectories
+#
+# Trajectories is a set of Trajectory.  All the trajectories must share
+# the same timestamp gap, here called stepsize.
 
 # config is required to carry np.ndarray in pydantic's dataclass
 @dataclass(config=ConfigDict(arbitrary_types_allowed=True))
@@ -15,11 +28,11 @@ class Trajectories:
     stepsize : float
 
 def parse_trajectories(path : str) -> Trajectories:
-    '''
+    """
     Load trajectories from a tsv file.
     
     - No check of stepsize uniqueness
-    '''
+    """
     with open(path, 'r') as ic:
         reader = csv.reader(ic, delimiter='\t')
 
@@ -45,20 +58,13 @@ def preprocess_trajectories(list_of_trajectories : list[Trajectory]) -> tuple[ N
                                                                                NDArray[np.float64],
                                                                                list[tuple[int, int]] ]:
     '''
-    This function performs the actual conversion of the list of trajectories into a single trajectory.
+    Concatenate the trajectories.
 
-    :param list_of_trajectories: Each element of the list is a trajectory.
-                                 A trajectory is a 2-tuple of (time, vector), where
-    :time: is a list having a single item. The item is the sampling time, stored as a numpy.ndarray having structure as
-           (rows, ) where rows is the number of sample points. The dimension cols is empty meaning a single dim array.
-    :vector: is a list having a single item. The item is a numpy.ndarray with (rows,cols), rows indicates the number of
-           points and cols as the system's dimension. The dimension is the total number of variables in the trajectories
-           including both input and output variables.
+    :param list_of_trajectories: a list of trajectories.  They must have the same timestamp gap.
 
     :return: the value pair (time and vector) where
-        t_list: a single-item list whose item is a numpy.ndarray containing time-values as a concatenated list
-        y_list: a single-item list whose item is a numpy.ndarray containing vector of values (of input and output) as a
-                concatenated list of trajectories.
+        t: a numpy.ndarray containing time-values as a concatenated list
+        y: a numpy.ndarray containing vector of values (of input and output) as a concatenated list of trajectories.
         ranges: the ranges of the Trajectories in the lists.
     '''
 
