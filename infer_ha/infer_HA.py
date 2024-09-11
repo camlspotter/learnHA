@@ -4,6 +4,8 @@ This is the main module for inferring an HA model.
 
 import sys  # This is used for command line arguments
 from typeguard import typechecked
+import numpy as np
+import os
 
 from infer_ha.segmentation.segmentation import two_fold_segmentation, segmented_trajectories, Segment
 from infer_ha.clustering.clustering import select_clustering
@@ -15,6 +17,7 @@ from infer_ha.trajectories import Trajectory, Trajectories, preprocess_trajector
 from infer_ha.utils.commandline_parser import Options
 from infer_ha.HA import Raw
 from infer_ha.types import MATRIX
+from infer_ha.plot import plot_timeseries_multi
 
 sys.setrecursionlimit(1000000)  # this is the limit
 
@@ -68,6 +71,13 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
     y : MATRIX
     positions : list[tuple[int, int]]
     t, y, positions = preprocess_trajectories(list_of_trajectories.trajectories)
+
+    # plot of preprocessed trajectories
+    tys = [ (np.array(t[start:end+1]), np.array(y[start:end+1][:])) for (start, end) in positions ]
+    plot_timeseries_multi(os.path.join(opts.output_directory, "preprocess.svg"),
+                          "Preprocessed trajectories",
+                          tys,
+                          1.0)
 
     # Apply Linear Multistep Method
     # compute forward and backward version of BDF
