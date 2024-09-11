@@ -57,12 +57,10 @@ def compute_invariant (L_y : int,
 
     """
 
-    P = create_simple_modes_positions(P_modes)
+    P : list[list[int]] = create_simple_modes_positions(P_modes)
 
     x_pts : list[dict[int, float]] = []
-    #for each mode i
-    invariant : list[tuple[float,float]] = []
-    mode_inv = []
+
     '''
     Example:
     invariant =[]
@@ -79,34 +77,19 @@ def compute_invariant (L_y : int,
     mode_inv.append([2, invariant])
     print ("Mode invariant = ", mode_inv)
     '''
-    for imode in range(0, len(P)):   # This loop runs for each mode. Also, used to obtain Mode invariants
-        x_pts = []
-        invariant = []
-        for id0 in P[imode]:  # Note: P contains list of clustered segments each segments contains the positions
-            x_pts.append({dim + 1: Y[id0, dim] for dim in range(L_y)})
 
+    #for each mode i
+    mode_inv : list[list[tuple[float,float]]] = []
+    for ids in P:   # This loop runs for each mode. Also, used to obtain Mode invariants
+        x_pts = [ {dim + 1: Y[id0, dim] for dim in range(L_y)} for id0 in ids ] 
+
+        invariant : list[tuple[float,float]] = []
         for var_dim in range(L_y):  # invariant consists of list of bounds on the variables. The order is maintained
             x_dim_list = list(map(itemgetter(var_dim+1), x_pts))
             upperBound = max(x_dim_list)
             lowerBound = min(x_dim_list)
             invariant.append((lowerBound, upperBound))
-        '''            
-        upperBound = max(x_p1)
-        lowerBound = min(x_p1)
-        invariant.append([lowerBound, upperBound])
-        upperBound = max(x_p2)
-        lowerBound = min(x_p2)
-        invariant.append([lowerBound, upperBound])
-        upperBound = max(x_p3)
-        lowerBound = min(x_p3)
-        invariant.append([lowerBound, upperBound])
-        upperBound = max(x_p4)
-        lowerBound = min(x_p4)
-        invariant.append([lowerBound, upperBound])
-        upperBound = max(x_p5)
-        lowerBound = min(x_p5)
-        invariant.append([lowerBound, upperBound])
-        '''
+
         mode_inv.append(invariant)
 
     # print("Mode-invariants =", mode_inv)
