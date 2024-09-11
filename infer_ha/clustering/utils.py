@@ -35,7 +35,7 @@ def get_signal_data(segmented_traj : list[Segment],
     # print("len of res=", len(res))
     for seg_element in segmented_traj:
 
-        (_, _, segData) = seg_element  # access the third item of the tuple that has only the data positions
+        segData = seg_element.positions  # access the third item of the tuple that has only the data positions
         # ToDo: instead of taking the exact points, for better ODE comparison use segment excluding boundary-points
 
         time_data = []
@@ -167,8 +167,8 @@ def create_simple_modes_positions(P_modes : list[list[Segment]]) -> list[list[in
       """
 
     P = [ [ pos
-            for (_ , _, poss) in mode
-            for pos in poss ]
+            for seg in mode
+            for pos in seg.positions ]
           for mode in P_modes ]
 
     return P
@@ -193,8 +193,8 @@ def create_simple_modes_positions_for_ODE(P_modes : list[list[Segment]]) -> list
         data_pos = []
         for segs in mode:
             # make a simple mode
-            start_ode = segs[0][0]
-            end_ode = segs[0][1]
+            start_ode = segs.ode[0]
+            end_ode = segs.ode[1]
             inexact_seg = list(range(start_ode, end_ode))   # making the list instead of filtering [p1, ..., p_n]
             data_pos.extend(inexact_seg)    # merge/extend only the inexact positions of the segment
         P.append(data_pos)
@@ -224,8 +224,9 @@ def create_simple_modes_positions_for_ODE_with_pruned_segments(P_modes : list[li
         performance_prune_count = 0
         for segs in mode:
             # make a simple mode
-            start_ode = segs[0][0]
-            end_ode = segs[0][1]
+            start_ode = segs.ode[0]
+            end_ode = segs.ode[1]
+            # xxx Jun: Not +1 for end_ode?  The original code is like this.
             inexact_seg = list(range(start_ode, end_ode))  # making the list instead of filtering [p1, ..., p_n]
             data_pos.extend(inexact_seg)  # merge/extend only the inexact positions of the segment
             performance_prune_count += 1
@@ -259,8 +260,8 @@ def create_simple_per_segmented_positions(segmented_traj : list[Segment]) -> lis
     res = []
     for segs in segmented_traj:
         # segs a tuple of the form ([start_ode, end_ode], [start_exact, end_exact], [p_1, ... , p_n]).
-        start_ode = segs[0][0]
-        end_ode = segs[0][1]
+        start_ode = segs.ode[0]
+        end_ode = segs.ode[1]
         inexact_seg = list(range(start_ode, end_ode + 1))   # making the list instead of searching/filtering from [p1, ..., p_n]
         res.append(inexact_seg)
 
@@ -286,10 +287,10 @@ def create_simple_per_segmented_positions_exact(segmented_traj : list[Segment]) 
     """
 
     res = []
-    for segs in segmented_traj:
+    for seg in segmented_traj:
         # segs a tuple of the form ([start_ode, end_ode], [start_exact, end_exact], [p_1, ... , p_n]).
 
-        exact_seg = segs[2]   # last element of the tuple i.e., [p1, ..., p_n]
+        exact_seg = seg.positions   # last element of the tuple i.e., [p1, ..., p_n]
         res.append(exact_seg)
 
     return res
