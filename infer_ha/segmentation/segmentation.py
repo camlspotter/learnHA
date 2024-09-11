@@ -21,7 +21,7 @@ class Segment:
 def two_fold_segmentation(A : MATRIX,
                           b1 : MATRIX,
                           b2 : MATRIX,
-                          ytuple : list[tuple[int,int]],
+                          ys : list[int],
                           Y : MATRIX,
                           size_of_input_variables : int,
                           method : ClusteringMethod,
@@ -55,7 +55,7 @@ def two_fold_segmentation(A : MATRIX,
          function (or the mapping function) as mention in Jin et al. paper.
     :param b1: the derivatives of each point computed using the backward version of BDF.
     :param b2: the derivatives of each point computed using the forward version of BDF.
-    :param ytuple: is a list of two tuple with the first item as zero and the second the size of the total points.
+    :param ys: is a list of the sizes of the total points.
     :param Y: contains the y_list values for all the points except the first and last M points.
     :param size_of_input_variables: total number of input variables present in the trajectories.
     :param method: clustering method selected by the user (options dtw, dbscan, etc.)
@@ -87,9 +87,8 @@ def two_fold_segmentation(A : MATRIX,
     segmented_traj : list[Segment] = []
     max_id = 0  # declaring this variable, so that it can be used to create drop
 
-    for (l1, l2) in ytuple:
-        assert l1 == 0 # XXX It is fixed to be 0!
-        cur_pos = l1  # start position
+    for l2 in ys:
+        cur_pos = 0  # start position
         max_id = l2 - 1  # end position of the entire data.
         low = cur_pos
         near_low = cur_pos
@@ -331,15 +330,13 @@ The list of functions that can be removed and currently not in use are:
 def segment_and_fit(A : MATRIX,
                     b1 : MATRIX,
                     b2 : MATRIX,
-                    ytuple : list[tuple[int,int]],
+                    ys : list[int],
                     ep : float =0.01) -> tuple[list[list[int]], list[int] ,list[MATRIX]]:
     # Segmentation
     # This function is used to implement the simple segmentation Algorithm-1 in the paper by Jin et al.
     res = []
-    for i in range(0, len(ytuple)):
-        (l1, l2) = ytuple[i]
-        assert l1 == 0 # XXX it is fixed to 0!
-        cur_pos = l1    # start position
+    for l2 in ys:
+        cur_pos = 0    # start position
         max_id = l2    # end position of the entire data
         while True:
             low = cur_pos
@@ -379,7 +376,7 @@ def segment_and_fit(A : MATRIX,
 def two_fold_segmentation_new(A : MATRIX,
                               b1 : MATRIX,
                               b2 : MATRIX,
-                              ytuple : list[tuple[int,int]],
+                              ys : list[int],
                               size_of_input_variables : int,
                               method : ClusteringMethod,
                               ep : float=0.01) -> tuple[list[list[int]],
@@ -407,7 +404,7 @@ def two_fold_segmentation_new(A : MATRIX,
          function (or the mapping function) as mention in Jin et al. paper.
     :param b1: the derivatives of each point computed using the backward version of BDF.
     :param b2: the derivatives of each point computed using the forward version of BDF.
-    :param ytuple: is a list of two tuple with the first item as zero and the second the size of the total points.
+    :param ys: is a list of the sizes of the total points.
     :param size_of_input_variables: total number of input variables present in the trajectories.
     :param method: clustering method selected by the user (options dtw, dbscan, etc.)
     :param ep: Maximal error toleration value. In the paper, \Epsilon_{FwdBwd}
@@ -440,10 +437,8 @@ def two_fold_segmentation_new(A : MATRIX,
     res : list[list[int]] = []
     res_modified = []
     # print("input size =", size_of_input_variables, "  output size =", size_of_output_variables)
-    print("len(ytuple) =", len(ytuple))
-    for i in range(0, len(ytuple)):
-        (l1, l2) = ytuple[i]
-        cur_pos = l1  # start position
+    for l2 in ys:
+        cur_pos = 0  # start position
         max_id = l2  # end position of the entire data
         low = cur_pos
         # start_low = cur_pos

@@ -86,24 +86,24 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
     b1 : MATRIX
     b2 : MATRIX
     Y : MATRIX
-    ytuple : list[tuple[int,int]]
-    A, b1, b2, Y, ytuple = diff_method_backandfor(y, maxorder, list_of_trajectories.stepsize, stepM)
+    ys : list[int]
+    A, b1, b2, Y, ys = diff_method_backandfor(y, maxorder, list_of_trajectories.stepsize, stepM)
 
     # ********* Debugging ***********************
     # output_derivatives(b1, b2, Y, size_of_input_variables)
     # ********* Debugging ***********************
 
-    # print("ytuple is = ", ytuple)
+    # print("ys is = ", ys)
     # print("A length=", A.shape)
     # Segment and fit
-    # res, drop, clfs = segment_and_fit(A, b1, b2, ytuple,ep) #Amit: uses the simple relative-difference between forward and backward BDF presented in the paper, Algorithm-1.
-    # res, drop, clfs, res_modified = segment_and_fit_Modified_two(A, b1, b2, ytuple,ep)
-    # res, drop, clfs, res_modified = two_fold_segmentation_new(A, b1, b2, ytuple, size_of_input_variables, method, ep)
+    # res, drop, clfs = segment_and_fit(A, b1, b2, ys, ep) #Amit: uses the simple relative-difference between forward and backward BDF presented in the paper, Algorithm-1.
+    # res, drop, clfs, res_modified = segment_and_fit_Modified_two(A, b1, b2, ys, ep)
+    # res, drop, clfs, res_modified = two_fold_segmentation_new(A, b1, b2, ys, size_of_input_variables, method, ep)
 
     segmented_traj : list[Segment]
     clfs : list[MATRIX]
     drop : list[int]
-    segmented_traj, clfs, drop = two_fold_segmentation(A, b1, b2, ytuple, Y, size_of_input_variables,
+    segmented_traj, clfs, drop = two_fold_segmentation(A, b1, b2, ys, Y, size_of_input_variables,
                                                        clustering_method, stepM, ep, ep_backward)
     print("Number of segments =", len(segmented_traj))
 

@@ -85,7 +85,7 @@ def diff_method_backandfor(y : MATRIX,
                                                   MATRIX,
                                                   MATRIX,
                                                   MATRIX,
-                                                  list[tuple[int,int]] ]:
+                                                  list[int] ]:
     r"""Using multi-step backwards differentiation formula (BDF) to calculate the
     coefficient matrix. We have concatenated all the trajectories into a single list because this helped us discard fewer data than
     considering trajectories as a list of independent trajectories. This is because, for the first M points (M the
@@ -112,14 +112,14 @@ def diff_method_backandfor(y : MATRIX,
         final_b1_mat: the derivatives of each point computed using the backward version of BDF.
         final_b2_mat: the derivatives of each point computed using the forward version of BDF.
         final_y_mat: contains the y values for all the points except the first and last M points.
-        ytuple: is a list of two tuple with the first item as zero and the second the size of the total points.
+        ys: is a list of the sizes of the total points.
 
     """
     final_A_mat = None
     final_b1_mat = None
     final_b2_mat = None
     final_y_mat = None
-    ytuple = []
+    ys = []
 
     # stepM = 5   # the step size of Linear Multi-step Method (step M)
 
@@ -163,8 +163,7 @@ def diff_method_backandfor(y : MATRIX,
     # print("b1_matrix =", b1_matrix)
     # print("b2_matrix =", b2_matrix)
 
-    # XXX the first element of the tuple is always 0!
-    ytuple.append((0, A_matrix.shape[0]))       #shape[0] is the rows of A_matrix
+    ys.append(A_matrix.shape[0])
     final_A_mat = A_matrix
     final_b1_mat = b1_matrix
     final_b2_mat = b2_matrix
@@ -175,6 +174,6 @@ def diff_method_backandfor(y : MATRIX,
     assert not (final_b2_mat is None)
     assert not (final_y_mat is None)
 
-    return final_A_mat, final_b1_mat, final_b2_mat, final_y_mat, ytuple
+    return final_A_mat, final_b1_mat, final_b2_mat, final_y_mat, ys
 
 
