@@ -39,7 +39,7 @@ def get_signal_data(segmented_traj : list[Segment],
         # print("leg(segData) is ", len(segData))
         signalData = []
         # ToDo: instead of taking the exact points, for better ODE comparison use segment excluding boundary-points
-        for pos_id in seg_element.positions():
+        for pos_id in seg_element.exact_range():
             signalData.append([Y[pos_id, dim] for dim in range(size_of_input_variables, L_y)])  # ignore input-variables. * Y contain the actual data-points
             # signalData.append([b1[pos_id, dim] for dim in range(size_of_input_variables, L_y)])  # ignore input-variables. * b1 contain the backward derivatives
 
@@ -161,7 +161,7 @@ def create_simple_modes_positions(P_modes : list[list[Segment]]) -> list[list[in
           exact list (including both start_exact and end_exact).
       """
     return [ [ p for seg in mode
-                 for p in seg.positions() ]
+               for p in seg.exact_range() ]
              for mode in P_modes ]
 
 # Used in plotDebug.py 
@@ -260,4 +260,4 @@ def create_simple_per_segmented_positions_exact(segmented_traj : list[Segment]) 
 
     """
 
-    return [ list(seg.positions()) for seg in segmented_traj ]
+    return [ list(seg.exact_range()) for seg in segmented_traj ]

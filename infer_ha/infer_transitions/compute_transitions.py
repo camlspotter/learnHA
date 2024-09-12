@@ -90,7 +90,7 @@ def compute_transitions(output_dir : str,
         destData = []
         for connect_pt in list_connection_pt:
             # in this implementation we use pre_end_pt_position and end_pt_position for guard
-            srcData.append(connect_pt.src_pre_end)  # index [0] is the pre_end_pt_position
+            srcData.append(connect_pt.src_end-1)  # index [0] is the pre_end_pt_position
             destData.append(connect_pt.src_end)  # index [1] is the end_pt_position
 
             # # in this implementation we use end_pt_position and start_pt_position for guard

@@ -48,14 +48,14 @@ def create_connecting_points(P_modes : list[list[Segment]],
                 for g in range(0, segment_size - 1):
                     # last start-point is compared with previous end-point
                     end_posi = segmentedTrajectories[t][g].end  # the end-pt of the trajectory t and segment g
-                    pre_end_posi = segmentedTrajectories[t][g].pre_end  # the pre-end-pt of the trajectory t and segment g
+                    pre_end_posi = end_posi - 1
                     if end_posi in P[i]:  # TRUE
                         start_posi = segmentedTrajectories[t][g + 1].start  # the start-pt of the trajectory t and segment g+1
                         if start_posi in P[j]:  # if this also returns TRUE
                             # print ("Store. (end,start)=(", end_posi,",",start_posi,") in transition(i,j)=(", i, ",",j,") \n")
                             # data_points.append([i, j, [end_posi, start_posi]])
                             # Now we apppend 3 points, data_points_per_trans.append([end_posi, start_posi])
-                            data_points_per_trans.append(Connection(pre_end_posi, end_posi, start_posi))
+                            data_points_per_trans.append(Connection(end_posi, start_posi))
             if len(data_points_per_trans) > 0:
                 data_points.append((i, j, data_points_per_trans))
                 # print("[src, dest, total-points] = [", i, " , ", j, " , ", len(data_points_per_trans), "]")
@@ -67,14 +67,14 @@ def create_connecting_points(P_modes : list[list[Segment]],
                     segment_size = len(segmentedTrajectories[t])  # Length of each segmented trajectory
                     for g in range(0, segment_size - 1):  # last start-point is compared with previous end-point
                         end_posi = segmentedTrajectories[t][g].end
-                        pre_end_posi = segmentedTrajectories[t][g].pre_end
+                        pre_end_posi = end_posi - 1
                         if end_posi in P[j]:  # TRUE
                             start_posi = segmentedTrajectories[t][g + 1].start
                             if start_posi in P[i]:  # if this also returns TRUE
                                 # print("Store. (end,start)=(", end_posi, ",", start_posi,") in transition(j,i)=(", j, ",", i, ") \n")
                                 # data_points.append([j, i, [end_posi, start_posi]])
                                 # now we have 3points: data_points_per_trans.append([end_posi, start_posi])
-                                data_points_per_trans.append(Connection(pre_end_posi, end_posi, start_posi))
+                                data_points_per_trans.append(Connection(end_posi, start_posi))
                 if len(data_points_per_trans) > 0:
                     data_points.append((j, i, data_points_per_trans))
                     # print("[src, dest, total-points] = [", j, " , ", i, " , ", len(data_points_per_trans), "]")

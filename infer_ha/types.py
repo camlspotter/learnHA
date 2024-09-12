@@ -13,7 +13,6 @@ Assignment = tuple[MATRIX, # coeffs, 2d
 @dataclass
 class SegmentedTrajectory:
     start : int
-    pre_end : int # Always end - 1
     end : int
 
 # Triplet of type [pre_end_posi, end_posi, start_posi],
@@ -22,6 +21,5 @@ class SegmentedTrajectory:
 # the destination location.
 @dataclass
 class Connection:
-    src_pre_end : int  # = start_end - 1 (I guess)
     src_end : int
     dst_start : int
