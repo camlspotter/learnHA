@@ -21,7 +21,7 @@ from infer_ha.types import MATRIX
 def get_desired_ODE_coefficients(P_modes : list[list[Segment]],
                                  A : MATRIX,
                                  b1 : MATRIX,
-                                 maximum_ode_prune_factor : float) -> list[MATRIX]:
+                                 maximum_ode_prune_factor : int) -> list[MATRIX]:
     r"""
     ODE inference.
     This function computes the coefficients of the polynomial ODE for each cluster/mode. Note during ODE coefficient
