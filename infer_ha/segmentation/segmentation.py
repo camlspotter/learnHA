@@ -14,8 +14,8 @@ from infer_ha.types import MATRIX
 
 @dataclass
 class Segment:
-    ode : tuple[int,int]
-    guard_and_assignment : tuple[int,int]
+    ode : tuple[int,int] # start and end, end is included
+    guard_and_assignment : tuple[int,int] # start and end, end is included
 
     def positions(self) -> range:
         return range (self.guard_and_assignment[0],
@@ -24,7 +24,7 @@ class Segment:
 def two_fold_segmentation(A : MATRIX,
                           b1 : MATRIX,
                           b2 : MATRIX,
-                          ys : list[int],
+                          npoints : int,
                           Y : MATRIX,
                           size_of_input_variables : int,
                           method : ClusteringMethod,
@@ -58,7 +58,7 @@ def two_fold_segmentation(A : MATRIX,
          function (or the mapping function) as mention in Jin et al. paper.
     :param b1: the derivatives of each point computed using the backward version of BDF.
     :param b2: the derivatives of each point computed using the forward version of BDF.
-    :param ys: is a list of the sizes of the total points.
+    :param npoints: the sizes of the total points.
     :param Y: contains the y_list values for all the points except the first and last M points.
     :param size_of_input_variables: total number of input variables present in the trajectories.
     :param method: clustering method selected by the user (options dtw, dbscan, etc.)
@@ -88,101 +88,100 @@ def two_fold_segmentation(A : MATRIX,
     # lowDifference = ep_backward #bball=0.9 is good  # rest set 0.01     In the paper, \Epsilon_{Bwd}
     # next_low = 0 # not used
     segmented_traj : list[Segment] = []
-    max_id = 0  # declaring this variable, so that it can be used to create drop
 
-    for l2 in ys:
-        cur_pos = 0  # start position
-        max_id = l2 - 1  # end position of the entire data.
-        low = cur_pos
-        near_low = cur_pos
-        good_low = cur_pos
-        next_good_low = cur_pos
+    max_id = npoints - 1  # end position of the entire data.
 
-        while True:
-            high = cur_pos
-            position_diffValue = []
-            while high < max_id:
-                # print("b1[high]:",b1[high], "   and b1[high,2] =", b1[high,2], "   and b1[high, 1:] =", b1[high, 1:])
-                # diff_val = rel_diff(b1[high,2], b2[high,2])  # print("pos:",high,"  diff-val:",diff_val)
-                diff_val = rel_diff(b1[high, size_of_input_variables:], b2[high, size_of_input_variables:]) # ignore input-variables note: zero-based indexing
-                # print("pos:",high,"  (b1-b2) diff-val:",diff_val)
-                if diff_val < ep_FwdBwd:
-                    high += 1
-                else:
-                    # print("pos:", high, "  diff-val:", diff_val)
-                    break
+    cur_pos = 0  # start position
+    low = cur_pos
+    near_low = cur_pos
+    good_low = cur_pos
+    next_good_low = cur_pos
 
-            # I have here low and high but I want high to take some extra near the actual-boundary
-            near_high = high - 1   # This is the boundary end-point. upto (high - 1) points lie in the current segment where as high hits the guard condition.
-            good_high = high - 1  # this will be improved
-            next_good_low = high  # this will be improved
-            while high < max_id:  # moving high further to find the end of boundary point i.e., the next start-point.
-
-                diff_val = rel_diff(b1[high, size_of_input_variables:], b2[high, size_of_input_variables:]) # rel diff between backward and forward derivatives
-
-                # relDiff_data_value = rel_diff(Y[high, size_of_input_variables:],
-                #                 Y[(high - 1), size_of_input_variables:]) # rel diff: current and previous data-values
-
-                relDiff_backward = rel_diff(b1[high, size_of_input_variables:], b1[(high - 1),
-                                size_of_input_variables:])  # compute relative diff: current and previous
-
-                if (high+1) == max_id:  # at the last position we do not want to have index out of bounds error
-                    relDiff_forward = rel_diff(b2[high, size_of_input_variables:], b2[high,
-                                size_of_input_variables:])  # the last point will not be used, so does not matter
-                else:
-                    relDiff_forward = rel_diff(b2[high, size_of_input_variables:], b2[(high + 1),
-                                size_of_input_variables:])  # rel diff: current and next forward-derivatives
-
-                if diff_val >= ep_FwdBwd:  # high difference.    This will detect and store all boundary points
-                    # position_diffValue.append([high, relDiff_backward, relDiff_forward, relDiff_data_value]) # recording position and diff-value
-                    position_diffValue.append((high, relDiff_backward, relDiff_forward))  # recording position and diff-value
-                    high += 1
-                else:  # low difference so same segment
-                    break
-                # print("high=", high, "  relDiff_Data =", relDiff_data_value, "  relDiff_Bwd=", relDiff_backward, "  relDiff_Fwd =", relDiff_forward)
-                # print("pos =", high, "  diff_val =", diff_val,  "  relDiff_Bwd=", relDiff_backward, "  relDiff_Fwd =", relDiff_forward)
-
-
-
-            if len(position_diffValue) != 0:
-                # find last point and then also check if the next point is fit for the start-pt for next segment, otherwise find next correct point
-                found_last_point = 0
-                for index in range(0, len(position_diffValue)):
-                    value_position = position_diffValue[index][0]
-                    value_relDiff_backward_derivative = position_diffValue[index][1]
-                    value_relDiff_forward_derivative = position_diffValue[index][2]
-                    # value_relDiff_data = position_diffValue[index][3]
-                    if (found_last_point == 0) and (value_relDiff_backward_derivative >= ep_backward): # found the exact change-point or the boundary point
-                        good_high = value_position - 1  # the previous position is the last/end-point of the previous segment
-                        next_good_low = value_position  # the current position is the start-point for the next segment.
-                        break   # this will stop searching further
-
-                    #     if (value_relDiff_forward_derivative <= ep_FwdBwd):  # both <=ep_FwdBwd and <=ep_Fwd has same task: to consider data-points are in the same segment
-                    #         next_good_low = value_position  # this is a good next segment's start-point
-                    #         break  # found both good_high and next_low so break for-loop
-                    #     else:
-                    #         found_last_point = 1
-                    #         continue    # search for next segment's start-point
-                    # if (found_last_point == 1) and (value_relDiff_forward_derivative <= ep_FwdBwd): # found the last point but not the next start point
-                    #     next_good_low = value_position # this is a good next segment's start-point
-                    #     break   # also found the next segment's start-point so break the for-loop
-                    #
-
-                # print("good_high=", good_high, "  next_good_low=", next_good_low, "  but near_low=", near_high)
-            # else:  # what happens if boundary-point is also the exact point? This block will be executed
-            #     print("************ This block will be exectued only once. Since we have both the check  diff_val < ep_FwdBwd and diff_val >= ep_FwdBwd ************")
-
-            # if (good_high - good_low) >= stepM:   this is not safe
-            if (near_high - near_low) >= stepM:    # when segment size is >= M points, where M is the step size of LMM
-                segment = Segment((near_low, near_high), (good_low, good_high))
-                segmented_traj.append(segment)
-
-            if high == max_id:
+    while True:
+        high = cur_pos
+        position_diffValue = []
+        while high < max_id:
+            # print("b1[high]:",b1[high], "   and b1[high,2] =", b1[high,2], "   and b1[high, 1:] =", b1[high, 1:])
+            # diff_val = rel_diff(b1[high,2], b2[high,2])  # print("pos:",high,"  diff-val:",diff_val)
+            diff_val = rel_diff(b1[high, size_of_input_variables:], b2[high, size_of_input_variables:]) # ignore input-variables note: zero-based indexing
+            # print("pos:",high,"  (b1-b2) diff-val:",diff_val)
+            if diff_val < ep_FwdBwd:
+                high += 1
+            else:
+                # print("pos:", high, "  diff-val:", diff_val)
                 break
 
-            cur_pos = high  # the position from where the next iteration should continue as upto high is already done
-            good_low = next_good_low
-            near_low = high     # next boundary start-point
+        # I have here low and high but I want high to take some extra near the actual-boundary
+        near_high = high - 1   # This is the boundary end-point. upto (high - 1) points lie in the current segment where as high hits the guard condition.
+        good_high = high - 1  # this will be improved
+        next_good_low = high  # this will be improved
+        while high < max_id:  # moving high further to find the end of boundary point i.e., the next start-point.
+
+            diff_val = rel_diff(b1[high, size_of_input_variables:], b2[high, size_of_input_variables:]) # rel diff between backward and forward derivatives
+
+            # relDiff_data_value = rel_diff(Y[high, size_of_input_variables:],
+            #                 Y[(high - 1), size_of_input_variables:]) # rel diff: current and previous data-values
+
+            relDiff_backward = rel_diff(b1[high, size_of_input_variables:], b1[(high - 1),
+                            size_of_input_variables:])  # compute relative diff: current and previous
+
+            if (high+1) == max_id:  # at the last position we do not want to have index out of bounds error
+                relDiff_forward = rel_diff(b2[high, size_of_input_variables:], b2[high,
+                            size_of_input_variables:])  # the last point will not be used, so does not matter
+            else:
+                relDiff_forward = rel_diff(b2[high, size_of_input_variables:], b2[(high + 1),
+                            size_of_input_variables:])  # rel diff: current and next forward-derivatives
+
+            if diff_val >= ep_FwdBwd:  # high difference.    This will detect and store all boundary points
+                # position_diffValue.append([high, relDiff_backward, relDiff_forward, relDiff_data_value]) # recording position and diff-value
+                position_diffValue.append((high, relDiff_backward, relDiff_forward))  # recording position and diff-value
+                high += 1
+            else:  # low difference so same segment
+                break
+            # print("high=", high, "  relDiff_Data =", relDiff_data_value, "  relDiff_Bwd=", relDiff_backward, "  relDiff_Fwd =", relDiff_forward)
+            # print("pos =", high, "  diff_val =", diff_val,  "  relDiff_Bwd=", relDiff_backward, "  relDiff_Fwd =", relDiff_forward)
+
+
+
+        if len(position_diffValue) != 0:
+            # find last point and then also check if the next point is fit for the start-pt for next segment, otherwise find next correct point
+            found_last_point = 0
+            for index in range(0, len(position_diffValue)):
+                value_position = position_diffValue[index][0]
+                value_relDiff_backward_derivative = position_diffValue[index][1]
+                value_relDiff_forward_derivative = position_diffValue[index][2]
+                # value_relDiff_data = position_diffValue[index][3]
+                if (found_last_point == 0) and (value_relDiff_backward_derivative >= ep_backward): # found the exact change-point or the boundary point
+                    good_high = value_position - 1  # the previous position is the last/end-point of the previous segment
+                    next_good_low = value_position  # the current position is the start-point for the next segment.
+                    break   # this will stop searching further
+
+                #     if (value_relDiff_forward_derivative <= ep_FwdBwd):  # both <=ep_FwdBwd and <=ep_Fwd has same task: to consider data-points are in the same segment
+                #         next_good_low = value_position  # this is a good next segment's start-point
+                #         break  # found both good_high and next_low so break for-loop
+                #     else:
+                #         found_last_point = 1
+                #         continue    # search for next segment's start-point
+                # if (found_last_point == 1) and (value_relDiff_forward_derivative <= ep_FwdBwd): # found the last point but not the next start point
+                #     next_good_low = value_position # this is a good next segment's start-point
+                #     break   # also found the next segment's start-point so break the for-loop
+                #
+
+            # print("good_high=", good_high, "  next_good_low=", next_good_low, "  but near_low=", near_high)
+        # else:  # what happens if boundary-point is also the exact point? This block will be executed
+        #     print("************ This block will be exectued only once. Since we have both the check  diff_val < ep_FwdBwd and diff_val >= ep_FwdBwd ************")
+
+        # if (good_high - good_low) >= stepM:   this is not safe
+        if (near_high - near_low) >= stepM:    # when segment size is >= M points, where M is the step size of LMM
+            segment = Segment((near_low, near_high), (good_low, good_high))
+            segmented_traj.append(segment)
+
+        if high == max_id:
+            break
+
+        cur_pos = high  # the position from where the next iteration should continue as upto high is already done
+        good_low = next_good_low
+        near_low = high     # next boundary start-point
 
     all_pts : set[int] = set()
     for seg_element in segmented_traj:
@@ -332,26 +331,28 @@ The list of functions that can be removed and currently not in use are:
 def segment_and_fit(A : MATRIX,
                     b1 : MATRIX,
                     b2 : MATRIX,
-                    ys : list[int],
+                    npoints : int,
                     ep : float =0.01) -> tuple[list[list[int]], list[int] ,list[MATRIX]]:
     # Segmentation
     # This function is used to implement the simple segmentation Algorithm-1 in the paper by Jin et al.
     res = []
-    for l2 in ys:
-        cur_pos = 0    # start position
-        max_id = l2    # end position of the entire data
-        while True:
-            low = cur_pos
-            while low < max_id and rel_diff(b1[low], b2[low]) >= ep:
-                low += 1
-            if low == max_id:
-                break
-            high = low
-            while high < max_id and rel_diff(b1[high], b2[high]) < ep:
-                high += 1
-            if high - low >= 5:
-                res.append(list(range(low, high)))
-            cur_pos = high
+
+    max_id = npoints # end position of the entire data  # XXX not npoints -1 ?
+
+    cur_pos = 0    # start position
+    while True:
+        low = cur_pos
+        while low < max_id and rel_diff(b1[low], b2[low]) >= ep:
+            low += 1
+        if low == max_id:
+            break
+        high = low
+        while high < max_id and rel_diff(b1[high], b2[high]) < ep:
+            high += 1
+        if high - low >= 5:
+            res.append(list(range(low, high)))
+        cur_pos = high
+
     all_pts : set[int] = set()
     for lst in res:
         all_pts = all_pts.union(set(lst))
@@ -378,7 +379,7 @@ def segment_and_fit(A : MATRIX,
 def two_fold_segmentation_new(A : MATRIX,
                               b1 : MATRIX,
                               b2 : MATRIX,
-                              ys : list[int],
+                              npoints : int,
                               size_of_input_variables : int,
                               method : ClusteringMethod,
                               ep : float=0.01) -> tuple[list[list[int]],
@@ -406,7 +407,7 @@ def two_fold_segmentation_new(A : MATRIX,
          function (or the mapping function) as mention in Jin et al. paper.
     :param b1: the derivatives of each point computed using the backward version of BDF.
     :param b2: the derivatives of each point computed using the forward version of BDF.
-    :param ys: is a list of the sizes of the total points.
+    :param npoints: size of the total points.
     :param size_of_input_variables: total number of input variables present in the trajectories.
     :param method: clustering method selected by the user (options dtw, dbscan, etc.)
     :param ep: Maximal error toleration value. In the paper, \Epsilon_{FwdBwd}
@@ -439,57 +440,58 @@ def two_fold_segmentation_new(A : MATRIX,
     res : list[list[int]] = []
     res_modified = []
     # print("input size =", size_of_input_variables, "  output size =", size_of_output_variables)
-    for l2 in ys:
-        cur_pos = 0  # start position
-        max_id = l2  # end position of the entire data
-        low = cur_pos
-        # start_low = cur_pos
-        while True:
-            high : int = cur_pos
-            position_diffValue : list[tuple[int,float]] = []
-            # highest_pos = [] # not used
-            while high < max_id:
-                # print("b1[high]:",b1[high], "   and b1[high,2] =", b1[high,2], "   and b1[high, 1:] =", b1[high, 1:])
-                # diff_val = rel_diff(b1[high,2], b2[high,2])  # print("pos:",high,"  diff-val:",diff_val)
-                diff_val = rel_diff(b1[high, size_of_input_variables:], b2[high, size_of_input_variables:]) # ignore input-variables note: zero-based indexing
-                # print("pos:",high,"  (b1-b2) diff-val:",diff_val)
-                if diff_val < ep:
-                    high += 1
-                else:
-                    # print("pos:", high, "  diff-val:", diff_val)
-                    break
-            # I have here low and high but I want high to take some extra near the actual-boundary
-            near_high = high
-            good_high = high # this will be improved
-            while high < max_id:  # moving high further.
-                diff_val = rel_diff(b1[high, size_of_input_variables:], b2[high, size_of_input_variables:])
-                relDiff_backward = rel_diff(b1[high, size_of_input_variables:], b1[(high - 1), size_of_input_variables:]) # compute relative difference between current and previous
 
-                if diff_val >= ep:  # high difference.    This will detect all boundary points
-                    position_diffValue.append((high, relDiff_backward)) # recording position and diff-value
-                    high += 1
-                else:  # low difference so same segment
-                    break
-            if len(position_diffValue) != 0:
-                arr_len = len(position_diffValue)
-                next_low_search = 0
-                for (value_position, value_backward) in position_diffValue:
-                    if value_backward >= lowDifference: # found the exact change-point or the boundary point
-                        good_high = value_position  # this is the point where difference found
-                        good_high = value_position - 1 # Thus -1 point is the last point in the segment before jump-reset
-                        next_low = value_position
-                        break    # found both good_high and next_low so break the for loop from check forward as they will all satisfy
-                print("good_high=", good_high, "  next_low=", next_low, "  but near_low=", near_high)
+    max_id = npoints  # end position of the entire data # XXX not npoints - 1?
 
-            if good_high - low >= 5:
-                res.append(list(range(low, near_high)))
-                res_modified.append(list(range(low, good_high)))  # ignoring (Step 2)
-                # res_modified.append(list(range(start_low, good_high))) # Consider (Step 2): had issue in ODE formation
-            if high == max_id:
+    cur_pos = 0  # start position
+    low = cur_pos
+
+    while True:
+        high : int = cur_pos
+        position_diffValue : list[tuple[int,float]] = []
+        # highest_pos = [] # not used
+        while high < max_id:
+            # print("b1[high]:",b1[high], "   and b1[high,2] =", b1[high,2], "   and b1[high, 1:] =", b1[high, 1:])
+            # diff_val = rel_diff(b1[high,2], b2[high,2])  # print("pos:",high,"  diff-val:",diff_val)
+            diff_val = rel_diff(b1[high, size_of_input_variables:], b2[high, size_of_input_variables:]) # ignore input-variables note: zero-based indexing
+            # print("pos:",high,"  (b1-b2) diff-val:",diff_val)
+            if diff_val < ep:
+                high += 1
+            else:
+                # print("pos:", high, "  diff-val:", diff_val)
                 break
-            cur_pos = high  # the position from where the next iteration should continue as upto high is already done
-            # low = high  # next_low   ignoring (Step 2)
-            low = next_low  # consider (Step 2). Note irrespective of all possibilities we assume next_low till high all points lie in the next segment
+        # I have here low and high but I want high to take some extra near the actual-boundary
+        near_high = high
+        good_high = high # this will be improved
+        while high < max_id:  # moving high further.
+            diff_val = rel_diff(b1[high, size_of_input_variables:], b2[high, size_of_input_variables:])
+            relDiff_backward = rel_diff(b1[high, size_of_input_variables:], b1[(high - 1), size_of_input_variables:]) # compute relative difference between current and previous
+
+            if diff_val >= ep:  # high difference.    This will detect all boundary points
+                position_diffValue.append((high, relDiff_backward)) # recording position and diff-value
+                high += 1
+            else:  # low difference so same segment
+                break
+        if len(position_diffValue) != 0:
+            arr_len = len(position_diffValue)
+            next_low_search = 0
+            for (value_position, value_backward) in position_diffValue:
+                if value_backward >= lowDifference: # found the exact change-point or the boundary point
+                    good_high = value_position  # this is the point where difference found
+                    good_high = value_position - 1 # Thus -1 point is the last point in the segment before jump-reset
+                    next_low = value_position
+                    break    # found both good_high and next_low so break the for loop from check forward as they will all satisfy
+            print("good_high=", good_high, "  next_low=", next_low, "  but near_low=", near_high)
+
+        if good_high - low >= 5:
+            res.append(list(range(low, near_high)))
+            res_modified.append(list(range(low, good_high)))  # ignoring (Step 2)
+            # res_modified.append(list(range(start_low, good_high))) # Consider (Step 2): had issue in ODE formation
+        if high == max_id:
+            break
+        cur_pos = high  # the position from where the next iteration should continue as upto high is already done
+        # low = high  # next_low   ignoring (Step 2)
+        low = next_low  # consider (Step 2). Note irrespective of all possibilities we assume next_low till high all points lie in the next segment
 
     all_pts : set[int] = set()
     for lst in res:

@@ -78,14 +78,14 @@ def BDF_forward_version(stepM : int, stepsize : float, y_points : MATRIX, index 
 
 
 
-def diff_method_backandfor(y : MATRIX,
+def diff_method_backandfor(y : MATRIX, # values. 2D
                            order : int,
                            stepsize : float,
                            stepM : int) -> tuple[ MATRIX,
                                                   MATRIX,
                                                   MATRIX,
                                                   MATRIX,
-                                                  list[int] ]:
+                                                  int ]:
     r"""Using multi-step backwards differentiation formula (BDF) to calculate the
     coefficient matrix. We have concatenated all the trajectories into a single list because this helped us discard fewer data than
     considering trajectories as a list of independent trajectories. This is because, for the first M points (M the
@@ -112,27 +112,24 @@ def diff_method_backandfor(y : MATRIX,
         final_b1_mat: the derivatives of each point computed using the backward version of BDF.
         final_b2_mat: the derivatives of each point computed using the forward version of BDF.
         final_y_mat: contains the y values for all the points except the first and last M points.
-        ys: is a list of the sizes of the total points.
+        npoints: is the sizes of the total points, equal to final_A_mat.shape[0]
 
     """
     final_A_mat = None
     final_b1_mat = None
     final_b2_mat = None
     final_y_mat = None
-    ys = []
 
-    # stepM = 5   # the step size of Linear Multi-step Method (step M)
+    L_y = y.shape[1]  # nvars
 
-    L_y = y.shape[1]
-    # print ("L_y=", L_y)  # returns the dimension excluding the time-column
     gene = generate.generate_complete_polynomial(L_y, order)
     L_p = gene.shape[0]
     # print("Value of L_p = ", L_p)  # L_p = total number of terms in the mapping function \Phi as in the paper (depending on the order-size and dimension)
 
-    y_points = y
-    L_t = len(y_points)
-    D = L_t - stepM  # here M = order5      //Discarding the last M-points
-    # print("Value of D = ", D) # D = total-points - 5
+    L_t = len(y) # nsamples
+
+    D = L_t - stepM  # Discarding the last M-points
+
     A_matrix = np.zeros((D - stepM, L_p), dtype=np.double)  # stores the mapping function \Phi as in the paper
     b1_matrix = np.zeros((D - stepM, L_y), dtype=np.double)  # stores the backward_BDF using LMM as in the paper
     b2_matrix = np.zeros((D - stepM, L_y), dtype=np.double)  # stores the forward_BDF using LMM  as in the paper
@@ -141,21 +138,21 @@ def diff_method_backandfor(y : MATRIX,
     for i in range(0, L_t):
         for j in range(0, L_p):
             for l in range(0, L_y):
-                coef_matrix[i][j] = coef_matrix[i][j] * (y_points[i][l] ** gene[j][l])
+                coef_matrix[i][j] = coef_matrix[i][j] * (y[i][l] ** gene[j][l])
     # For all the points i: For each variable, the mapping function \Phi is computed (monomials)
 
     for i in range(stepM, D):      #//Discarding the first M-points
         # forward
         A_matrix[i - stepM] = coef_matrix[i]
-        # b1_matrix[i - 5] = (137 * y_points[i] - 300 * y_points[i - 1] + 300 * y_points[i - 2] -
-        #                   200 * y_points[i - 3] + 75 * y_points[i - 4] - 12 * y_points[i - 5]) / (60 * stepsize)
-        b1_matrix[i - stepM] = BDF_backward_version(stepM, stepsize, y_points, i)
+        # b1_matrix[i - 5] = (137 * y[i] - 300 * y[i - 1] + 300 * y[i - 2] -
+        #                   200 * y[i - 3] + 75 * y[i - 4] - 12 * y[i - 5]) / (60 * stepsize)
+        b1_matrix[i - stepM] = BDF_backward_version(stepM, stepsize, y, i)
 
-        # b2_matrix[i - 5] = (-137 * y_points[i] + 300 * y_points[i + 1] - 300 * y_points[i + 2] +
-        #           200 * y_points[i + 3] - 75 * y_points[i + 4] + 12 * y_points[i + 5]) / (60 * stepsize)
-        b2_matrix[i - stepM] = BDF_forward_version(stepM, stepsize, y_points, i)
+        # b2_matrix[i - 5] = (-137 * y[i] + 300 * y[i + 1] - 300 * y[i + 2] +
+        #           200 * y[i + 3] - 75 * y[i + 4] + 12 * y[i + 5]) / (60 * stepsize)
+        b2_matrix[i - stepM] = BDF_forward_version(stepM, stepsize, y, i)
 
-        y_matrix[i - stepM] = y_points[i]
+        y_matrix[i - stepM] = y[i]
 
     # Finally, A_matrix now contain the monomial terms obtained using \Phi function
     # b1_matrix and b2_matrix contains the forward and backward BDF values using LMM. As in the paper Equation (10)
@@ -163,7 +160,8 @@ def diff_method_backandfor(y : MATRIX,
     # print("b1_matrix =", b1_matrix)
     # print("b2_matrix =", b2_matrix)
 
-    ys.append(A_matrix.shape[0])
+    npoints = D - stepM
+
     final_A_mat = A_matrix
     final_b1_mat = b1_matrix
     final_b2_mat = b2_matrix
@@ -174,6 +172,6 @@ def diff_method_backandfor(y : MATRIX,
     assert not (final_b2_mat is None)
     assert not (final_y_mat is None)
 
-    return final_A_mat, final_b1_mat, final_b2_mat, final_y_mat, ys
+    return final_A_mat, final_b1_mat, final_b2_mat, final_y_mat, npoints
 
 
