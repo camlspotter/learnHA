@@ -15,9 +15,12 @@ from infer_ha.types import MATRIX
 @dataclass
 class Segment:
     ode : tuple[int,int]
-    guard_and_assignment : tuple[int,int]  # Not used at all...
-    positions : list[int]  # = range(guard_and_assignment[0], guard_and_assignment[1]+1)
-    
+    guard_and_assignment : tuple[int,int]
+
+    def positions(self) -> range:
+        return range (self.guard_and_assignment[0],
+                      self.guard_and_assignment[1]+1)
+        
 def two_fold_segmentation(A : MATRIX,
                           b1 : MATRIX,
                           b2 : MATRIX,
@@ -171,8 +174,7 @@ def two_fold_segmentation(A : MATRIX,
 
             # if (good_high - good_low) >= stepM:   this is not safe
             if (near_high - near_low) >= stepM:    # when segment size is >= M points, where M is the step size of LMM
-                segment_positions = list(range(good_low, good_high + 1)) # is a list holding the positions of the points. range(x,<y) goes upto < y.
-                segment = Segment((near_low, near_high), (good_low, good_high), segment_positions)
+                segment = Segment((near_low, near_high), (good_low, good_high))
                 segmented_traj.append(segment)
 
             if high == max_id:
@@ -184,7 +186,7 @@ def two_fold_segmentation(A : MATRIX,
 
     all_pts : set[int] = set()
     for seg_element in segmented_traj:
-        lst_positions = seg_element.positions  # access the third item of the tuple
+        lst_positions = seg_element.positions() # access the third item of the tuple
         all_pts = all_pts.union(set(lst_positions))
     drop = list(set(range(max_id)) - all_pts)  # set(range(max_id)): creates set from 0 to max_id. operation - all_pts (all_pts contains the segemented set)
 
@@ -195,7 +197,7 @@ def two_fold_segmentation(A : MATRIX,
         # for DTW we do not need clfs computation at this stage, but for dbscan/linearpiece we need
         # print ("len of segmented_traj", len(segmented_traj))
         for seg_element in segmented_traj:
-            lst = seg_element.positions  # access the third item of the tuple
+            lst = list(seg_element.positions())  # access the third item of the tuple
             # print("List in res is ", lst)
             Ai = matrowex(A, lst)
             Bi = matrowex(b1, lst)
@@ -269,7 +271,7 @@ def segmented_trajectories(clfs : list[MATRIX],
     del_index = 0 # index pointer for each segment in res
     del_res_indices = []    # store the list of indices of res to be deleted
     for seg_traj_element in segmented_traj:
-        s = seg_traj_element.positions # third element of the tuple segmented_traj
+        s = seg_traj_element.positions() # third element of the tuple segmented_traj
         # print("s=",s)
         start_segment_pos = s[0]  # start position of the segment
         pre_end_segment_pos = s[len(s) - 2]  # pre-end position of the segment (2nd last position)

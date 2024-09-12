@@ -35,13 +35,11 @@ def get_signal_data(segmented_traj : list[Segment],
     # print("len of res=", len(res))
     for seg_element in segmented_traj:
 
-        segData = seg_element.positions  # access the third item of the tuple that has only the data positions
-        # ToDo: instead of taking the exact points, for better ODE comparison use segment excluding boundary-points
-
         time_data = []
         # print("leg(segData) is ", len(segData))
         signalData = []
-        for pos_id in segData:
+        # ToDo: instead of taking the exact points, for better ODE comparison use segment excluding boundary-points
+        for pos_id in seg_element.positions():
             signalData.append([Y[pos_id, dim] for dim in range(size_of_input_variables, L_y)])  # ignore input-variables. * Y contain the actual data-points
             # signalData.append([b1[pos_id, dim] for dim in range(size_of_input_variables, L_y)])  # ignore input-variables. * b1 contain the backward derivatives
 
@@ -168,7 +166,7 @@ def create_simple_modes_positions(P_modes : list[list[Segment]]) -> list[list[in
 
     P = [ [ pos
             for seg in mode
-            for pos in seg.positions ]
+            for pos in seg.positions() ]
           for mode in P_modes ]
 
     return P
@@ -286,11 +284,4 @@ def create_simple_per_segmented_positions_exact(segmented_traj : list[Segment]) 
 
     """
 
-    res = []
-    for seg in segmented_traj:
-        # segs a tuple of the form ([start_ode, end_ode], [start_exact, end_exact], [p_1, ... , p_n]).
-
-        exact_seg = seg.positions   # last element of the tuple i.e., [p1, ..., p_n]
-        res.append(exact_seg)
-
-    return res
+    return [ list(seg.positions()) for seg in segmented_traj ]
