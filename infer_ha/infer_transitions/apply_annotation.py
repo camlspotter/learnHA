@@ -1,12 +1,12 @@
 import numpy as np
 
 from infer_ha.annotation import Continuous, Pool, Constant, Annotation, AnnotationTbl
-from infer_ha.types import MATRIX, Assignment, Connection
+from infer_ha.types import MATRIX, Assignment, ConnectionPoint
 from infer_ha.infer_transitions.compute_assignments import Assignment
 
 def apply_annotation(Y : MATRIX,
                      variable_types : AnnotationTbl,
-                     list_connection_pt : list[Connection],
+                     list_connection_pt : list[ConnectionPoint],
                      assignment : Assignment
                      ) -> Assignment:
     """

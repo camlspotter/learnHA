@@ -80,9 +80,9 @@ def compute_transitions(output_dir : str,
     # Note we are considering possible transition only based on the given trajectory-data.
     # *************** Trying to plot these points. Also creating transition ***********************************
     for imode in range(0, len(data_points)):   # len(data_points) returns the total number of transitions
-        list_connection_pt = data_points[imode][2]  # list of connecting point(s) of type [pre_end_pt_position, end_pt_position, start_pt_position]
-        src_mode = data_points[imode][0]  # src mode
-        dest_mode = data_points[imode][1]  # dest mode
+        list_connection_pt = data_points[imode].links
+        src_mode = data_points[imode].src_mode
+        dest_mode = data_points[imode].dst_mode
 
         # Now we only use a few connecting-points [pre_end_point and end_point] to find guard using SVM
         # ******* Step-1: create the source and destination list of positions and Step-2: call getGuardEquation()

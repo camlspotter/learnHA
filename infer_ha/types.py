@@ -20,6 +20,12 @@ class SegmentedTrajectory:
 # and start_posi is the position of the starting point of a segment in
 # the destination location.
 @dataclass
-class Connection:
+class ConnectionPoint:
     src_end : int
     dst_start : int
+
+@dataclass
+class Connection:
+    src_mode : int
+    dst_mode : int
+    links : list[ConnectionPoint]

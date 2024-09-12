@@ -77,7 +77,7 @@ def compile(out : TextIOWrapper,
 
     addInputComponents(out, ha, simulink_model_name) # when model has input variables
     addOutputComponents(out, ha, simulink_model_name)
-    # addConnectionLines(out)
+    # addConnectionPointLines(out)
 
     out.write("\n\n")
     out.write(f"Simulink.BlockDiagram.arrangeSystem('{simulink_model_name}');\n")
@@ -434,7 +434,7 @@ def addLoopTransitions(out : TextIOWrapper,
                        next_height : int,
                        condition_str : str,
                        reset_str : str) -> None:
-    out.write("%% Transition to represent Invariants: Current fix is using Junction Connection to avoid inner Transitions\n")
+    out.write("%% Transition to represent Invariants: Current fix is using Junction ConnectionPoint to avoid inner Transitions\n")
 
     pos_x += 10
     next_height += 10

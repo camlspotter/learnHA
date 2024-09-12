@@ -1,8 +1,8 @@
 from sklearn import linear_model
 import numpy as np
-from infer_ha.types import MATRIX, Assignment, Connection
+from infer_ha.types import MATRIX, Assignment, ConnectionPoint
 
-def compute_assignments(list_connection_pt : list[Connection],
+def compute_assignments(list_connection_pt : list[ConnectionPoint],
                         L_y : int,
                         Y : MATRIX) -> Assignment:
     """
