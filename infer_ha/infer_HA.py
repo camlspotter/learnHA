@@ -16,7 +16,7 @@ from infer_ha.clustering.utils import create_simple_modes_positions
 from infer_ha.trajectories import Trajectory, Trajectories, preprocess_trajectories
 from infer_ha.utils.commandline_parser import Options
 from infer_ha.HA import Raw
-from infer_ha.types import MATRIX, Assignment
+from infer_ha.types import MATRIX, Assignment, SegmentedTrajectory
 from infer_ha.plot import plot_timeseries_multi
 
 sys.setrecursionlimit(1000000)  # this is the limit
@@ -85,7 +85,7 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
     A : MATRIX
     b1 : MATRIX
     b2 : MATRIX
-    Y : MATRIX
+    Y : MATRIX  # slice of y, dropping the first and last stepM samples
     npoints : int
     A, b1, b2, Y, npoints = diff_method_backandfor(y, maxorder, list_of_trajectories.stepsize, stepM)
 
@@ -125,8 +125,10 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
     # Instead of deleting the last segment for all models. It is better to ask user's options for deleting
     filter_last_segment = opts.filter_last_segment  # True for delete last segment and False NOT to delete
 
-    segmentedTrajectories : list[list[list[int]]]
+    segmentedTrajectories : list[list[SegmentedTrajectory]]
     segmentedTrajectories, segmented_traj, clfs = segmented_trajectories(clfs, segmented_traj, positions, clustering_method, filter_last_segment) # deleted the last segment in each trajectory
+
+    print("SegmentedTrajectories", segmentedTrajectories)
     # print("Segmentation done!")
     # print("segmentedTrajectories = ", segmentedTrajectories)
     # plot_data_values(segmentedTrajectories, Y, L_y)
@@ -156,7 +158,7 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
     # plotdebug.plot_dropped_points(t, L_y, Y, Drop)
     # plot_after_clustering(t, L_y, P_modes, Y, stepM)
 
-    mode_inv : list[list[tuple[float, float]]]
+    mode_inv : list[list[tuple[float,float]]]
     mode_inv = compute_mode_invariant(L_y, P_modes, Y, isInvariant)
 
     # *************** Trying to plot the clustered points ***********************************

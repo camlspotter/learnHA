@@ -10,7 +10,7 @@ from pydantic.dataclasses import dataclass
 
 from infer_ha.utils.util_functions import rel_diff, matrowex
 from infer_ha.utils.commandline_parser import ClusteringMethod
-from infer_ha.types import MATRIX
+from infer_ha.types import MATRIX, SegmentedTrajectory
 
 @dataclass
 class Segment:
@@ -141,8 +141,6 @@ def two_fold_segmentation(A : MATRIX,
             # print("high=", high, "  relDiff_Data =", relDiff_data_value, "  relDiff_Bwd=", relDiff_backward, "  relDiff_Fwd =", relDiff_forward)
             # print("pos =", high, "  diff_val =", diff_val,  "  relDiff_Bwd=", relDiff_backward, "  relDiff_Fwd =", relDiff_forward)
 
-
-
         if len(position_diffValue) != 0:
             # find last point and then also check if the next point is fit for the start-pt for next segment, otherwise find next correct point
             found_last_point = 0
@@ -172,7 +170,7 @@ def two_fold_segmentation(A : MATRIX,
         #     print("************ This block will be exectued only once. Since we have both the check  diff_val < ep_FwdBwd and diff_val >= ep_FwdBwd ************")
 
         # if (good_high - good_low) >= stepM:   this is not safe
-        if (near_high - near_low) >= stepM:    # when segment size is >= M points, where M is the step size of LMM
+        if near_high - near_low >= stepM:  # when segment size is >= M points, where M is the step size of LMM
             segment = Segment((near_low, near_high), (good_low, good_high))
             segmented_traj.append(segment)
 
@@ -216,7 +214,7 @@ def segmented_trajectories(clfs : list[MATRIX],
                            segmented_traj : list[Segment],
                            positions : list[tuple[int,int]],
                            method : ClusteringMethod,
-                           filter_last_segment : bool) -> tuple[list[list[list[int]]],
+                           filter_last_segment : bool) -> tuple[list[list[SegmentedTrajectory]],
                                                                 list[Segment],
                                                                 list[MATRIX]]:
     """
@@ -266,7 +264,7 @@ def segmented_trajectories(clfs : list[MATRIX],
     seg = positions[traj_id - 1]  # starting trajectory=0
     start_trajectory_pos = seg[0]
     end_trajectory_pos = seg[1]
-    traj_segs : list[int] = []
+
     del_index = 0 # index pointer for each segment in res
     del_res_indices = []    # store the list of indices of res to be deleted
     for seg_traj_element in segmented_traj:
@@ -276,10 +274,7 @@ def segmented_trajectories(clfs : list[MATRIX],
         pre_end_segment_pos = s[len(s) - 2]  # pre-end position of the segment (2nd last position)
         end_segment_pos = s[len(s) - 1]  # end position of the segment
         # print("start_segment_pos=",start_segment_pos,"   pre_end_segment_pos =",pre_end_segment_pos , "   end_segment_pos=", end_segment_pos)
-        traj_segs = []
-        traj_segs.append(start_segment_pos)
-        traj_segs.append(pre_end_segment_pos)
-        traj_segs.append(end_segment_pos)
+        traj_segs = SegmentedTrajectory(start_segment_pos, pre_end_segment_pos, end_segment_pos)
         if (start_segment_pos >= start_trajectory_pos) and (end_segment_pos <= end_trajectory_pos):
             segments_per_traj.append(traj_segs)
         else:  # meaning if any of the above condition fails. I am assuming all segments will be segmented trajectory-wise

@@ -1,12 +1,12 @@
 import numpy as np
 
 from infer_ha.annotation import Continuous, Pool, Constant, Annotation, AnnotationTbl
-from infer_ha.types import MATRIX, Assignment
+from infer_ha.types import MATRIX, Assignment, Connection
 from infer_ha.infer_transitions.compute_assignments import Assignment
 
 def apply_annotation(Y : MATRIX,
                      variable_types : AnnotationTbl,
-                     list_connection_pt : list[tuple[int,int,int]],
+                     list_connection_pt : list[Connection],
                      assignment : Assignment
                      ) -> Assignment:
     """
@@ -51,7 +51,7 @@ def apply_annotation(Y : MATRIX,
             case Pool(pool_values):
                 frequency_count = [0] * len(pool_values)  # List of zero values of size=number of pool values
                 for connection_pt in list_connection_pt:
-                    dest_loc_position = connection_pt[2]  # Now the start-point of the destination is index [2]
+                    dest_loc_position = connection_pt.dst_start
                     pv = Y[dest_loc_position, var_index]
                     # print("pv=",pv)
                     for pool_val_index in range(0, len(pool_values)):

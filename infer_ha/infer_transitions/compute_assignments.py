@@ -1,8 +1,8 @@
 from sklearn import linear_model
 import numpy as np
-from infer_ha.types import MATRIX, Assignment
+from infer_ha.types import MATRIX, Assignment, Connection
 
-def compute_assignments(list_connection_pt : list[tuple[int,int,int]],
+def compute_assignments(list_connection_pt : list[Connection],
                         L_y : int,
                         Y : MATRIX) -> Assignment:
     """
@@ -14,9 +14,9 @@ def compute_assignments(list_connection_pt : list[tuple[int,int,int]],
     :return: the coefficients and intercept values of the assignment equations.
 
     """
-    x_pts = [ [ Y [ connection_pt[1], dim ] for dim in range(L_y) ]
+    x_pts = [ [ Y [ connection_pt.src_end, dim ] for dim in range(L_y) ]
               for connection_pt in list_connection_pt ]
-    y_pts = [ [ Y [ connection_pt[2], dim ] for dim in range(L_y) ]
+    y_pts = [ [ Y [ connection_pt.dst_start, dim ] for dim in range(L_y) ]
               for connection_pt in list_connection_pt ]
 
     # print("x_pts =", x_pts)
