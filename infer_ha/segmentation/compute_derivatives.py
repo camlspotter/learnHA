@@ -115,11 +115,6 @@ def diff_method_backandfor(y : MATRIX, # values. 2D
         npoints: is the sizes of the total points, equal to final_A_mat.shape[0]
 
     """
-    final_A_mat = None
-    final_b1_mat = None
-    final_b2_mat = None
-    final_y_mat = None
-
     L_y = y.shape[1]  # nvars
 
     gene = generate.generate_complete_polynomial(L_y, order)
@@ -133,7 +128,7 @@ def diff_method_backandfor(y : MATRIX, # values. 2D
     A_matrix = np.zeros((D - stepM, L_p), dtype=np.double)  # stores the mapping function \Phi as in the paper
     b1_matrix = np.zeros((D - stepM, L_y), dtype=np.double)  # stores the backward_BDF using LMM as in the paper
     b2_matrix = np.zeros((D - stepM, L_y), dtype=np.double)  # stores the forward_BDF using LMM  as in the paper
-    y_matrix = np.zeros((D - stepM, L_y), dtype=np.double)
+    y_matrix = np.zeros((D - stepM, L_y), dtype=np.double)  # slice of y. [stepM:-stepM]
     coef_matrix = np.ones((L_t, L_p), dtype=np.double)  # stores the coefficient F as in the paper
     for i in range(0, L_t):
         for j in range(0, L_p):
@@ -162,16 +157,5 @@ def diff_method_backandfor(y : MATRIX, # values. 2D
 
     npoints = D - stepM
 
-    final_A_mat = A_matrix
-    final_b1_mat = b1_matrix
-    final_b2_mat = b2_matrix
-    final_y_mat = y_matrix
-
-    assert not (final_A_mat is None)
-    assert not (final_b1_mat is None)
-    assert not (final_b2_mat is None)
-    assert not (final_y_mat is None)
-
-    return final_A_mat, final_b1_mat, final_b2_mat, final_y_mat, npoints
-
+    return A_matrix, b1_matrix, b2_matrix, y_matrix, npoints
 
