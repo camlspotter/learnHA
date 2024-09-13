@@ -11,6 +11,7 @@ from operator import itemgetter
 
 from infer_ha.clustering.utils import create_simple_modes_positions
 from infer_ha.segmentation.segmentation import Segment
+from infer_ha.types import Span
 
 def compute_mode_invariant(L_y : int,
                            P_modes : list[list[Segment]],
@@ -57,7 +58,7 @@ def compute_invariant (L_y : int,
 
     """
 
-    P : list[list[int]] = create_simple_modes_positions(P_modes)
+    P : list[list[Span]] = create_simple_modes_positions(P_modes)
 
     x_pts : list[dict[int, float]] = []
 
@@ -80,8 +81,8 @@ def compute_invariant (L_y : int,
 
     #for each mode i
     mode_inv : list[list[tuple[float,float]]] = []
-    for ids in P:   # This loop runs for each mode. Also, used to obtain Mode invariants
-        x_pts = [ {dim + 1: Y[id0, dim] for dim in range(L_y)} for id0 in ids ] 
+    for spans in P:   # This loop runs for each mode. Also, used to obtain Mode invariants
+        x_pts = [ {dim + 1: Y[id0, dim] for dim in range(L_y)} for span in spans for id0 in span.range() ] 
 
         invariant : list[tuple[float,float]] = []
         for var_dim in range(L_y):  # invariant consists of list of bounds on the variables. The order is maintained

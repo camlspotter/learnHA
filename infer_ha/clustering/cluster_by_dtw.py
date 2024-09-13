@@ -16,7 +16,7 @@ from numpy.typing import NDArray
 # from ..helpers.plotDebug import print_segmented_trajectories, print_P_modes
 # from ..helpers import plotDebug as plotdebug
 from infer_ha.segmentation.segmentation import Segment
-from infer_ha.types import MATRIX
+from infer_ha.types import MATRIX, Span
 
 def get_desired_ODE_coefficients(P_modes : list[list[Segment]],
                                  A : MATRIX,
@@ -49,7 +49,7 @@ def get_desired_ODE_coefficients(P_modes : list[list[Segment]],
 
     # P = create_simple_modes_positions_for_ODE(P_modes)  # for ODE inference we use segment excluding boundary points
     # for ODE inference we use segments
-    P = create_simple_modes_positions_for_ODE_with_pruned_segments(P_modes, maximum_ode_prune_factor)
+    P : list[list[Span]] = create_simple_modes_positions_for_ODE_with_pruned_segments(P_modes, maximum_ode_prune_factor)
         # excluding boundary points. The number of segments in each mode is decided by the prune factor for performance.
 
     # print("Sort clusters based on Data-size and take the first num_mode clusters")
@@ -66,7 +66,8 @@ def get_desired_ODE_coefficients(P_modes : list[list[Segment]],
     mode_pts = [ mode_ptsi for (_datasize, mode_ptsi) in length_and_modepts ]
 
     # Fit each cluster again
-    def fit(pt : list[int]) -> Any:  # = LinearRegression
+    def fit(spans : list[Span]) -> Any:  # = LinearRegression
+        pt = [ x for span in spans for x in span.range() ]
         clf = linear_model.LinearRegression(fit_intercept=False)
         clf.fit(matrowex(A, pt), matrowex(b1, pt))
         return clf

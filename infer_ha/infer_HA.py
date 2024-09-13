@@ -222,9 +222,9 @@ def get_initial_location(P_modes : list[list[Segment]]) -> list[int]:
         init_locations: contains a list of initial location ID(s), having zero based indexing.
 
     """
-    P = create_simple_modes_positions(P_modes)
+    P : list[list[Span]] = create_simple_modes_positions(P_modes)
 
-    minkey = min(enumerate(P), key= lambda x: x[1][0])[0]
+    minkey : int = min(enumerate(P), key= lambda x: x[1][0].start)[0]  # [1] to get P's element
 
     # ToDo: to find all initial location/mode, use the structure segmented_traj: 1st position of each trajectory
     return [minkey]

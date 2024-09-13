@@ -8,6 +8,7 @@ import itertools
 from infer_ha.clustering.utils import create_simple_per_segmented_positions_exact, create_simple_modes_positions_for_ODE
 from infer_ha.utils.util_functions import rel_diff
 from infer_ha.utils import io
+from infer_ha.types import Span
 
 def plot_signals(timeSignal1, Signal1, timeSignal2, Signal2):
     # Note Signal1 and Signal2 only has output variables
@@ -232,7 +233,7 @@ def plot_segmentation_new(segmented_traj, L_y, t_list, Y, stepM):
     fig, axs = plt.subplots(L_y, figsize=(10, 20))
 
     fig.suptitle('Segmentation', fontsize=16)
-    res = create_simple_per_segmented_positions_exact(segmented_traj)
+    res : list[list[Span]] = create_simple_per_segmented_positions_exact(segmented_traj)
     print("L_y=",L_y)
     for imode in range(0, len(res)):
         x_pts = []
@@ -379,7 +380,7 @@ def plot_after_clustering(t_list, L_y, P_modes, Y, stepM):
     '''
 
 
-    P = create_simple_modes_positions_for_ODE(P_modes)
+    P : list[list[Span]] = create_simple_modes_positions_for_ODE(P_modes)
 
 
     NUM_COLORS = len(P)

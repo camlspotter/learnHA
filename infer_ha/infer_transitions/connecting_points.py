@@ -34,6 +34,9 @@ def create_connecting_points(P_modes : list[list[Segment]],
 
     P = create_simple_modes_positions(P_modes)
 
+    def spans_contain(spans : list[Span], x : int) -> bool:
+        return any(span.start <= x <= span.end for span in spans)
+
     cluster_len = len(P)
     traj_size = len(position)
     # print("len(position)/traj_size = ", traj_size)
@@ -49,9 +52,9 @@ def create_connecting_points(P_modes : list[list[Segment]],
                     # last start-point is compared with previous end-point
                     end_posi = segmentedTrajectories[t][g].end  # the end-pt of the trajectory t and segment g
                     pre_end_posi = end_posi - 1
-                    if end_posi in P[i]:  # TRUE
+                    if spans_contain(P[i], end_posi):  # TRUE
                         start_posi = segmentedTrajectories[t][g + 1].start  # the start-pt of the trajectory t and segment g+1
-                        if start_posi in P[j]:  # if this also returns TRUE
+                        if spans_contain(P[j], start_posi):  # if this also returns TRUE
                             # print ("Store. (end,start)=(", end_posi,",",start_posi,") in transition(i,j)=(", i, ",",j,") \n")
                             # data_points.append([i, j, [end_posi, start_posi]])
                             # Now we apppend 3 points, data_points_per_trans.append([end_posi, start_posi])
@@ -68,9 +71,9 @@ def create_connecting_points(P_modes : list[list[Segment]],
                     for g in range(0, segment_size - 1):  # last start-point is compared with previous end-point
                         end_posi = segmentedTrajectories[t][g].end
                         pre_end_posi = end_posi - 1
-                        if end_posi in P[j]:  # TRUE
+                        if spans_contain(P[j], end_posi):  # TRUE
                             start_posi = segmentedTrajectories[t][g + 1].start
-                            if start_posi in P[i]:  # if this also returns TRUE
+                            if spans_contain(P[i], start_posi):  # if this also returns TRUE
                                 # print("Store. (end,start)=(", end_posi, ",", start_posi,") in transition(j,i)=(", j, ",", i, ") \n")
                                 # data_points.append([j, i, [end_posi, start_posi]])
                                 # now we have 3points: data_points_per_trans.append([end_posi, start_posi])

@@ -2,7 +2,7 @@ import numpy as np
 from numpy.typing import NDArray
 from typing import cast, Any
 from infer_ha.segmentation.segmentation import Segment
-from infer_ha.types import MATRIX
+from infer_ha.types import MATRIX, Span
 
 def get_signal_data(segmented_traj : list[Segment],
                     Y : MATRIX,
@@ -147,7 +147,7 @@ def compute_correlation(path : list[float], signal1 : list[list[float]], signal2
 
     return correlation_value
 
-def create_simple_modes_positions(P_modes : list[list[Segment]]) -> list[list[int]]:
+def create_simple_modes_positions(P_modes : list[list[Segment]]) -> list[list[Span]]:
     """
       This function transforms/creates a simple data structure from P_modes. The structure is a list of modes.
       Each mode in the list holding only the position values of data points as a single concatenated list. Unlike the
@@ -160,12 +160,10 @@ def create_simple_modes_positions(P_modes : list[list[Segment]]) -> list[list[in
           P: holds a list of modes. Each mode is a list of positions. Note here we return all the positions using the
           exact list (including both start_exact and end_exact).
       """
-    return [ [ p for seg in mode
-               for p in seg.exact.range() ]
-             for mode in P_modes ]
+    return [ [ seg.exact for seg in mode ] for mode in P_modes ]
 
 # Used in plotDebug.py 
-def create_simple_modes_positions_for_ODE(P_modes : list[list[Segment]]) -> list[list[int]]:
+def create_simple_modes_positions_for_ODE(P_modes : list[list[Segment]]) -> list[list[Span]]:
     """
       This function transforms/creates a "simple data" structure from P_modes. This simple structure is a list of modes.
       Each mode in the list holding only the position values of data points as a single concatenated list. Unlike the
@@ -181,13 +179,12 @@ def create_simple_modes_positions_for_ODE(P_modes : list[list[Segment]]) -> list
 
     # making the list instead of filtering [p1, ..., p_n]
     # merge/extend only the inexact positions of the segment
-    return [ [ p for seg in mode
-                 for p in range(seg.ode.start, seg.ode.end) ] # XXX not seg.ode[1] + 1 ?
+    return [ [ Span(seg.ode.start, seg.ode.end-1) for seg in mode ] # XXX not seg.ode.end?
              for mode in P_modes ]
 
 # Used in cluster_by_dtw.py
 def create_simple_modes_positions_for_ODE_with_pruned_segments(P_modes : list[list[Segment]],
-                                                               maximum_ode_prune_factor : int) -> list[list[int]]:
+                                                               maximum_ode_prune_factor : int) -> list[list[Span]]:
     """
      This function transforms/creates a "simple data" structure from P_modes. This simple structure is a list of modes.
      Each mode in the list holding only the position values of data points as a single concatenated list. Unlike the
@@ -208,17 +205,15 @@ def create_simple_modes_positions_for_ODE_with_pruned_segments(P_modes : list[li
     for mode in P_modes:
         if len(mode) >= maximum_ode_prune_factor:
             print("performance_prune_count=", maximum_ode_prune_factor)
-        data_pos = [ p
+        data_pos = [ Span(seg.ode.start, seg.ode.end-1) # xxx Jun: Not +1 for end_ode?  The original code is like this.
                      # This slicing helps in pruning same segments for performance of ODE computaion
-                     for seg in mode[:maximum_ode_prune_factor]
-                     # xxx Jun: Not +1 for end_ode?  The original code is like this.
-                     for p in list(range(seg.ode.start, seg.ode.end)) ]
+                     for seg in mode[:maximum_ode_prune_factor] ]
         P.append(data_pos)
 
     return P
 
 # Used in cluster_by_others.py
-def create_simple_per_segmented_positions(segmented_traj : list[Segment]) -> list[list[int]] :
+def create_simple_per_segmented_positions(segmented_traj : list[Segment]) -> list[Span] :
     """
     This function transforms/creates a simple list structure from segmented_traj. This simple list consists of positions.
     Each item of the list holds only the position values of data points after segmentation.
@@ -238,10 +233,10 @@ def create_simple_per_segmented_positions(segmented_traj : list[Segment]) -> lis
     """
 
     # making the list instead of searching/filtering from [p1, ..., p_n]
-    return [ list(segs.ode.range()) for segs in segmented_traj ]
+    return [ seg.ode for seg in segmented_traj ]
 
 # Used only in plotDebug.py
-def create_simple_per_segmented_positions_exact(segmented_traj : list[Segment]) -> list[list[int]]:
+def create_simple_per_segmented_positions_exact(segmented_traj : list[Segment]) -> list[Span]:
     """
     This function transforms/creates a simple list structure from segmented_traj. This simple list consists of positions.
     Each item of the list holds only the position values of data points after segmentation.
@@ -260,4 +255,4 @@ def create_simple_per_segmented_positions_exact(segmented_traj : list[Segment]) 
 
     """
 
-    return [ list(seg.exact.range()) for seg in segmented_traj ]
+    return [ seg.exact for seg in segmented_traj ]
