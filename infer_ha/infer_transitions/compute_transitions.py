@@ -7,13 +7,13 @@ from infer_ha.infer_transitions.connecting_points import create_connecting_point
 from infer_ha.infer_transitions.compute_assignments import compute_assignments
 from infer_ha.infer_transitions.guards import getGuard_inequality
 from infer_ha.segmentation.segmentation import Segment
-from infer_ha.types import MATRIX, Assignment, SegmentedTrajectory
+from infer_ha.types import MATRIX, Assignment, Span
 from infer_ha.annotation import AnnotationTbl
 
 def compute_transitions(output_dir : str,
                         P_modes : list[list[Segment]],
                         position : list[tuple[int,int]],
-                        segmentedTrajectories : list[list[SegmentedTrajectory]],
+                        segmentedTrajectories : list[list[Span]],
                         L_y : int,
                         boundary_order : int,
                         Y : MATRIX,

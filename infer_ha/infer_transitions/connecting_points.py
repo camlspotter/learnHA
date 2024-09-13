@@ -3,11 +3,11 @@ Connecting points for inferring transitions
 """
 from infer_ha.clustering.utils import create_simple_modes_positions
 from infer_ha.segmentation.segmentation import Segment
-from infer_ha.types import SegmentedTrajectory, ConnectionPoint, Connection
+from infer_ha.types import Span, ConnectionPoint, Connection
 
 def create_connecting_points(P_modes : list[list[Segment]],
                              position : list[tuple[int,int]],
-                             segmentedTrajectories : list[list[SegmentedTrajectory]]) -> list[Connection]:
+                             segmentedTrajectories : list[list[Span]]) -> list[Connection]:
     """
     Determine connecting points from the segmented trajectories concerning clusters. Our idea is to establish
     connections by determining segments' start and end positions/points on either mode (src and dest modes). We plan to

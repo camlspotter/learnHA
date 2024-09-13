@@ -10,15 +10,12 @@ from pydantic.dataclasses import dataclass
 
 from infer_ha.utils.util_functions import rel_diff, matrowex
 from infer_ha.utils.commandline_parser import ClusteringMethod
-from infer_ha.types import MATRIX, SegmentedTrajectory
+from infer_ha.types import MATRIX, Span
 
 @dataclass
 class Segment:
-    ode : tuple[int,int] # start and end, end is included
-    exact : tuple[int,int] # start and end, end is included for assignment and guard
-
-    def exact_range(self) -> range:
-        return range (self.exact[0], self.exact[1]+1)
+    ode : Span # start and end, end is included
+    exact : Span # start and end, end is included for assignment and guard
         
 def two_fold_segmentation(A : MATRIX,
                           b1 : MATRIX,
@@ -170,7 +167,7 @@ def two_fold_segmentation(A : MATRIX,
 
         # if (good_high - good_low) >= stepM:   this is not safe
         if near_high - near_low >= stepM:  # when segment size is >= M points, where M is the step size of LMM
-            segment = Segment((near_low, near_high), (good_low, good_high))
+            segment = Segment(Span(near_low, near_high), Span(good_low, good_high))
             segmented_traj.append(segment)
 
         if high == max_id:
@@ -182,7 +179,7 @@ def two_fold_segmentation(A : MATRIX,
 
     all_pts : set[int] = set()
     for seg_element in segmented_traj:
-        lst_positions = seg_element.exact_range() # access the third item of the tuple
+        lst_positions = seg_element.exact.range()
         all_pts = all_pts.union(set(lst_positions))
     drop = list(set(range(max_id)) - all_pts)  # set(range(max_id)): creates set from 0 to max_id. operation - all_pts (all_pts contains the segemented set)
 
@@ -193,7 +190,7 @@ def two_fold_segmentation(A : MATRIX,
         # for DTW we do not need clfs computation at this stage, but for dbscan/linearpiece we need
         # print ("len of segmented_traj", len(segmented_traj))
         for seg_element in segmented_traj:
-            lst = list(seg_element.exact_range())  # access the third item of the tuple
+            lst = list(seg_element.exact.range())
             # print("List in res is ", lst)
             Ai = matrowex(A, lst)
             Bi = matrowex(b1, lst)
@@ -213,7 +210,7 @@ def segmented_trajectories(clfs : list[MATRIX],
                            segmented_traj : list[Segment],
                            positions : list[tuple[int,int]],
                            method : ClusteringMethod,
-                           filter_last_segment : bool) -> tuple[list[list[SegmentedTrajectory]],
+                           filter_last_segment : bool) -> tuple[list[list[Span]],
                                                                 list[Segment],
                                                                 list[MATRIX]]:
     """
@@ -267,10 +264,10 @@ def segmented_trajectories(clfs : list[MATRIX],
     del_index = 0 # index pointer for each segment in res
     del_res_indices = []    # store the list of indices of res to be deleted
     for seg_traj_element in segmented_traj:
-        start_segment_pos = seg_traj_element.exact[0]
-        end_segment_pos = seg_traj_element.exact[1]
+        start_segment_pos = seg_traj_element.exact.start
+        end_segment_pos = seg_traj_element.exact.end
         # print("start_segment_pos=",start_segment_pos,"   pre_end_segment_pos =",pre_end_segment_pos , "   end_segment_pos=", end_segment_pos)
-        traj_segs = SegmentedTrajectory(start_segment_pos, end_segment_pos)
+        traj_segs = Span(start_segment_pos, end_segment_pos)
         if start_segment_pos >= start_trajectory_pos and end_segment_pos <= end_trajectory_pos:
             segments_per_traj.append(traj_segs)
         else:  # meaning if any of the above condition fails. I am assuming all segments will be segmented trajectory-wise

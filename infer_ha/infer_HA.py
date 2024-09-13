@@ -16,7 +16,7 @@ from infer_ha.clustering.utils import create_simple_modes_positions
 from infer_ha.trajectories import Trajectory, Trajectories, preprocess_trajectories
 from infer_ha.utils.commandline_parser import Options
 from infer_ha.HA import Raw
-from infer_ha.types import MATRIX, Assignment, SegmentedTrajectory
+from infer_ha.types import MATRIX, Assignment, Span
 from infer_ha.plot import plot_timeseries_multi
 
 sys.setrecursionlimit(1000000)  # this is the limit
@@ -125,10 +125,9 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
     # Instead of deleting the last segment for all models. It is better to ask user's options for deleting
     filter_last_segment = opts.filter_last_segment  # True for delete last segment and False NOT to delete
 
-    segmentedTrajectories : list[list[SegmentedTrajectory]]
+    segmentedTrajectories : list[list[Span]]
     segmentedTrajectories, segmented_traj, clfs = segmented_trajectories(clfs, segmented_traj, positions, clustering_method, filter_last_segment) # deleted the last segment in each trajectory
 
-    print("SegmentedTrajectories", segmentedTrajectories)
     # print("Segmentation done!")
     # print("segmentedTrajectories = ", segmentedTrajectories)
     # plot_data_values(segmentedTrajectories, Y, L_y)

@@ -7,13 +7,17 @@ MATRIX = NDArray[np.float64]
 Assignment = tuple[MATRIX, # coeffs, 2d
                    MATRIX] # intercepts 1d
 
-# SegmentedTrajectories: the required position data structures.
-# (start_segment_pos, pre_end_segment_pos, end_segment_pos).
-# This is used later in learning  transition's guard and assignment equations.
+# Like range but in integers inclusive
 @dataclass
-class SegmentedTrajectory:
+class Span:
     start : int
-    end : int
+    end : int # included
+
+    def stop(self) -> int:
+        return self.end + 1
+
+    def range(self) -> range:
+        return range(self.start, self.end+1)
 
 # Triplet of type [pre_end_posi, end_posi, start_posi],
 # where pre_end_posi and end_posi positions are on the source location,

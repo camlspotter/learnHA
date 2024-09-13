@@ -39,7 +39,7 @@ def get_signal_data(segmented_traj : list[Segment],
         # print("leg(segData) is ", len(segData))
         signalData = []
         # ToDo: instead of taking the exact points, for better ODE comparison use segment excluding boundary-points
-        for pos_id in seg_element.exact_range():
+        for pos_id in seg_element.exact.range():
             signalData.append([Y[pos_id, dim] for dim in range(size_of_input_variables, L_y)])  # ignore input-variables. * Y contain the actual data-points
             # signalData.append([b1[pos_id, dim] for dim in range(size_of_input_variables, L_y)])  # ignore input-variables. * b1 contain the backward derivatives
 
@@ -161,7 +161,7 @@ def create_simple_modes_positions(P_modes : list[list[Segment]]) -> list[list[in
           exact list (including both start_exact and end_exact).
       """
     return [ [ p for seg in mode
-               for p in seg.exact_range() ]
+               for p in seg.exact.range() ]
              for mode in P_modes ]
 
 # Used in plotDebug.py 
@@ -182,7 +182,7 @@ def create_simple_modes_positions_for_ODE(P_modes : list[list[Segment]]) -> list
     # making the list instead of filtering [p1, ..., p_n]
     # merge/extend only the inexact positions of the segment
     return [ [ p for seg in mode
-                 for p in list(range(seg.ode[0], seg.ode[1])) ] # XXX not seg.ode[1] + 1 ?
+                 for p in range(seg.ode.start, seg.ode.end) ] # XXX not seg.ode[1] + 1 ?
              for mode in P_modes ]
 
 # Used in cluster_by_dtw.py
@@ -212,7 +212,7 @@ def create_simple_modes_positions_for_ODE_with_pruned_segments(P_modes : list[li
                      # This slicing helps in pruning same segments for performance of ODE computaion
                      for seg in mode[:maximum_ode_prune_factor]
                      # xxx Jun: Not +1 for end_ode?  The original code is like this.
-                     for p in list(range(seg.ode[0], seg.ode[1])) ]
+                     for p in list(range(seg.ode.start, seg.ode.end)) ]
         P.append(data_pos)
 
     return P
@@ -238,7 +238,7 @@ def create_simple_per_segmented_positions(segmented_traj : list[Segment]) -> lis
     """
 
     # making the list instead of searching/filtering from [p1, ..., p_n]
-    return [ list(range(segs.ode[0], segs.ode[1] + 1)) for segs in segmented_traj ]
+    return [ list(segs.ode.range()) for segs in segmented_traj ]
 
 # Used only in plotDebug.py
 def create_simple_per_segmented_positions_exact(segmented_traj : list[Segment]) -> list[list[int]]:
@@ -260,4 +260,4 @@ def create_simple_per_segmented_positions_exact(segmented_traj : list[Segment]) 
 
     """
 
-    return [ list(seg.exact_range()) for seg in segmented_traj ]
+    return [ list(seg.exact.range()) for seg in segmented_traj ]
