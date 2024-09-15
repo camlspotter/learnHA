@@ -67,13 +67,16 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
     clustering_method = opts.clustering_method
     stepM = opts.lmm_step_size # 2 for engine-timing  #  the step size of Linear Multi-step Method (step M)
 
+    # Concatenate all the trajectories.
+    # The positions of them in the unified trajectory is recorded in traj_spans.
     t : MATRIX # times, 1D 
     y : MATRIX # values, 2D
-    positions : list[tuple[int, int]]
-    t, y, positions = preprocess_trajectories(list_of_trajectories.trajectories)
+    traj_spans : list[Span]
+    t, y, traj_spans = preprocess_trajectories(list_of_trajectories.trajectories)
 
     # plot of preprocessed trajectories
-    tys = [ (np.array(t[start:end+1]), np.array(y[start:end+1][:])) for (start, end) in positions ]
+    tys = [ (np.array(t[span.start:span.end+1]), np.array(y[span.start:span.end+1][:]))
+            for span in traj_spans ]
     plot_timeseries_multi(os.path.join(opts.output_directory, "preprocess.svg"),
                           "Preprocessed trajectories",
                           tys,
@@ -81,7 +84,6 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
 
     # Apply Linear Multistep Method
     # compute forward and backward version of BDF
-
     A : MATRIX
     b1 : MATRIX
     b2 : MATRIX
@@ -104,7 +106,8 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
     drop : list[int]
     segmented_traj, clfs, drop = two_fold_segmentation(A, b1, b2, npoints, Y, size_of_input_variables,
                                                        clustering_method, stepM, ep, ep_backward)
-    print("Number of segments =", len(segmented_traj))
+    print("num of segments by two_fold_segmentation=", len(segmented_traj))
+    print(segmented_traj)
 
     # L_y: length (nrows) of y
     L_y = len(opts.input_variables) + len(opts.output_variables)
@@ -115,18 +118,18 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
     # ********* Plotting/Visualizing various points for debugging *************************
     # plot_segmentation_new(segmented_traj, L_y, t, Y, stepM) # Trying to verify the segmentation for each segmented points
     # print_segmented_trajectories(segmented_traj)
-    # print("positions = ", positions)
 
     # print("Y = ", Y)
     # print("len of drop = ", len(drop))
     # print("segmented_traj = ", segmented_traj)
     # print("clfs size = ", len(clfs))
 
-    # Instead of deleting the last segment for all models. It is better to ask user's options for deleting
-    filter_last_segment = opts.filter_last_segment  # True for delete last segment and False NOT to delete
-
+    # Group the segments by trajectories.
+    # The last segment of each trajectory is dropped since it is often truncated.
+    filter_last_segment = opts.filter_last_segment  # True to delete the last segment and False NOT to delete
     segmentedTrajectories : list[list[Span]]
-    segmentedTrajectories, segmented_traj, clfs = segmented_trajectories(clfs, segmented_traj, positions, clustering_method, filter_last_segment) # deleted the last segment in each trajectory
+    segmentedTrajectories, segmented_traj, clfs = \
+        segmented_trajectories(clfs, segmented_traj, traj_spans, clustering_method, filter_last_segment)
 
     # print("Segmentation done!")
     # print("segmentedTrajectories = ", segmentedTrajectories)
@@ -140,6 +143,9 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
     # plot_segmentation_new(segmented_traj, L_y, t, Y, stepM) # Trying to verify the segmentation for each segmented points
 
     number_of_segments_before_cluster = len(segmented_traj)
+    print("num of segments before clustering", number_of_segments_before_cluster)
+    print("num of segmentedTrajectories", len(segmentedTrajectories))
+    print(segmented_traj)
 
     P_modes : list[list[Segment]]
     G : list[MATRIX]
@@ -149,6 +155,8 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
     # P, Drop = dropclass(P, G, drop, A, b1, Y, ep, stepsize)  # appends the dropped point to a cluster that fits well
     # print("Total dropped points (after fixing) are: ", len(Drop))
     number_of_segments_after_cluster = len(P_modes)
+    print("#segments after clustering", number_of_segments_after_cluster)
+    print(P_modes)
 
     init_location : int
     [init_location] = get_initial_location(P_modes)
@@ -180,7 +188,7 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
                              # x'j = x1 * cj1 + x2 * cj2 + .. + xn *cjn + ij
                              ]]
     transitions = compute_transitions(opts.output_directory,
-                                      P_modes, positions, segmentedTrajectories, L_y, boundary_order, Y,
+                                      P_modes, traj_spans, segmentedTrajectories, L_y, boundary_order, Y,
                                       annotations,
                                       number_of_segments_before_cluster,
                                       number_of_segments_after_cluster)

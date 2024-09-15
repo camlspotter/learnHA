@@ -6,7 +6,7 @@ from infer_ha.segmentation.segmentation import Segment
 from infer_ha.types import Span, ConnectionPoint, Connection
 
 def create_connecting_points(P_modes : list[list[Segment]],
-                             position : list[tuple[int,int]],
+                             position : list[Span],
                              segmentedTrajectories : list[list[Span]]) -> list[Connection]:
     """
     Determine connecting points from the segmented trajectories concerning clusters. Our idea is to establish

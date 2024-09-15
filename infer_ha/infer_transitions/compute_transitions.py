@@ -12,7 +12,7 @@ from infer_ha.annotation import AnnotationTbl
 
 def compute_transitions(output_dir : str,
                         P_modes : list[list[Segment]],
-                        position : list[tuple[int,int]],
+                        position : list[Span],
                         segmentedTrajectories : list[list[Span]],
                         L_y : int,
                         boundary_order : int,

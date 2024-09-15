@@ -5,6 +5,8 @@ from typing import Optional, TypeVar, Callable, Iterator
 from pydantic.dataclasses import dataclass
 from pydantic import ConfigDict
 
+from infer_ha.types import Span
+
 # Timeseries.
 # 
 # The first element of the tuple is a 1D array of timestamps. The timestamps
@@ -56,7 +58,7 @@ def parse_trajectories(path : str) -> Trajectories:
 
 def preprocess_trajectories(list_of_trajectories : list[Trajectory]) -> tuple[ NDArray[np.float64],
                                                                                NDArray[np.float64],
-                                                                               list[tuple[int, int]] ]:
+                                                                               list[Span] ]:
     '''
     Concatenate the trajectories.
 
@@ -70,10 +72,10 @@ def preprocess_trajectories(list_of_trajectories : list[Trajectory]) -> tuple[ N
 
     sizes = [ len(ts) for traj in list_of_trajectories for ts in [traj[0]] ]
 
-    position : list[tuple[int,int]] = []
+    position : list[Span] = []
     for (i,size) in enumerate(sizes):
-        last_position = position[i-1][1] if i > 0 else -1
-        position.append((last_position + 1, last_position + size))
+        last_position = position[i-1].end if i > 0 else -1
+        position.append(Span(last_position + 1, last_position + size))
 
     # XXX Why does this returns singleton lists?
     t = np.concatenate([ traj[0] for traj in list_of_trajectories ])

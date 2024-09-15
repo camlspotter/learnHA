@@ -208,7 +208,7 @@ def two_fold_segmentation(A : MATRIX,
 
 def segmented_trajectories(clfs : list[MATRIX],
                            segmented_traj : list[Segment],
-                           positions : list[tuple[int,int]],
+                           positions : list[Span],
                            method : ClusteringMethod,
                            filter_last_segment : bool) -> tuple[list[list[Span]],
                                                                 list[Segment],
@@ -251,61 +251,64 @@ def segmented_trajectories(clfs : list[MATRIX],
     # found single-segment-per-trajectory or not,
     # meaning each trajectory has a single segment (continuous single mode system), or not.
     found_single_segment_per_trajectory = total_segments == total_trajectories
+    filter_last_segment = filter_last_segment and not found_single_segment_per_trajectory
 
     # We create a list of segments positions of the form [start, pre-end, end] for each segment.
 
-    segments_per_traj = []  # contain list of all start and end position for each trajectory. Note each trajectory has the overall start and end position value
+    segments_per_traj : list[Span] = []  # contain list of all start and end position for each trajectory. Note each trajectory has the overall start and end position value
     segmentedTrajectories = []  # contain list of all segments of all the trajectories.
-    traj_id = 1
-    seg = positions[traj_id - 1]  # starting trajectory=0
-    start_trajectory_pos = seg[0]
-    end_trajectory_pos = seg[1]
 
-    del_index = 0 # index pointer for each segment in res
+    traj_id = 0
+    traj_span = positions[traj_id]  # starting trajectory=0
+    start_trajectory_pos = traj_span.start
+    end_trajectory_pos = traj_span.end
+
     del_res_indices = []    # store the list of indices of res to be deleted
-    for seg_traj_element in segmented_traj:
-        start_segment_pos = seg_traj_element.exact.start
-        end_segment_pos = seg_traj_element.exact.end
+
+    # Both positions and segmented_traj are sorted.
+    # We delete the last segmented portion of all the trajectories, assuming they are short segments and does not
+    # help learning. In fact in some cases, they can create problem during clustering (comparing segments for similarity).
+    # XXX This code is hard to understand. Should be rewritten as a loop over traj_id in range(0, len(positions)).
+
+    def filter_out_last_segment(i) -> None:
+        if filter_last_segment:
+            nonlocal segments_per_traj  # Python is broken!
+            # deletes the last segment before creating segmented-trajectories
+            segments_per_traj = segments_per_traj[:-1]
+            # stores the previous index for deletion
+            del_res_indices.append(i) 
+
+    for (seg_index, seg) in enumerate(segmented_traj):
+        start_segment_pos = seg.exact.start
+        end_segment_pos = seg.exact.end
         # print("start_segment_pos=",start_segment_pos,"   pre_end_segment_pos =",pre_end_segment_pos , "   end_segment_pos=", end_segment_pos)
         traj_segs = Span(start_segment_pos, end_segment_pos)
-        if start_segment_pos >= start_trajectory_pos and end_segment_pos <= end_trajectory_pos:
+        if traj_span.start <= start_segment_pos and end_segment_pos <= traj_span.end:
+            # segment is in the trajectory #traj_id
             segments_per_traj.append(traj_segs)
-        else:  # meaning if any of the above condition fails. I am assuming all segments will be segmented trajectory-wise
+        else:
+            # meaning if any of the above condition fails. I am assuming all segments will be segmented trajectory-wise
             # that is, no segments will overlap.
-            del_res_indices.append(del_index - 1)   # stores the previous index for deletion
-            # delete when single_segment_per_trajectory not Found and user selected the option filter_last_segment
-            if not found_single_segment_per_trajectory and filter_last_segment:
-                segments_per_traj = segments_per_traj[ : -1]    # deletes the last segment before creating segmented-trajectories
+            filter_out_last_segment(seg_index - 1)
             segmentedTrajectories.append(segments_per_traj)
 
+            # Move to the next trajectory
             segments_per_traj = []
             traj_id += 1
-            # print("traj_id =", traj_id)
-            seg = positions[traj_id - 1]  # starting trajectory=0
-            start_trajectory_pos = seg[0]
-            end_trajectory_pos = seg[1]
+            traj_span = positions[traj_id]  # starting trajectory=0
             segments_per_traj.append(traj_segs)  # previously created seg
+    filter_out_last_segment(seg_index)
 
-        del_index += 1
-
-    del_res_indices.append(del_index - 1)  # stores the previous index for deletion
-    # delete when single_segment_per_trajectory not Found and user selected the option filter_last_segment
-    if not found_single_segment_per_trajectory and filter_last_segment:
-        segments_per_traj = segments_per_traj[ : -1]   # deletes the last segment before creating segmented-trajectories
     segmentedTrajectories.append(segments_per_traj)  # the last segmented trajectory
     # ************************************ End of segmentation ******************************************
     # print("segmentedTrajectories is ", segmentedTrajectories)
     # print("list of position to be delted are ", del_res_indices)
 
-    # cluster_by_DTW = True
-    # delete when single_segment_per_trajectory not Found and user selected the option filter_last_segment
-    if not found_single_segment_per_trajectory and filter_last_segment:
-        for pos in reversed(del_res_indices):
-            segmented_traj.pop(pos)
-            if method != ClusteringMethod.DTW:
-                clfs.pop(pos)    # for DTW we do not have clfs at this stage, so skipping this line
-            # if not cluster_by_DTW:  # for DTW clustering we do not have clfs data. So skipping this line saves time
-            #     clfs.pop(pos)
+    # Remove deleted segment from segmented_traj too
+    for pos in reversed(del_res_indices):
+        segmented_traj.pop(pos)
+        if method != ClusteringMethod.DTW:
+            clfs.pop(pos)    # for DTW we do not have clfs at this stage, so skipping this line
 
     return segmentedTrajectories, segmented_traj, clfs
 
