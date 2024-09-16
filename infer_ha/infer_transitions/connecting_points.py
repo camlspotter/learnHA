@@ -6,7 +6,6 @@ from infer_ha.segmentation.segmentation import Segment
 from infer_ha.types import Span, ConnectionPoint, Connection
 
 def create_connecting_points(P_modes : list[list[Segment]],
-                             position : list[Span],
                              segmentedTrajectories : list[list[Span]]) -> list[Connection]:
     """
     Determine connecting points from the segmented trajectories concerning clusters. Our idea is to establish
@@ -32,55 +31,55 @@ def create_connecting_points(P_modes : list[list[Segment]],
 
     """
 
-    P = create_simple_modes_positions(P_modes)
+    cluster_len = len(P_modes)
+    traj_size = len(segmentedTrajectories)
+
+    mode_spans : list[list[Span]] = create_simple_modes_positions(P_modes)
 
     def spans_contain(spans : list[Span], x : int) -> bool:
         return any(span.start <= x <= span.end for span in spans)
 
-    cluster_len = len(P)
-    traj_size = len(position)
-    # print("len(position)/traj_size = ", traj_size)
     # Below computes connecting points when the number of clusters > 1. But not for single mode system
-    data_points : list[Connection] = []  # Structure containing [src, dest, list of connecting-points]
+    connections : list[Connection] = []  # Structure containing [src, dest, list of connecting-points]
     for i in range(0, cluster_len):
         for j in range(i, cluster_len):  # modified j in range(i, cluster_len) from i+1
             # Code for Forward-Transitions
-            data_points_per_trans = []
+            links = []
             for t in range(0, traj_size):  # Loop for all trajectories
                 segment_size = len(segmentedTrajectories[t])  # total number of segments in each trajectory
                 for g in range(0, segment_size - 1):
                     # last start-point is compared with previous end-point
-                    end_posi = segmentedTrajectories[t][g].end  # the end-pt of the trajectory t and segment g
+                    end_posi : int = segmentedTrajectories[t][g].end  # the end-pt of the trajectory t and segment g
                     pre_end_posi = end_posi - 1
-                    if spans_contain(P[i], end_posi):  # TRUE
+                    if spans_contain(mode_spans[i], end_posi):  # TRUE
                         start_posi = segmentedTrajectories[t][g + 1].start  # the start-pt of the trajectory t and segment g+1
-                        if spans_contain(P[j], start_posi):  # if this also returns TRUE
+                        if spans_contain(mode_spans[j], start_posi):  # if this also returns TRUE
                             # print ("Store. (end,start)=(", end_posi,",",start_posi,") in transition(i,j)=(", i, ",",j,") \n")
-                            # data_points.append([i, j, [end_posi, start_posi]])
-                            # Now we apppend 3 points, data_points_per_trans.append([end_posi, start_posi])
-                            data_points_per_trans.append(ConnectionPoint(end_posi, start_posi))
-            if len(data_points_per_trans) > 0:
-                data_points.append(Connection(i, j, data_points_per_trans))
-                # print("[src, dest, total-points] = [", i, " , ", j, " , ", len(data_points_per_trans), "]")
+                            # connections.append([i, j, [end_posi, start_posi]])
+                            # Now we apppend 3 points, links.append([end_posi, start_posi])
+                            links.append(ConnectionPoint(end_posi, start_posi))
+            if len(links) > 0:
+                connections.append(Connection(i, j, links))
+                # print("[src, dest, total-points] = [", i, " , ", j, " , ", len(links), "]")
 
             # Code for Backward-Transitions
             if i != j:  # loop is to be done only one
-                data_points_per_trans = []
+                links = []
                 for t in range(0, traj_size):  # Loop for all trajectories
                     segment_size = len(segmentedTrajectories[t])  # Length of each segmented trajectory
                     for g in range(0, segment_size - 1):  # last start-point is compared with previous end-point
                         end_posi = segmentedTrajectories[t][g].end
                         pre_end_posi = end_posi - 1
-                        if spans_contain(P[j], end_posi):  # TRUE
+                        if spans_contain(mode_spans[j], end_posi):  # TRUE
                             start_posi = segmentedTrajectories[t][g + 1].start
-                            if spans_contain(P[i], start_posi):  # if this also returns TRUE
+                            if spans_contain(mode_spans[i], start_posi):  # if this also returns TRUE
                                 # print("Store. (end,start)=(", end_posi, ",", start_posi,") in transition(j,i)=(", j, ",", i, ") \n")
-                                # data_points.append([j, i, [end_posi, start_posi]])
-                                # now we have 3points: data_points_per_trans.append([end_posi, start_posi])
-                                data_points_per_trans.append(ConnectionPoint(end_posi, start_posi))
-                if len(data_points_per_trans) > 0:
-                    data_points.append(Connection(j, i, data_points_per_trans))
-                    # print("[src, dest, total-points] = [", j, " , ", i, " , ", len(data_points_per_trans), "]")
-    # print("\nLength of data points = ", len(data_points))
-    # print("data points are ", data_points)
-    return data_points
+                                # connections.append([j, i, [end_posi, start_posi]])
+                                # now we have 3points: links.append([end_posi, start_posi])
+                                links.append(ConnectionPoint(end_posi, start_posi))
+                if len(links) > 0:
+                    connections.append(Connection(j, i, links))
+                    # print("[src, dest, total-points] = [", j, " , ", i, " , ", len(links), "]")
+    # print("\nLength of data points = ", len(connections))
+    # print("data points are ", connections)
+    return connections

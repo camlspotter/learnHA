@@ -52,7 +52,7 @@ def compute_transitions(output_dir : str,
 
     """
     # print("Computing Connecting points for Transitions ...")
-    data_points = create_connecting_points(P_modes, position, segmentedTrajectories)
+    data_points = create_connecting_points(P_modes, segmentedTrajectories)
     # print("Computing Connecting points done!")
     # print("len(data_points) =",len(data_points))
     # print("data_points=", data_points)
