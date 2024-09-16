@@ -19,6 +19,7 @@ def BDF_backward_version(stepM : int, stepsize : float, y_points : MATRIX, index
     @return:
     """
 
+    backward_derivative : float
     match stepM:
         case 2:
             backward_derivative = (3 * y_points[index] - 4 * y_points[index - 1] + 1 * y_points[index - 2]) / (2 * stepsize)
@@ -53,6 +54,7 @@ def BDF_forward_version(stepM : int, stepsize : float, y_points : MATRIX, index 
     @return:
     """
 
+    forward_derivative : float
     match stepM:
         case 2:
             forward_derivative = (-3 * y_points[index] + 4 * y_points[index + 1] - 1 * y_points[index + 2]) / (2 * stepsize)

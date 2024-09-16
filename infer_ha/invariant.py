@@ -1,3 +1,4 @@
+from typing import cast
 import random
 from typeguard import typechecked
 import pyparsing as pp
@@ -14,4 +15,4 @@ def instance_of_invariant(rng : random.Random, inv : Invariant) -> dict[str,floa
 
 @typechecked
 def invariant_of_string(s : str) -> Invariant:
-    return parser.check_invariant(parser.invariant.parse_string(s, parse_all=True))
+    return cast(Invariant, parser.check_invariant(parser.invariant.parse_string(s, parse_all=True)))

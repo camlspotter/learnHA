@@ -7,7 +7,7 @@ from infer_ha.annotation import *
 
 class Test(unittest.TestCase):
     def test_json(self):
-        print(list(map(asdict, [Pool([1,2,3]), Constant(2), Continuous()])))
+        print(list(map(asdict, [Pool([1,2,3]), Constant(2), Continuous()]))) #type: ignore
         
     def test_parse_annotation(self):
         assert parse_annotation('continuous') == Continuous()

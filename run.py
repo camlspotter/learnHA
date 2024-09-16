@@ -10,7 +10,7 @@ from infer_ha.trajectories import parse_trajectories
 import infer_ha.utils.io as utils_io
 from infer_ha.slx_compiler import compile, OdeSolverType, InvariantMode
 
-def runLearnHA():  # Calling the implementation from project BBC4CPS
+def runLearnHA() -> None:  # Calling the implementation from project BBC4CPS
     '''
     Hints:
         To analysis the segmentation output: in the file "learnHA/infer_ha/infer_HA.py" uncomment the line 24 having "plot_segmentation_new(segmented_traj, L_y, t_list, Y, stepM)"

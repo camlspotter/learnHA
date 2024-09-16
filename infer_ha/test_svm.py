@@ -34,13 +34,13 @@ class Test(unittest.TestCase):
         # Plot the decision boundary
         Z, _, _ = svm_predict([0]*len(xx.ravel()), np.c_[xx.ravel(), yy.ravel()].tolist(), model)
         Z = np.array(Z).reshape(xx.shape)
-        plt.contourf(xx, yy, Z, cmap=plt.cm.coolwarm, alpha=0.8)
+        plt.contourf(xx, yy, Z, cmap=plt.cm.coolwarm, alpha=0.8) # type: ignore
         
         # Plot also the training points
         colors = ['navy', 'turquoise', 'darkorange']
         for color, i in zip(colors, [0, 1, 2]):
             idx = np.where(y == i)
-            plt.scatter(X[idx, 0], X[idx, 1], c=color, cmap=plt.cm.coolwarm, edgecolor='k', s=20)
+            plt.scatter(X[idx, 0], X[idx, 1], c=color, cmap=plt.cm.coolwarm, edgecolor='k', s=20) # type: ignore
         plt.xlabel('Feature 1')
         plt.ylabel('Feature 2')
         plt.title('SVM Decision Boundary')

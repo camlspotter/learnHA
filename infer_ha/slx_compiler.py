@@ -110,10 +110,6 @@ def printDefinition(out : TextIOWrapper,
         case OdeSolverType.FIXED:
             out.write(f"set_param(bdroot, 'SolverType', 'Fixed-step', 'StopTime', 'timeFinal', 'SolverName', '{ode_solver}', 'FixedStep', 'timeStepMax');\n")
 
-        case _:
-            print("ode_solver_type:", ode_solver_type, OdeSolverType.FIXED, ode_solver_type == OdeSolverType.FIXED)
-            assert False
-
     out.write(textwrap.dedent(
         """
         ch.ActionLanguage = 'C';
