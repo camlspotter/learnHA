@@ -11,7 +11,7 @@ import infer_ha.types
 @dataclass(config=ConfigDict(arbitrary_types_allowed=True))
 class Raw:
     num_mode : int          # num_mode
-    G : list[np.ndarray]    # ODE coeffs, called Flow in the paper.  The array size is (#v + 1) * #o
+    G : list[np.ndarray]    # ODE coeffs and intercepts, called Flow in the paper.  The array size is (#v + 1) * #o
     mode_inv : list[ list[ tuple[ float, float ] ] ]  # Variable invariants per mode
     transitions : list[tuple[int,          # src
                              int,          # dest
@@ -31,36 +31,26 @@ Polynomial = dict[str,float] # Σ_i1x_i +c
 def string_of_polynomial(p : Polynomial) -> str:
     return " + ".join([( f"{v}" if k == "1" else f"{v} * {k}") for (k,v) in p.items()])
 
-ODE = Polynomial
-
-Guard = Polynomial
-
-Assignment = Polynomial
-
 @dataclass
 class Transition:
     id : int
     src : int
     dst : int
-    guard : Guard
-    assignments : dict[str, Assignment]
+    guard : Polynomial
+    assignments : dict[str, Polynomial]
 
-def build_guard(vars : list[str], guard_coeffs : list[float] ) -> Guard:
-    return { (vars[i] if i < len(guard_coeffs) - 1 else "1"): c for (i, c) in enumerate(guard_coeffs) }
+def build_polynomial(vars : list[str], coeffs_and_intercept : list[float] ) -> Polynomial:
+    assert len(vars) + 1 == len(coeffs_and_intercept)
+    return { (vars[i] if i < len(coeffs_and_intercept) - 1 else "1"): c
+             for (i, c) in enumerate(coeffs_and_intercept) }
 
-
-def build_assignment(vars : list[str], coeffs : np.ndarray, intercept : float) -> Assignment:
-    d = { vars[i]: c for (i, c) in enumerate(coeffs) }
-    d["1"] = intercept
-    return d
-
-def build_assignments(vars : list[str], output_vars : list[str], assignment : infer_ha.types.Assignment) -> dict[str,Assignment]:
+def build_assignments(vars : list[str], output_vars : list[str], assignment : infer_ha.types.Assignment) -> dict[str, Polynomial]:
     (coeffs, intercepts) = assignment
     (nvs1, nvs2) = coeffs.shape
     (nvs3,) = intercepts.shape  # syntax for 1 element tuple
     assert nvs1 == nvs2
     assert nvs1 == nvs3
-    assignments = [build_assignment(vars, coeffs, intercept) for (coeffs, intercept) in zip(coeffs, intercepts)]
+    assignments = [build_polynomial(vars, list(coeffs) + [intercept]) for (coeffs, intercept) in zip(coeffs, intercepts)]
     return { vars[i]: a for (i, a) in enumerate(assignments) if vars[i] in output_vars }
 
 def build_Transition(id : int,
@@ -73,7 +63,7 @@ def build_Transition(id : int,
                                    ]) -> Transition:
     (src, dst, guard_coeffs, assignment) = trans
 
-    guard = build_guard(vars, guard_coeffs)
+    guard = build_polynomial(vars, guard_coeffs)
     assignments = build_assignments(vars, output_vars, assignment)
     return Transition(id= id,
                       src= src,
@@ -85,16 +75,16 @@ def build_Transition(id : int,
 class Mode:
     id : int
     invariant : Invariant
-    flow : dict[str,ODE]
+    flow : dict[str, Polynomial] # ODE
 
 def build_invariant(vars : list[str], inv : list[tuple[float, float]]) -> Invariant:
     return { vars[i]: Range(min, max) for (i,(min,max)) in enumerate(inv) }
 
 # XXX Very simliar to build_guard
-def build_ode(vars : list[str], ode : np.ndarray) -> ODE:
+def build_ode(vars : list[str], ode : np.ndarray) -> Polynomial:
     return { (vars[i] if i < len(ode) - 1 else "1"): c for (i, c) in enumerate(ode) }
 
-def build_odes(vars : list[str], output_vars : list[str], odes : np.ndarray) -> dict[str,ODE]:
+def build_odes(vars : list[str], output_vars : list[str], odes : np.ndarray) -> dict[str, Polynomial]:
     iodes = [ (i, ode) for (i, ode) in enumerate(odes) if vars[i] in output_vars ]
     return { vars[i] : build_ode(vars, ode) for (i, ode) in iodes }
 

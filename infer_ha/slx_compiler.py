@@ -3,7 +3,7 @@ from io import TextIOWrapper
 import textwrap
 from dataclasses import dataclass
 
-from infer_ha.HA import HybridAutomaton, Assignment, Polynomial
+from infer_ha.HA import HybridAutomaton, Polynomial
 from infer_ha.invariant import Invariant
 import infer_ha.invariant
 import infer_ha.HA
@@ -531,7 +531,7 @@ def resetPrinter(ha : HA) -> str:
 
     return "{" + reset_str + "}"
 
-def resetPrinter2(ha : HA, reset_list : dict[str, Assignment]) -> str:
+def resetPrinter2(ha : HA, reset_list : dict[str, Polynomial]) -> str:
 
     reset_str : str = ""
 
