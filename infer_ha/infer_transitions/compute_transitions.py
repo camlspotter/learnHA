@@ -11,10 +11,16 @@ from infer_ha.types import MATRIX, Assignment, Span
 from infer_ha.annotation import AnnotationTbl
 
 def compute_transitions(output_dir : str,
+
+                        # segments in clusters
                         P_modes : list[list[Segment]],
-                        position : list[Span],
+
+                        # The positions of the full segments in the trajectories
                         segmentedTrajectories : list[list[Span]],
+
+                        # number of the input and output variables
                         L_y : int,
+
                         boundary_order : int,
                         Y : MATRIX,
                         annotations : AnnotationTbl,
@@ -51,15 +57,13 @@ def compute_transitions(output_dir : str,
         coefficients and intercepts value for the assignment equations.
 
     """
+    traj_size = len(segmentedTrajectories)
+
     # print("Computing Connecting points for Transitions ...")
-    data_points = create_connecting_points(P_modes, segmentedTrajectories)
+    connections = create_connecting_points(P_modes, segmentedTrajectories)
     # print("Computing Connecting points done!")
     # print("len(data_points) =",len(data_points))
     # print("data_points=", data_points)
-
-    transitions : list[tuple[int,int, 
-                             list[float],
-                             Assignment]] = []
 
     # If a model is a single-mode system for instance, lets say our segmentation identifies a full trajectory as a
     # single mode. And this is true for all input trajectories (say init-size 10 and all 10 trajectories are learned
@@ -68,59 +72,45 @@ def compute_transitions(output_dir : str,
     # Therefore, we need to handle it carefully
     # Fixing separately for single-mode system like Bouncing Ball or single-mode systems without transition.
     # E.g. in the case of bouncing ball all segments are clustered into One.
-    if number_of_segments_after_cluster == 1 and number_of_segments_before_cluster >= 1:
-        tot_input_trajectories = len(position)
-        # print("Total initial simulation=", tot_input_trajectories)
-        if tot_input_trajectories == number_of_segments_before_cluster:
-            return transitions  # transitions here is empty for a single mode system without transition.
+    if number_of_segments_after_cluster == 1 \
+       and number_of_segments_before_cluster >= 1 \
+       and traj_size == number_of_segments_before_cluster:
+        return [] # transitions here is empty for a single mode system without transition.
 
-
-    # transitions = []
     # data_points contains list of connecting points for each Transition
     # Note we are considering possible transition only based on the given trajectory-data.
     # *************** Trying to plot these points. Also creating transition ***********************************
-    for imode in range(0, len(data_points)):   # len(data_points) returns the total number of transitions
-        list_connection_pt = data_points[imode].links
-        src_mode = data_points[imode].src_mode
-        dest_mode = data_points[imode].dst_mode
+    transitions : list[tuple[int,int, 
+                             list[float],
+                             Assignment]] = []
+    for conn in connections:
+        links = conn.links
+        src_mode = conn.src_mode
+        dest_mode = conn.dst_mode
 
         # Now we only use a few connecting-points [pre_end_point and end_point] to find guard using SVM
         # ******* Step-1: create the source and destination list of positions and Step-2: call getGuardEquation()
-        srcData = []
-        destData = []
-        for connect_pt in list_connection_pt:
-            # in this implementation we use pre_end_pt_position and end_pt_position for guard
-            srcData.append(connect_pt.src_end-1)  # index [0] is the pre_end_pt_position
-            destData.append(connect_pt.src_end)  # index [1] is the end_pt_position
-
-            # # in this implementation we use end_pt_position and start_pt_position for guard
-            # srcData.append(connect_pt[1])  # index [1] is the end_pt_position
-            # destData.append(connect_pt[2])  # index [2] is the start_pt_position
-
-        guard_coeff = getGuard_inequality(output_dir, srcData, destData, L_y, boundary_order, Y)
+        srcData = [ link.src_end - 1 for link in links ]
+        destData = [ link.src_end for link in links ]
 
         # C++ code assumes the first element of guard_coeff is either 0, 1 or -1
-        guard_coeff = normalize_guard(guard_coeff)
-
-        # print("Check guard=", guard_coeff)
+        guard = normalize_guard(getGuard_inequality(output_dir, srcData, destData, L_y, boundary_order, Y))
 
         '''
         We will not check any complex condition. We simply apply linear regression to first learn the assignments.
         Then, we check the condition for annotations and whenever annotation information is available we replace
          the computed (learned using linear regression) values using our approach of annotations.
         '''
+        assignment : Assignment = compute_assignments(links, L_y, Y)
+        assignment = apply_annotation(Y, annotations, links, assignment)
 
-        # print("list_connection_pt = ", list_connection_pt)
-        assignment : Assignment = compute_assignments(list_connection_pt, L_y, Y)
-        assignment = apply_annotation(Y, annotations, list_connection_pt, assignment)
-
-        transitions.append((src_mode, dest_mode, guard_coeff, assignment))
-        # print("All Transitions are: ",transitions)
+        transitions.append((src_mode, dest_mode, guard, assignment))
 
     return transitions
 
 def normalize_guard(coeffs : list[float]) -> list[float]:
-    coeff0_abs = abs(coeffs[0])  # first column coefficient, can be used to divide on both sides to normalize. Taking only value not sign
+    # first column coefficient, can be used to divide on both sides to normalize. Taking only value not sign
+    coeff0_abs = abs(coeffs[0])
     if coeff0_abs != 0:
         coeffs = [ c / coeff0_abs for c in coeffs ]
     return coeffs

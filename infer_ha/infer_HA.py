@@ -188,7 +188,7 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
                              # x'j = x1 * cj1 + x2 * cj2 + .. + xn *cjn + ij
                              ]]
     transitions = compute_transitions(opts.output_directory,
-                                      P_modes, traj_spans, segmentedTrajectories, L_y, boundary_order, Y,
+                                      P_modes, segmentedTrajectories, L_y, boundary_order, Y,
                                       annotations,
                                       number_of_segments_before_cluster,
                                       number_of_segments_after_cluster)
