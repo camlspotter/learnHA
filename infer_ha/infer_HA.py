@@ -12,7 +12,6 @@ from infer_ha.clustering.clustering import select_clustering
 from infer_ha.infer_invariants.invariants import compute_mode_invariant
 from infer_ha.segmentation.compute_derivatives import diff_method_backandfor
 from infer_ha.infer_transitions.compute_transitions import compute_transitions
-from infer_ha.clustering.utils import create_simple_modes_positions
 from infer_ha.trajectories import Trajectory, Trajectories, preprocess_trajectories
 from infer_ha.utils.commandline_parser import Options
 from infer_ha.HA import Raw
@@ -219,7 +218,7 @@ def get_initial_location(P_modes : list[list[Segment]]) -> list[int]:
         init_locations: contains a list of initial location ID(s), having zero based indexing.
 
     """
-    P : list[list[Span]] = create_simple_modes_positions(P_modes)
+    P : list[list[Span]] = [ [ seg.exact for seg in mode ] for mode in P_modes ]
 
     minkey : int = min(enumerate(P), key= lambda x: x[1][0].start)[0]  # [1] to get P's element
 

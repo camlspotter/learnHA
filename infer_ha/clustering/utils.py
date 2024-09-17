@@ -147,41 +147,6 @@ def compute_correlation(path : list[float], signal1 : list[list[float]], signal2
 
     return correlation_value
 
-def create_simple_modes_positions(P_modes : list[list[Segment]]) -> list[list[Span]]:
-    """
-      This function transforms/creates a simple data structure from P_modes. The structure is a list of modes.
-      Each mode in the list holding only the position values of data points as a single concatenated list. Unlike the
-      input argument P_modes is a structure with list of modes and each mode has one or more segments in the mode-list.
-
-      :param P_modes: holds a list of modes. Each mode is a list of structures; we call it a segment.
-          Thus, P = [mode-1, mode-2, ... , mode-n] where mode-1 = [ segment-1, ... , segment-n] and segments are
-          of type ([start_ode, end_ode], [start_exact, end_exact], [p1, ..., p_n]).
-      :return:
-          P: holds a list of modes. Each mode is a list of positions. Note here we return all the positions using the
-          exact list (including both start_exact and end_exact).
-      """
-    return [ [ seg.exact for seg in mode ] for mode in P_modes ]
-
-# Used in plotDebug.py 
-def create_simple_modes_positions_for_ODE(P_modes : list[list[Segment]]) -> list[list[Span]]:
-    """
-      This function transforms/creates a "simple data" structure from P_modes. This simple structure is a list of modes.
-      Each mode in the list holding only the position values of data points as a single concatenated list. Unlike the
-      input argument P_modes is a structure with list of modes and each mode has one or more segments in the mode-list.
-
-      :param P_modes: holds a list of modes. Each mode is a list of structures; we call it a segment.
-          Thus, P = [mode-1, mode-2, ... , mode-n] where mode-1 = [ segment-1, ... , segment-n] and segments are
-          of type ([start_ode, end_ode], [start_exact, end_exact], [p1, ..., p_n]).
-      :return:
-          P: holds a list of modes. Each mode is a list of positions.
-          Note here we return all the positions of points that lies inside the boundary (excluding the exact points).
-      """
-
-    # making the list instead of filtering [p1, ..., p_n]
-    # merge/extend only the inexact positions of the segment
-    return [ [ Span(seg.ode.start, seg.ode.end-1) for seg in mode ] # XXX not seg.ode.end?
-             for mode in P_modes ]
-
 # Used in cluster_by_dtw.py
 def create_simple_modes_positions_for_ODE_with_pruned_segments(P_modes : list[list[Segment]],
                                                                maximum_ode_prune_factor : int) -> list[list[Span]]:
@@ -211,48 +176,3 @@ def create_simple_modes_positions_for_ODE_with_pruned_segments(P_modes : list[li
         P.append(data_pos)
 
     return P
-
-# Used in cluster_by_others.py
-def create_simple_per_segmented_positions(segmented_traj : list[Segment]) -> list[Span] :
-    """
-    This function transforms/creates a simple list structure from segmented_traj. This simple list consists of positions.
-    Each item of the list holds only the position values of data points after segmentation.
-
-    :param segmented_traj: is a list of a custom data structure consisting of segmented trajectories (positions). Each item
-    of the list contains a tuple of the form ([start_ode, end_ode], [start_exact, end_exact], [p_1, ... , p_n]).
-    The Tuple has 3 items:
-        (1) first a list of two values for recording start and end points for learning ODE
-        (2) second a list of two values for recording start and end points for learning guard and assignment using the
-        exact point of jump
-        (3) third the list of values represent the positions of points of the trajectories.
-    :return:
-      res: a simple list of positions of the segmented trajectories. Segmented positions is a list containing
-      positions of points in the trajectories.
-      Note here we return all the positions of points that lies inside the boundary (excluding the exact points).
-      This is particularly suitable for ODE inference.
-    """
-
-    # making the list instead of searching/filtering from [p1, ..., p_n]
-    return [ seg.ode for seg in segmented_traj ]
-
-# Used only in plotDebug.py
-def create_simple_per_segmented_positions_exact(segmented_traj : list[Segment]) -> list[Span]:
-    """
-    This function transforms/creates a simple list structure from segmented_traj. This simple list consists of positions.
-    Each item of the list holds only the position values of data points after segmentation.
-
-    :param segmented_traj: is a list of a custom data structure consisting of segmented trajectories (positions). Each item
-    of the list contains a tuple of the form ([start_ode, end_ode], [start_exact, end_exact], [p_1, ... , p_n]).
-    The Tuple has 3 items:
-        (1) first a list of two values for recording start and end points for learning ODE
-        (2) second a list of two values for recording start and end points for learning guard and assignment using the
-        exact point of jump
-        (3) third the list of values represent the positions of points of the trajectories.
-    :return:
-      res: a simple list of positions of the segmented trajectories. Segmented positions is a list containing
-      positions of points in the trajectories.
-      Note here we return all the positions of points of a segment (including the exact points or boundary points).
-
-    """
-
-    return [ seg.exact for seg in segmented_traj ]

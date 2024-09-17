@@ -10,9 +10,7 @@ from sklearn import linear_model
 
 import itertools
 
-from infer_ha.clustering.utils import create_simple_per_segmented_positions
 from infer_ha.utils.util_functions import matrowex
-
 
 def convert_clfs_to_coeffArray_selected_data(clfs, size_of_input_variable):
     selected_cluster_coef = []

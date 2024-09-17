@@ -1,7 +1,6 @@
 """
 Connecting points for inferring transitions
 """
-from infer_ha.clustering.utils import create_simple_modes_positions
 from infer_ha.segmentation.segmentation import Segment
 from infer_ha.types import Span, ConnectionPoint, Connection
 
@@ -34,7 +33,7 @@ def create_connecting_points(P_modes : list[list[Segment]],
     cluster_len = len(P_modes)
     traj_size = len(segmentedTrajectories)
 
-    mode_spans : list[list[Span]] = create_simple_modes_positions(P_modes)
+    mode_spans : list[list[Span]] = [ [ seg.exact for seg in mode ] for mode in P_modes ]
 
     def spans_contain(spans : list[Span], x : int) -> bool:
         return any(span.start <= x <= span.end for span in spans)

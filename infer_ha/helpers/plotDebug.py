@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from operator import itemgetter
 import itertools
 
-from infer_ha.clustering.utils import create_simple_per_segmented_positions_exact, create_simple_modes_positions_for_ODE
+from infer_ha.clustering.utils import create_simple_per_segmented_positions_exact
 from infer_ha.utils.util_functions import rel_diff
 from infer_ha.utils import io
 from infer_ha.types import Span
@@ -51,11 +51,11 @@ def plot_guard_points(segmentedTrajectories_modified, L_y, t_list, Y, stepM):
     '''
 
     x_pts = []
-    x_p1 = []
-    x_p2 = []
-    x_p3 = []
-    x_p4 = []
-    x_p5 = []
+    x_p1 : list[float] = []
+    x_p2 : list[float] = []
+    x_p3 : list[float] = []
+    x_p4 : list[float] = []
+    x_p5 : list[float] = []
     time_pt = []
     for each_traj_row in range(0, len(segmentedTrajectories_modified)):
         for each_segment in segmentedTrajectories_modified[each_traj_row]:
@@ -121,12 +121,12 @@ def plot_guard_points(segmentedTrajectories_modified, L_y, t_list, Y, stepM):
 
 def plot_reset_points(segmentedTrajectories_modified, L_y, t_list, Y, stepM):
     x_pts = []
-    x_p1 = []
-    x_p2 = []
-    x_p3 = []
-    x_p4 = []
-    x_p5 = []
-    time_pt = []
+    x_p1 : list[float] = []
+    x_p2 : list[float] = []
+    x_p3 : list[float] = []
+    x_p4 : list[float] = []
+    x_p5 : list[float] = []
+    time_pt : list[float] = []
     for each_traj_row in range(0, len(segmentedTrajectories_modified)):
         for each_segment in segmentedTrajectories_modified[each_traj_row]:
             # pre_end_pt = each_segment[1]
@@ -233,7 +233,7 @@ def plot_segmentation_new(segmented_traj, L_y, t_list, Y, stepM):
     fig, axs = plt.subplots(L_y, figsize=(10, 20))
 
     fig.suptitle('Segmentation', fontsize=16)
-    res : list[list[Span]] = create_simple_per_segmented_positions_exact(segmented_traj)
+    res : list[Span] = create_simple_per_segmented_positions_exact(segmented_traj)
     print("L_y=",L_y)
     for imode in range(0, len(res)):
         x_pts = []
@@ -243,7 +243,7 @@ def plot_segmentation_new(segmented_traj, L_y, t_list, Y, stepM):
         # x_p4 = []
         # x_p5 = []
         time_pt = []
-        for id0 in res[imode]:  # Note: P contains list of clustered segments each segments contains the positions
+        for id0 in res[imode].range():  # Note: P contains list of clustered segments each segments contains the positions
             x_pts.append({dim + 1: Y[id0, dim] for dim in range(L_y)})
             time_pt.append(t_list[0][id0 + stepM])  # since Y values are after leaving 5 point from start and -5 at the end
 
@@ -380,7 +380,7 @@ def plot_after_clustering(t_list, L_y, P_modes, Y, stepM):
     '''
 
 
-    P : list[list[Span]] = create_simple_modes_positions_for_ODE(P_modes)
+    P : list[list[Span]] = [ [ seg.ode for seg in segs ] for segs in P_modes ]
 
 
     NUM_COLORS = len(P)
@@ -564,8 +564,7 @@ def analyse_output(segmentedTrajectories, b1, b2, Y, t_list, L_y, size_of_input_
     # ##### writing to a csv file for debugging and analysing values #########
     file_csv = io.open_for_write('segmentationFile.csv')
     writer = csv.writer(file_csv)   # file pointer created
-    rowValue = ["pos", "t_value", "x_"+str(varIndex) , "BDF_backward", "BDF_forward", "Seg-ID"]
-    writer.writerow(rowValue)
+    writer.writerow(["pos", "t_value", "x_"+str(varIndex) , "BDF_backward", "BDF_forward", "Seg-ID"])
     count = 0   # count for segment-ID
     for seg in segmentedTrajectories:
         # for seg in traj:

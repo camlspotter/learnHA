@@ -9,7 +9,6 @@ import numpy as np
 from numpy.typing import NDArray
 from operator import itemgetter
 
-from infer_ha.clustering.utils import create_simple_modes_positions
 from infer_ha.segmentation.segmentation import Segment
 from infer_ha.types import Span
 
@@ -58,7 +57,7 @@ def compute_invariant (L_y : int,
 
     """
 
-    P : list[list[Span]] = create_simple_modes_positions(P_modes)
+    P : list[list[Span]] = [ [ seg.exact for seg in mode ] for mode in P_modes ]
 
     x_pts : list[dict[int, float]] = []
 
