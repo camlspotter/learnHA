@@ -2,7 +2,7 @@ import os
 import random
 
 from infer_ha.simulate import simulate
-from infer_ha.simulation_input import generate_simulation_input, SignalType
+from infer_ha.simulation_input import generate_simulation_input, SignalType, Simulation_input
 from infer_ha.range import Range
 from infer_ha.simulation_script import generate_simulation_script
 import infer_ha.utils.io as utils_io
@@ -74,7 +74,5 @@ simulate( script_file= script_file,
           output_file= output_file,
           input_variables= input_variables,
           output_variables= output_variables,
-          input_value_ts= sis.input_value_ts,
-          initial_output_values= sis.initial_output_values )
-
-# Repeating this simulation overwrites the result file
+          input= Simulation_input(input_value_ts= sis.input_value_ts,
+                                  initial_output_values= sis.initial_output_values) )

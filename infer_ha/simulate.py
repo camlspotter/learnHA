@@ -1,13 +1,13 @@
 from os import path
 import matlab
 from infer_ha.matlab_engine import matlab_engine
+from infer_ha.simulation_input import Simulation_input
 
 def simulate(script_file : str,
              output_file : str,
              input_variables : list[str],
              output_variables : list[str],
-             input_value_ts : dict[str, list[tuple[float, float]]],
-             initial_output_values : dict[str, float]) -> None:
+             input : Simulation_input) -> None:
 
     assert path.isabs(output_file), \
         "simulate: output_file cannot be relative: " \
@@ -17,10 +17,10 @@ def simulate(script_file : str,
 
     matlab_engine.setvar("result_filename", output_file)
 
-    for (var, v) in initial_output_values.items():
+    for (var, v) in input.initial_output_values.items():
         matlab_engine.setvar(f"a{variable_index[var]}", v)
         
-    for (var, ts) in input_value_ts.items():
+    for (var, ts) in input.input_value_ts.items():
         vs = matlab.double([v for (_, v) in ts])
         matlab_engine.setvar(f"{var}_input", vs)
 
@@ -28,3 +28,26 @@ def simulate(script_file : str,
         matlab_engine.setvar(f"{var}_time", ts)
 
     matlab_engine.run(script_file)
+
+def simulate_list(script_file : str,
+                  output_file : str,
+                  input_variables : list[str],
+                  output_variables : list[str],
+                  inputs : list[Simulation_input]) -> None:
+    with open(output_file, 'w') as oc:
+        for (i,input) in enumerate(inputs):
+            print("Simulating", i, input)
+            # XXX Currently we need a dirty tempfile tech to prevent the Matlab script
+            # from overwriting the output_file.
+            # XXX We need ".txt" at the end of tmp_output_file since:
+            # ファイル拡張子 '.0000' が認識されません。'FileType' パラメーターを使用してファイル タイプを指定してください。
+            tmp_output_file=output_file + f".{i:04d}.txt"
+            simulate( script_file= script_file,
+                      output_file= tmp_output_file,
+                      input_variables= input_variables,
+                      output_variables= output_variables,
+                      input= input )
+            with open(tmp_output_file, 'r') as ic:
+                for line in ic:
+                    oc.write(line)
+

@@ -171,7 +171,7 @@ class TestLearnHA(unittest.TestCase):
         # deep mode comparison: where the content of the files are compared.
         result = filecmp.cmp(backup_file, test_generated_file, shallow=False)
         print(result)
-        # self.assertTrue(result) # Fails if the output generated is not equal to the file stored in the data/test_output
+        self.assertTrue(result) # Fails if the output generated is not equal to the file stored in the data/test_output
 
 if __name__ == '__main__':
     unittest.main()

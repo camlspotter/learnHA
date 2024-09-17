@@ -1,14 +1,15 @@
 # ex.
 #
-# pipenv run python simulate.py --simulink-model-file ../../src/test_cases/engine/learn_ha_loop/ex_sldemo_bounce_Input.slx --time-horizon 13.0 --sampling-time 0.001 --fixed-interval-data False --input-variables 'u' --output-variables 'x,v' --invariant '-9.9 <= u && u <= -9.5 && 10.2 <= x && x <= 10.5 && 15 <= v && v <= 15' --number-of-cps 'u:4' --var-types 'u:linear' -o model_simulation.txt
+# pipenv run python simulate.py --simulink-model-file ../../src/test_cases/engine/learn_ha_loop/ex_sldemo_bounce_Input.slx --time-horizon 13.0 --sampling-time 0.001 --fixed-interval-data False --input-variables 'u' --output-variables 'x,v' --invariant '-9.9 <= u && u <= -9.5 && 10.2 <= x && x <= 10.5 && 15 <= v && v <= 15' --number-of-cps 'u:4' --signal-types 'u:linear' -o model_simulation.txt -S 0 -n 64
 
 import os
 import random
 import argparse
 from typeguard import typechecked
 from pydantic.dataclasses import dataclass
+from typing import Optional
 
-from infer_ha.simulate import simulate
+from infer_ha.simulate import simulate_list
 from infer_ha.simulation_input import generate_simulation_input, SignalType
 from infer_ha.simulation_script import generate_simulation_script
 from infer_ha.utils.argparse_bool import argparse_bool
@@ -27,6 +28,8 @@ class Options:
     number_of_cps : dict[str,int]
     signal_types : dict[str,SignalType]
     output_file : str
+    seed : Optional[int]
+    nsimulations : int
 
 def parse_number_of_cps(s : str) -> dict[str,int]:
     def parse_ncps(s : str) -> tuple[str,int]:
@@ -58,8 +61,10 @@ def get_options() -> Options:
     parser.add_argument('--output-variables', help='Output variables', type=str, required=True)
     parser.add_argument('--invariant', help='Invariant', type=str, required=True)
     parser.add_argument('--number-of-cps', help='Number of control points', type=str, required=True)
-    parser.add_argument('--var-types', help='Variable types', type=str, required=True)
+    parser.add_argument('--signal-types', help='Variable signal types', type=str, required=True)
     parser.add_argument('--output-file', '-o', help='Output filename', type=str, required=True)
+    parser.add_argument('-S', '--seed', help='Seed', type=int, required=False)
+    parser.add_argument('-n', '--nsimulations', help='Number of simulations', type=int, default=1, required=False)
 
     args = vars(parser.parse_args())
 
@@ -93,21 +98,19 @@ with utils_io.open_for_write(script_file) as out:
                                input_variables= opts.input_variables,
                                output_variables = opts.output_variables)
 
-sis = generate_simulation_input(rng= random.Random(),
-                                time_horizon= opts.time_horizon,
-                                invariant= opts.invariant,
-                                number_of_cps= opts.number_of_cps,
-                                signal_types= opts.signal_types,
-                                input_variables= opts.input_variables,
-                                output_variables= opts.output_variables)
+rng= random.Random() if opts.seed is None else random.Random(opts.seed)
 
-print(sis)
+inputs = [ generate_simulation_input(rng,
+                                     time_horizon= opts.time_horizon,
+                                     invariant= opts.invariant,
+                                     number_of_cps= opts.number_of_cps,
+                                     signal_types= opts.signal_types,
+                                     input_variables= opts.input_variables,
+                                     output_variables= opts.output_variables)
+           for _ in range(opts.nsimulations) ]
 
-simulate( script_file= script_file,
-          output_file= opts.output_file,
-          input_variables= opts.input_variables,
-          output_variables= opts.output_variables,
-          input_value_ts= sis.input_value_ts,
-          initial_output_values= sis.initial_output_values )
-
-# Repeating this simulation overwrites the result file
+simulate_list(script_file= script_file,
+              output_file= opts.output_file,
+              input_variables= opts.input_variables,
+              output_variables= opts.output_variables,
+              inputs= inputs)
