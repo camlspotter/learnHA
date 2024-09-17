@@ -101,25 +101,25 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
     # res, drop, clfs, res_modified = segment_and_fit_Modified_two(A, b1, b2, npoints, ep)
     # res, drop, clfs, res_modified = two_fold_segmentation_new(A, b1, b2, npoints, size_of_input_variables, method, ep)
 
-    segmented_traj : list[Segment]
+    segments : list[Segment]
     clfs : list[MATRIX]
     drop : list[int]
-    segmented_traj, clfs, drop = two_fold_segmentation(A, b1, b2, npoints, Y, size_of_input_variables,
-                                                       clustering_method, stepM, ep, ep_backward)
+    segments, clfs, drop = two_fold_segmentation(A, b1, b2, npoints, Y, size_of_input_variables,
+                                                 clustering_method, stepM, ep, ep_backward)
 
     # analyse_variable_index = 2  # zero-based indexing. 0 for refrigeration-cycle. and 2 for engine-timing-system. 3 for AFC
-    # analyse_output(segmented_traj, b1, b2, Y, t, L_y, size_of_input_variables, stepM, analyse_variable_index)
+    # analyse_output(segments, b1, b2, Y, t, L_y, size_of_input_variables, stepM, analyse_variable_index)
 
     # ********* Plotting/Visualizing various points for debugging *************************
-    # plot_segmentation_new(segmented_traj, L_y, t, Y, stepM) # Trying to verify the segmentation for each segmented points
-    # print_segmented_trajectories(segmented_traj)
+    # plot_segmentation_new(segments, L_y, t, Y, stepM) # Trying to verify the segmentation for each segmented points
+    # print_segmentsectories(segments)
 
     # Group the segments by trajectories.
     # The last segment of each trajectory is dropped since it is often truncated.
     filter_last_segment = opts.filter_last_segment  # True to delete the last segment and False NOT to delete
     segmentedTrajectories : list[list[Span]]
-    segmentedTrajectories, segmented_traj, clfs = \
-        segmented_trajectories(clfs, segmented_traj, traj_spans, clustering_method, filter_last_segment)
+    segmentedTrajectories, segments, clfs = \
+        segmented_trajectories(clfs, segments, traj_spans, clustering_method, filter_last_segment)
     assert len(segmentedTrajectories) == len(traj_spans) # 1 segmentedTrajectory per trajectory
 
     # plot_data_values(segmentedTrajectories, Y, L_y)
@@ -127,16 +127,15 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
     # plot_guard_points(segmentedTrajectories, L_y, t, Y, stepM) # pre-end and end points of each segment
     # plotdebug.plot_reset_points(segmentedTrajectories_modified, L_y, t, Y, stepM) # plotting Reset or Start points
     # plotdebug.plot_segmentation(res, L_y, t, Y, stepM) # Trying to verify the segmentation for each segmented points
-    # plot_segmentation_new(segmented_traj, L_y, t, Y, stepM) # Trying to verify the segmentation for each segmented points
+    # plot_segmentation_new(segments, L_y, t, Y, stepM) # Trying to verify the segmentation for each segmented points
 
-    number_of_segments_before_cluster = len(segmented_traj)
+    number_of_segments_before_cluster = len(segments)
     print("num of segments before clustering", number_of_segments_before_cluster)
     print("num of segmentedTrajectories", len(segmentedTrajectories))
-    print(segmented_traj)
 
     P_modes : list[list[Segment]]
     G : list[MATRIX]
-    P_modes, G = select_clustering(segmented_traj, A, b1, clfs, Y, t, L_y, opts, stepM) # when len(res) < 2 compute P and G for the single mode
+    P_modes, G = select_clustering(segments, A, b1, clfs, Y, t, L_y, opts, stepM) # when len(res) < 2 compute P and G for the single mode
 
     # print("Fixing Dropped points ...") # I dont need to fix
     # P, Drop = dropclass(P, G, drop, A, b1, Y, ep, stepsize)  # appends the dropped point to a cluster that fits well
@@ -222,5 +221,5 @@ def get_initial_location(P_modes : list[list[Segment]]) -> list[int]:
 
     minkey : int = min(enumerate(P), key= lambda x: x[1][0].start)[0]  # [1] to get P's element
 
-    # ToDo: to find all initial location/mode, use the structure segmented_traj: 1st position of each trajectory
+    # ToDo: to find all initial location/mode, use the structure segments: 1st position of each trajectory
     return [minkey]
