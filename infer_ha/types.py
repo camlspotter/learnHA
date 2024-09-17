@@ -19,10 +19,6 @@ class Span:
     def range(self) -> range:
         return range(self.start, self.end+1)
 
-# Triplet of type [pre_end_posi, end_posi, start_posi],
-# where pre_end_posi and end_posi positions are on the source location,
-# and start_posi is the position of the starting point of a segment in
-# the destination location.
 @dataclass
 class ConnectionPoint:
     src_end : int
