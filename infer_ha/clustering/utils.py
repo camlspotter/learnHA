@@ -142,7 +142,7 @@ def compute_correlation(path : list[float], signal1 : list[list[float]], signal2
     # print("dim1=",offset_M1, "  dim2=",offset_M2, "  offset=", offset)
     correl_per_variable_wise = np.diagonal(corel_value, offset)
     # print("correl_per_variable_wise=", correl_per_variable_wise)
-    correlation_value = min(correl_per_variable_wise)
+    correlation_value : int = min(correl_per_variable_wise)
     # print("min correlation value =", correlation_value)
 
     return correlation_value
