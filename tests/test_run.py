@@ -29,16 +29,29 @@ def write_HA(opts, raw):
 
 class TestLearnHA(unittest.TestCase):
 
+    def doit(self, ps, golden_dir):
+        opts = Options(**ps)
+
+        list_of_trajectories = parse_trajectories(opts.input_filename)
+        
+        raw = infer_model(list_of_trajectories, opts)
+        write_HA(opts, raw)  # prints an HA model file
+
+        backup_file = os.path.join(golden_dir, "learned_HA.txt")
+        test_generated_file = os.path.join(opts.output_directory, 'learned_HA.txt')
+        assert filecmp.cmp(backup_file, test_generated_file, shallow=False)
+
+        backup_file = os.path.join(golden_dir, "learned_HA.json")
+        test_generated_file = os.path.join(opts.output_directory, 'learned_HA.json')
+        assert filecmp.cmp(backup_file, test_generated_file, shallow=False)
+        
+
     def test_runLearnHA_osci_withoutAnnotate(self):
-
-        ps = {}
         print("Running test runLearnHA module")
-
+        ps = {}
         ps['input_filename'] = "data/test_data/simu_oscillator_2.txt"
         ps['output_directory'] = "_test/oscillator_2_withoutAnnotate"
-
         ps['clustering_method'] = ClusteringMethod.DTW
-
         ps['ode_degree'] = 1
         ps['modes'] = 4
         ps['guard_degree'] = 1
@@ -58,35 +71,14 @@ class TestLearnHA(unittest.TestCase):
         ps['lmm_step_size'] = 5
         ps['annotations'] = {}
 
-        opts = Options(**ps)
-
-        list_of_trajectories = parse_trajectories(opts.input_filename)
-        
-        raw = infer_model(list_of_trajectories, opts)
-        write_HA(opts, raw)  # prints an HA model file
-
-        backup_file = "data/test_output/oscillator_2_without_annotation.txt"
-        test_generated_file = os.path.join(opts.output_directory, 'learned_HA.txt')
-
-        # shallow mode comparison: where only metadata of the files are compared like the size, date modified, etc.
-        # result = filecmp.cmp(backup_file, test_generated_file)
-        # print(result)
-        # deep mode comparison: where the content of the files are compared.
-        result = filecmp.cmp(backup_file, test_generated_file, shallow=False)
-        print(result)
-        # self.assertTrue(result) # Fails if the output generated is not equal to the file stored in the data/test_output
-
+        self.doit(ps, "data/test_output/oscillator_2_withoutAnnotate")
 
     def test_runLearnHA_osci_withAnnotate(self):
-
-        ps = {}
         print("Running test runLearnHA module with Oscillator model with type annotation")
-
+        ps = {}
         ps['input_filename'] = "data/test_data/simu_oscillator_2.txt"
         ps['output_directory'] = "_test/oscillator_2_withAnnotate"
-
         ps['clustering_method'] = ClusteringMethod.DTW
-
         ps['ode_degree'] = 1
         ps['modes'] = 4
         ps['guard_degree'] = 1
@@ -106,35 +98,14 @@ class TestLearnHA(unittest.TestCase):
         ps['lmm_step_size'] = 5
         ps['annotations'] = {0: Continuous(), 1: Continuous()}
 
-        opts = Options(**ps)
-
-        list_of_trajectories = parse_trajectories(opts.input_filename)
-
-        raw = infer_model(list_of_trajectories, opts)
-        write_HA(opts, raw) # prints an HA model file
-
-        backup_file = "data/test_output/oscillator_2_with_annotation.txt"
-        test_generated_file = os.path.join(opts.output_directory, 'learned_HA.txt')
-
-        # shallow mode comparison: where only metadata of the files are compared like the size, date modified, etc.
-        # result = filecmp.cmp(backup_file, test_generated_file)
-        # print(result)
-        # deep mode comparison: where the content of the files are compared.
-        result = filecmp.cmp(backup_file, test_generated_file, shallow=False)
-        print(result)
-        # self.assertTrue(result) # Fails if the output generated is not equal to the file stored in the data/test_output
+        self.doit(ps, "data/test_output/oscillator_2_withAnnotate")
 
     def test_runLearnHA_bball_withAnnotate(self):
-
-        ps = {}
         print("Running test runLearnHA module with Bouncing Ball model with type annotation")
-        # python3 run.py --input-filename data/test_data/simu_bball_4.txt --output-filename bball_4.txt --modes 1 --clustering-method dtw --ode-degree 1 --guard-degree 1 --segmentation-error-tol 0.1 --segmentation-fine-error-tol 0.9 --filter-last-segment 1 --threshold-correlation 0.8 --threshold-distance 9.0 --size-input-variable 1 --size-output-variable 2 --variable-types 'x0=t1,x1=t1' --pool-values '' --ode-speedup 50 --is-invariant False
-
+        ps = {}
         ps['input_filename'] = "data/test_data/simu_bball_4.txt"
         ps['output_directory'] = "_test/bball_4"
-
         ps['clustering_method'] = ClusteringMethod.DTW
-
         ps['ode_degree'] = 1
         ps['modes'] = 1
         ps['guard_degree'] = 1
@@ -155,23 +126,7 @@ class TestLearnHA(unittest.TestCase):
         ps['filter_last_segment'] = True
         ps['annotations'] = {0: Continuous(), 1: Constant(0)}
 
-        opts = Options(**ps)
-
-        list_of_trajectories = parse_trajectories(opts.input_filename)
-
-        raw = infer_model(list_of_trajectories, opts)
-        write_HA(opts, raw)
-
-        backup_file = "data/test_output/bball_4.txt"
-        test_generated_file = os.path.join(opts.output_directory, 'learned_HA.txt')
-
-        # shallow mode comparison: where only metadata of the files are compared like the size, date modified, etc.
-        # result = filecmp.cmp(backup_file, test_generated_file)
-        # print(result)
-        # deep mode comparison: where the content of the files are compared.
-        result = filecmp.cmp(backup_file, test_generated_file, shallow=False)
-        print(result)
-        self.assertTrue(result) # Fails if the output generated is not equal to the file stored in the data/test_output
+        self.doit(ps, "data/test_output/bball_4")
 
 if __name__ == '__main__':
     unittest.main()
