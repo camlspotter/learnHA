@@ -2,6 +2,7 @@ from os import path
 import matlab
 from infer_ha.matlab_engine import matlab_engine
 from infer_ha.simulation_input import Simulation_input
+import infer_ha.utils.io as utils_io
 
 def simulate(script_file : str,
              output_file : str,
@@ -34,7 +35,7 @@ def simulate_list(script_file : str,
                   input_variables : list[str],
                   output_variables : list[str],
                   inputs : list[Simulation_input]) -> None:
-    with open(output_file, 'w') as oc:
+    with utils_io.open_for_write(output_file) as oc:
         for (i,input) in enumerate(inputs):
             print("Simulating", i, input)
             # XXX Currently we need a dirty tempfile tech to prevent the Matlab script
