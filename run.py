@@ -33,10 +33,5 @@ def runLearnHA() -> None:  # Calling the implementation from project BBC4CPS
     with utils_io.open_for_write(outputfilename) as f_out:
         f_out.write(json.dumps(asdict(ha), indent=2))
 
-    # ODE solver name is not given to run.py
-    outputfilename = os.path.join(opts.output_directory, "generate_learned_modelX_slx.m")
-    with utils_io.open_for_write(outputfilename) as f_out:
-        compile(f_out, ha, OdeSolverType.FIXED, "XXXODESOLVERXXX", "learned_model0", InvariantMode.INCLUDE_NONE)
-
 if __name__ == '__main__':
     runLearnHA()
