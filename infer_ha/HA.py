@@ -120,7 +120,7 @@ def build(raw : Raw) -> HybridAutomaton:
 
     vars = raw.input_variables + raw.output_variables
 
-    modes = [ build_Mode (id, vars, raw.output_variables, inv, odes) for (id, (inv, odes)) in enumerate(zip(raw.mode_inv, raw.G)) ]
+    modes = [ build_Mode (id, vars, raw.output_variables, inv, odes) for (id, (inv, odes)) in enumerate(zip(mode_inv, raw.G)) ]
 
     transs : list[Transition] = [ build_Transition(id, vars, raw.output_variables, trans) for (id, trans) in enumerate(raw.transitions) ]
 
