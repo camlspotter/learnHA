@@ -9,9 +9,9 @@ from typeguard import typechecked
 from pydantic.dataclasses import dataclass
 from typing import Optional
 
-from infer_ha.simulate import simulate_list
-from infer_ha.simulation_input import generate_simulation_input, SignalType
-from infer_ha.simulation_script import generate_simulation_script
+from infer_ha.simulation.simulate import simulate_list
+from infer_ha.simulation.simulation_input import generate_simulation_input, SignalType
+from infer_ha.simulation.simulation_script import generate_simulation_script
 from infer_ha.utils.argparse_bool import argparse_bool
 import infer_ha.utils.io as utils_io
 from infer_ha.invariant import Invariant, invariant_of_string
@@ -66,7 +66,8 @@ def get_options() -> Options:
     parser.add_argument('-S', '--seed', help='Seed', type=int, required=False)
     parser.add_argument('-n', '--nsimulations', help='Number of simulations', type=int, default=1, required=False)
 
-    args = vars(parser.parse_args())
+    parsed = parser.parse_args()
+    args = vars(parsed)
 
     args['input_variables'] = [] if args['input_variables'] == "" else args['input_variables'].split(",")
     args['output_variables'] = [] if args['output_variables'] == "" else args['output_variables'].split(",")
@@ -81,12 +82,7 @@ def get_options() -> Options:
 
 opts = get_options()
 
-try:
-    os.mkdir('_test')
-except:
-    pass
-
-script_file= "_test/simulate_model.m"
+script_file= os.path.join(os.path.dirname(opts.output_file), "simulate_model.m")
 
 with utils_io.open_for_write(script_file) as out:
     generate_simulation_script(out= out,
@@ -97,6 +93,8 @@ with utils_io.open_for_write(script_file) as out:
                                fixed_interval_data= opts.fixed_interval_data,
                                input_variables= opts.input_variables,
                                output_variables = opts.output_variables)
+
+print("Random seed", opts.seed)
 
 rng= random.Random() if opts.seed is None else random.Random(opts.seed)
 
