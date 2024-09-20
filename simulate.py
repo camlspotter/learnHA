@@ -9,12 +9,12 @@ from typeguard import typechecked
 from pydantic.dataclasses import dataclass
 from typing import Optional
 
-from infer_ha.simulation.simulate import simulate_list
-from infer_ha.simulation.simulation_input import generate_simulation_input, SignalType
-from infer_ha.simulation.simulation_script import generate_simulation_script
-from infer_ha.utils.argparse_bool import argparse_bool
-import infer_ha.utils.io as utils_io
-from infer_ha.invariant import Invariant, invariant_of_string
+from hybridlearner.simulation import simulate_list
+from hybridlearner.simulation.input import generate_simulation_input, SignalType
+from hybridlearner.simulation.script import generate_simulation_script
+from hybridlearner.utils.argparse_bool import argparse_bool
+import hybridlearner.utils.io as utils_io
+from hybridlearner.invariant import Invariant, invariant_of_string
 
 @dataclass
 class Options:

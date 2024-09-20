@@ -4,10 +4,10 @@ import json
 import argparse
 from dataclasses import dataclass
 from typeguard import typechecked
-import infer_ha.utils.io as utils_io
-from infer_ha.slx_compiler import OdeSolverType, InvariantMode, compile
-from infer_ha.HA import HybridAutomaton
-from infer_ha.matlab_engine import matlab_engine
+import hybridlearner.utils.io as utils_io
+from hybridlearner.slx_compiler import OdeSolverType, InvariantMode, compile
+from hybridlearner.HA import HybridAutomaton
+from hybridlearner.matlab_engine import matlab_engine
 
 @dataclass
 class Options:

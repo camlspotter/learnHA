@@ -18,9 +18,9 @@ import argparse
 from typeguard import typechecked
 from pydantic.dataclasses import dataclass
 
-import infer_ha.utils.io as utils_io
-from infer_ha.simulation_script import generate_simulation_script
-from infer_ha.utils.argparse_bool import argparse_bool
+import hybridlearner.utils.io as utils_io
+from hybridlearner.simulation.script import generate_simulation_script
+from hybridlearner.utils.argparse_bool import argparse_bool
 
 @dataclass
 class Options:

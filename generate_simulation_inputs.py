@@ -11,9 +11,9 @@ from dataclasses import asdict
 from typeguard import typechecked
 from pydantic.dataclasses import dataclass
 
-from infer_ha.simulation_input import generate_simulation_input, SignalType
-import infer_ha.utils.io as utils_io
-from infer_ha.invariant import Invariant, invariant_of_string
+from hybridlearner.simulation.input import generate_simulation_input, SignalType
+import hybridlearner.utils.io as utils_io
+from hybridlearner.invariant import Invariant, invariant_of_string
 
 @dataclass
 class Options:

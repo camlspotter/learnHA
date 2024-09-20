@@ -2,19 +2,19 @@ import os
 import json
 from dataclasses import asdict
 
-from infer_ha import infer_HA as learnHA     #infer_model, svm_classify
-from infer_ha.model_printer.print_HA import print_HA
-from infer_ha import HA
-from infer_ha.utils.commandline_parser import read_commandline_arguments
-from infer_ha.trajectories import parse_trajectories
-import infer_ha.utils.io as utils_io
-from infer_ha.slx_compiler import compile, OdeSolverType, InvariantMode
+from hybridlearner.inference import infer_model
+from hybridlearner.obsolete.model_printer.print_HA import print_HA
+from hybridlearner import HA
+from hybridlearner.inference.options import read_commandline_arguments
+from hybridlearner.trajectory import parse_trajectories
+import hybridlearner.utils.io as utils_io
+from hybridlearner.slx_compiler import compile, OdeSolverType, InvariantMode
 
 def runLearnHA() -> None:  # Calling the implementation from project BBC4CPS
     '''
     Hints:
-        To analysis the segmentation output: in the file "learnHA/infer_ha/infer_HA.py" uncomment the line 24 having "plot_segmentation_new(segmented_traj, L_y, t_list, Y, stepM)"
-        To analysis the clustering output: in the file "learnHA/infer_ha/infer_HA.py" uncomment the line 136 having "plot_after_clustering(t_list, L_y, P_modes, Y, stepM)"
+        To analysis the segmentation output: in the file "learnHA/hybridlearner.inference.py" uncomment the line 24 having "plot_segmentation_new(segmented_traj, L_y, t_list, Y, stepM)"
+        To analysis the clustering output: in the file "learnHA/hybridlearner.inference.py" uncomment the line 136 having "plot_after_clustering(t_list, L_y, P_modes, Y, stepM)"
     @return:
     '''
     # input_filename, output_filename, list_of_trajectories, learning_parameters = read_command_line(sys.argv)
@@ -22,7 +22,7 @@ def runLearnHA() -> None:  # Calling the implementation from project BBC4CPS
 
     list_of_trajectories = parse_trajectories(opts.input_filename)
 
-    raw = learnHA.infer_model(list_of_trajectories, opts)
+    raw = infer_model(list_of_trajectories, opts)
 
     outputfilename = os.path.join(opts.output_directory, "learned_HA.txt")
     with utils_io.open_for_write(outputfilename) as f_out:

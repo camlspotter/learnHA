@@ -3,11 +3,11 @@ import unittest
 import os
 import random
 import filecmp
-import infer_ha.utils.io as utils_io
-from infer_ha.range import Range
-from infer_ha.simulation_input import generate_simulation_input, SignalType
-from infer_ha.simulation_script import generate_simulation_script
-from infer_ha.simulate import simulate_list
+import hybridlearner.utils.io as utils_io
+from hybridlearner.range import Range
+from hybridlearner.simulation.input import generate_simulation_input, SignalType
+from hybridlearner.simulation.script import generate_simulation_script
+from hybridlearner.simulation import simulate_list
 
 class Test(unittest.TestCase):
 

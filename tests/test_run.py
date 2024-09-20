@@ -5,13 +5,13 @@ import os
 import json
 from dataclasses import asdict
 
-from infer_ha.infer_HA import infer_model
-from infer_ha import HA
-from infer_ha.model_printer.print_HA import print_HA
-from infer_ha.utils.commandline_parser import ClusteringMethod, Options
-from infer_ha.trajectories import parse_trajectories
-import infer_ha.utils.io as utils_io
-from infer_ha.annotation import Continuous, Constant
+from hybridlearner.inference import infer_model
+from hybridlearner import HA
+from hybridlearner.obsolete.model_printer.print_HA import print_HA
+from hybridlearner.inference.options import ClusteringMethod, Options
+from hybridlearner.trajectory import parse_trajectories
+import hybridlearner.utils.io as utils_io
+from hybridlearner.inference.annotation import Continuous, Constant
 
 # To execute this test from the project folder "learnHA" type the command
 # amit@amit-Alienware-m15-R4:~/MyPythonProjects/learningHA/learnHA$ python -m unittest discover -v
@@ -43,8 +43,8 @@ class TestLearnHA(unittest.TestCase):
 
         backup_file = os.path.join(golden_dir, "learned_HA.json")
         test_generated_file = os.path.join(opts.output_directory, 'learned_HA.json')
-        assert filecmp.cmp(backup_file, test_generated_file, shallow=False)
-        
+        assert filecmp.cmp(backup_file, test_generated_file, shallow=False), \
+            f"Golden test fails: golden: {backup_file} generated: {test_generated_file}"
 
     def test_runLearnHA_osci_withoutAnnotate(self):
         print("Running test runLearnHA module")
