@@ -15,7 +15,7 @@ class ClusteringMethod(Enum):
    
 @dataclass
 class Options:
-    input_filename : str
+    input_filenames : list[str]
     output_directory : str
     ode_degree : int # default=1
     modes : int # default=1
@@ -40,7 +40,7 @@ class Options:
 def check_options(d : dict[str,Any]) -> Options:
     return Options(**d)
 
-def read_commandline_arguments() -> Options:
+def get_options() -> Options:
     """
     This function calls Python's built-in class ArgumentParser to read command line arguments that are necessary for our
     HA learning algorithm.
@@ -54,7 +54,6 @@ def read_commandline_arguments() -> Options:
     """
 
     parser = argparse.ArgumentParser(description='Learns HA model from input--output trajectories')
-    parser.add_argument('-i', '--input-filename', help='input FileName containing trajectories', type=str, required=True)
     parser.add_argument('--output-directory', help='output directory', required=True)
     parser.add_argument('-c', '--clustering-method', help='Clustering Algorithm. Options are: dtw (default), dbscan, piecelinear', type=str, choices=['dtw', 'dbscan', 'piecelinear'], default='dtw', required=False)
     parser.add_argument('-d', '--ode-degree', help='Degree of polynomial in ODE. Set to 1 by default', type=int, default=1, required=False)
@@ -94,6 +93,8 @@ def read_commandline_arguments() -> Options:
     parser.add_argument('--output-variables',
                         help='Output variable names separated by commas',
                         type=hybridlearner.parser.comma_separated_variables, required=True)
+    parser.add_argument('-i', '--input-filename', help='input trajectory filename', type=str, required=False)
+    parser.add_argument('input-filenames', help='Input trajectory filenames', type=list[str], required=False)
 
     args = vars(parser.parse_args())    #  create a dict structure of the arguments
 
@@ -107,6 +108,17 @@ def read_commandline_arguments() -> Options:
     # annotations
     args['annotations'] = parse_annotation_tbl(args['input_variables'], args['output_variables'], args['annotations'])
 
+    # input_filenames
+    if 'input_filename' in args and 'input_filenames' in args:
+        assert False, "--input-filename and input-filenames cannot coexist"
+
+    if 'input_filename' in args:
+        args['input_filenames'] = [args['input_filename']]
+        del args['input_filename']
+
+    if not 'input_filenames' in args:
+        assert False, "At least one input filename must be given"
+        
     return Options(**args)
 
 # This must be repaced!
@@ -198,4 +210,4 @@ def process_type_annotation_parameters(parameters : dict[str,Any]) -> Annotation
     return convert()
 
 if __name__ == '__main__':
-    read_commandline_arguments()
+    get_options()

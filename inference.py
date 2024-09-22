@@ -5,8 +5,8 @@ from dataclasses import asdict
 from hybridlearner.inference import infer_model
 from hybridlearner.obsolete.model_printer.print_HA import print_HA
 from hybridlearner import HA
-from hybridlearner.inference.options import read_commandline_arguments
-from hybridlearner.trajectory import parse_trajectories
+from hybridlearner.inference.options import get_options
+from hybridlearner.trajectory import parse_trajectories_files
 import hybridlearner.utils.io as utils_io
 from hybridlearner.slx_compiler import compile, OdeSolverType, InvariantMode
 
@@ -17,10 +17,9 @@ def runLearnHA() -> None:  # Calling the implementation from project BBC4CPS
         To analysis the clustering output: in the file "learnHA/hybridlearner.inference.py" uncomment the line 136 having "plot_after_clustering(t_list, L_y, P_modes, Y, stepM)"
     @return:
     '''
-    # input_filename, output_filename, list_of_trajectories, learning_parameters = read_command_line(sys.argv)
-    opts = read_commandline_arguments()   # reads the command line values also can use -h to see help on usages
+    opts = get_options()
 
-    list_of_trajectories = parse_trajectories(opts.input_filename)
+    list_of_trajectories = parse_trajectories_files(opts.input_filenames)
 
     raw = infer_model(list_of_trajectories, opts)
 
