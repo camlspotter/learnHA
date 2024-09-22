@@ -94,7 +94,7 @@ def get_options() -> Options:
                         help='Output variable names separated by commas',
                         type=hybridlearner.parser.comma_separated_variables, required=True)
     parser.add_argument('-i', '--input-filename', help='input trajectory filename', type=str, required=False)
-    parser.add_argument('input-filenames', help='Input trajectory filenames', type=list[str], required=False)
+    parser.add_argument('input-filenames', help='Input trajectory filenames', type=list[str])
 
     args = vars(parser.parse_args())    #  create a dict structure of the arguments
 
