@@ -65,12 +65,12 @@ def parse_trajectories_files(paths : list[str]) -> Trajectories:
     trs_list = [ parse_trajectories(path) for path in paths ]
 
     stepsize = trs_list[0].stepsize
-    nvars = trs_list[0].trajectories[0][0].shape[1]
+    nvars = trs_list[0].trajectories[0][1].shape[1]
 
     if not all(lambda trs: trs.stepsize == stepsize for trs in trs_list):
         assert False, "Trajectories files must have a unique stepsize"
 
-    if not all(lambda trs: trs.trajectories[0][0].shape[1] == nvars for trs in trs_list):
+    if not all(lambda trs: trs.trajectories[0][1].shape[1] == nvars for trs in trs_list):
         assert False, "Trajectories files must have the same number of variables"
 
     trajectories = [ tr for trs in trs_list for tr in trs.trajectories ]
