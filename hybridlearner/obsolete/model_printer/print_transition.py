@@ -1,7 +1,7 @@
 
 from hybridlearner.obsolete.model_printer.print_guard import *
 from hybridlearner.obsolete.model_printer.print_assignment import *
-from hybridlearner.utils import misc_math_functions as myUtil
+from hybridlearner.utils import math as myUtil
 
 def print_transition(f_out, transitions, system_dim, boundary_order):
     """

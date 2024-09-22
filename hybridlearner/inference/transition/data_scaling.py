@@ -3,7 +3,7 @@ import numpy as np
 from numpy.typing import NDArray
 import os
 from hybridlearner.types import MATRIX
-from hybridlearner.utils import misc_math_functions as myUtil
+from hybridlearner.utils import math as myUtil
 from hybridlearner.utils import io
 
 def create_data(output_filename : str,

@@ -9,7 +9,7 @@ import sklearn.cluster as skc
 from sklearn import linear_model
 import itertools
 
-from hybridlearner.utils.util_functions import matrowex
+from hybridlearner.utils.math import matrowex
 
 def convert_clfs_to_coeffArray_selected_data(clfs, size_of_input_variable):
     selected_cluster_coef = []

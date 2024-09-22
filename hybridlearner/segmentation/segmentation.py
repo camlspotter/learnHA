@@ -8,7 +8,7 @@ from numpy.typing import NDArray
 from sklearn import linear_model
 from pydantic.dataclasses import dataclass
 
-from hybridlearner.utils.util_functions import rel_diff, matrowex
+from hybridlearner.utils.math import rel_diff, matrowex
 from hybridlearner.inference.options import ClusteringMethod
 from hybridlearner.types import MATRIX, Span
 

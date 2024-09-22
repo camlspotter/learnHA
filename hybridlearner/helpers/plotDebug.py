@@ -6,7 +6,7 @@ from operator import itemgetter
 import itertools
 
 from hybridlearner.inference.clustering.utils import create_simple_per_segmented_positions_exact
-from hybridlearner.utils.util_functions import rel_diff
+from hybridlearner.utils.math import rel_diff
 from hybridlearner.utils import io
 from hybridlearner.types import Span
 

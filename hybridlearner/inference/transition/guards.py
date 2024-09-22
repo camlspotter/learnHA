@@ -12,8 +12,8 @@ import os
 from libsvm.commonutil import svm_read_problem, csr_find_scale_param, csr_scale
 from libsvm.svmutil import svm_save_model, svm_predict
 # from libsvm.svmutil import *
-from hybridlearner.utils.util_functions import rel_diff
-from hybridlearner.utils import misc_math_functions as myUtil
+from hybridlearner.utils.math import rel_diff
+from hybridlearner.utils import math as myUtil
 from hybridlearner.types import MATRIX
 from .gridSearch_fromSKLearn import gridSearchStart
 from .data_scaling import create_data, inverse_scale
