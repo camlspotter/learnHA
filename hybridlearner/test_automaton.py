@@ -1,5 +1,5 @@
 import unittest
-from hybridlearner.HA import *
+from hybridlearner.automaton import *
 
 class Test(unittest.TestCase):
     def test_build_polynomial(self):

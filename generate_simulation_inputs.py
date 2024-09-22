@@ -13,7 +13,7 @@ from pydantic.dataclasses import dataclass
 
 from hybridlearner.simulation.input import generate_simulation_input, SignalType, parse_signal_types
 import hybridlearner.utils.io as utils_io
-from hybridlearner.invariant import Invariant, invariant_of_string
+from hybridlearner.types import Invariant, invariant_of_string
 from hybridlearner.common import options as common_options
 from hybridlearner.simulation import options as simulation_options
 

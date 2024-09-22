@@ -5,7 +5,7 @@ import argparse
 
 from hybridlearner.inference import infer_model
 from hybridlearner.obsolete.model_printer.print_HA import print_HA
-from hybridlearner import HA
+from hybridlearner import automaton
 from hybridlearner.common import options as common_options
 from hybridlearner.inference import options as inference_options
 from hybridlearner.trajectory import parse_trajectories_files
@@ -60,7 +60,7 @@ def runLearnHA() -> None:  # Calling the implementation from project BBC4CPS
     with utils_io.open_for_write(outputfilename) as f_out:
         print_HA(f_out, raw)
 
-    ha = HA.build(raw)
+    ha = automaton.build(raw)
     outputfilename = os.path.join(opts.output_directory, "learned_HA.json")
     with utils_io.open_for_write(outputfilename) as f_out:
         f_out.write(json.dumps(asdict(ha), indent=2))

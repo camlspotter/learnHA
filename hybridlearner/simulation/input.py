@@ -2,8 +2,8 @@ from enum import Enum
 from pydantic.dataclasses import dataclass
 from dataclasses import asdict
 import random
-from hybridlearner.range import Range
-from hybridlearner.invariant import Invariant
+from hybridlearner.types import Range
+from hybridlearner.types import Invariant
 import json
 
 class SignalType(Enum):

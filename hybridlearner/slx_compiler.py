@@ -3,10 +3,10 @@ from io import TextIOWrapper
 import textwrap
 from dataclasses import dataclass
 
-from hybridlearner.HA import HybridAutomaton, Polynomial
-from hybridlearner.invariant import Invariant
-import hybridlearner.invariant
-import hybridlearner.HA
+from hybridlearner.automaton import HybridAutomaton
+from hybridlearner.types import Invariant, Polynomial
+import hybridlearner.types
+import hybridlearner.automaton
 
 oneVersusOne_oneVersusRest : int = 1  #XXX enum?
 
@@ -35,10 +35,10 @@ class HA(HybridAutomaton):
         return v in self.output_variables
 
     def string_of_polynomial(self, p : Polynomial) -> str:
-        return hybridlearner.HA.string_of_polynomial({ ("1" if k == "1" else f"x{self.variable_rev_dict[k]}") : v for (k,v) in p.items() })
+        return hybridlearner.types.string_of_polynomial({ ("1" if k == "1" else f"x{self.variable_rev_dict[k]}") : v for (k,v) in p.items() })
 
     def string_of_invariant(self, inv : Invariant) -> str:
-        return hybridlearner.invariant.string_of_invariant({ f"x{self.variable_rev_dict[k]}" : r for (k,r) in inv.items() })
+        return hybridlearner.types.string_of_invariant({ f"x{self.variable_rev_dict[k]}" : r for (k,r) in inv.items() })
 
 # Adds variable-index tables
 def extend_HA(ha_orig : HybridAutomaton) -> HA:

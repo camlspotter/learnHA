@@ -1,5 +1,5 @@
 import unittest
-from hybridlearner.range import *
+from hybridlearner.types import *
 
 class Test(unittest.TestCase):
     def test_range(self) -> None:

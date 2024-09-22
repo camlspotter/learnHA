@@ -4,7 +4,7 @@ import os
 import random
 import filecmp
 import hybridlearner.utils.io as utils_io
-from hybridlearner.range import Range
+from hybridlearner.types import Range
 from hybridlearner.simulation.input import generate_simulation_input, SignalType
 from hybridlearner.simulation.script import generate_simulation_script
 from hybridlearner.simulation import simulate_list

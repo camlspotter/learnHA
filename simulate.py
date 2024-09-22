@@ -14,7 +14,7 @@ from hybridlearner.simulation.input import generate_simulation_input, parse_sign
 from hybridlearner.simulation.script import generate_simulation_script
 from hybridlearner.utils.argparse_bool import argparse_bool
 import hybridlearner.utils.io as utils_io
-from hybridlearner.invariant import Invariant, invariant_of_string
+from hybridlearner.types import Invariant, invariant_of_string
 from hybridlearner.common import options as common_options
 from hybridlearner.simulation import options as simulation_options
 

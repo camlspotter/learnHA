@@ -1,6 +1,6 @@
 import pyparsing as pp
 from hybridlearner.astdsl import parse_expr, Variable, Expr, Tuple
-from hybridlearner.range import Range
+from hybridlearner.types import Range
 
 variable = pp.Word(pp.alphas, pp.alphanums+"_")
 

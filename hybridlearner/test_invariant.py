@@ -1,5 +1,5 @@
 import unittest
-from hybridlearner.invariant import *
+from hybridlearner.types import *
 from hybridlearner import parser
 
 class Test(unittest.TestCase):

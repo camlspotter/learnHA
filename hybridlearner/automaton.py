@@ -3,16 +3,10 @@ from typeguard import typechecked
 from pydantic.dataclasses import dataclass
 from pydantic import ConfigDict
 import numpy as np
-from hybridlearner.invariant import Invariant
-from hybridlearner.range import Range
+from hybridlearner.types import Invariant, Range, Polynomial, build_polynomial
 from hybridlearner.inference.transition import Transition as RawTransition
 from hybridlearner.inference.transition.assignment import Assignment
 from hybridlearner.inference import Raw
-
-Polynomial = dict[str,float] # Σ_i1x_i +c
-
-def string_of_polynomial(p : Polynomial) -> str:
-    return " + ".join([( f"{v}" if k == "1" else f"{v} * {k}") for (k,v) in p.items()])
 
 @dataclass
 class Transition:
@@ -21,11 +15,6 @@ class Transition:
     dst : int
     guard : Polynomial
     assignments : dict[str, Polynomial]
-
-def build_polynomial(vars : list[str], coeffs_and_intercept : list[float] ) -> Polynomial:
-    assert len(vars) + 1 == len(coeffs_and_intercept)
-    return { (vars[i] if i < len(coeffs_and_intercept) - 1 else "1"): c
-             for (i, c) in enumerate(coeffs_and_intercept) }
 
 def build_assignments(vars : list[str], output_vars : list[str], assignment : Assignment) -> dict[str, Polynomial]:
     (coeffs, intercepts) = assignment
