@@ -6,10 +6,7 @@ import json
 from .annotation import *
 
 class Test(unittest.TestCase):
-    def test_json(self):
-        print(list(map(asdict, [Pool([1,2,3]), Constant(2), Continuous()]))) #type: ignore
-        
-    def test_parse_annotation(self):
+    def test_parse_annotation(self) -> None:
         assert parse_annotation('continuous') == Continuous()
         assert parse_annotation('pool(1.2, 3, 9.0)') == Pool([1.2, 3, 9.0])
         assert parse_annotation('constant(3.4)') == Constant(3.4)

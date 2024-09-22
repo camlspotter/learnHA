@@ -12,6 +12,7 @@ from pydantic import ConfigDict
 from hybridlearner.segmentation import two_fold_segmentation, segmented_trajectories, Segment
 from hybridlearner.inference.clustering import select_clustering
 from hybridlearner.inference.invariant import compute_invariant
+from hybridlearner.inference.annotation import convert_annotation_dict, AnnotationDict, AnnotationTbl
 from hybridlearner.segmentation.derivatives import diff_method_backandfor
 from hybridlearner.inference.transition import Transition, compute_transitions
 from hybridlearner.trajectory import Trajectory, Trajectories, preprocess_trajectories
@@ -36,7 +37,10 @@ class Raw:
     input_variables : list[str]
     output_variables : list[str]
 
-def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
+def infer_model(list_of_trajectories : Trajectories,
+                input_variables : list[str],
+                output_variables : list[str],
+                opts : Options) -> Raw:
     """
     The main module to infer an HA model for the input trajectories.
 
@@ -76,11 +80,12 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
     boundary_order = opts.guard_degree
     ep = opts.segmentation_error_tol
     ep_backward = opts.segmentation_fine_error_tol
-    size_of_input_variables = len(opts.input_variables)
-    annotations =  opts.annotations # processed and stored in data-struct
+    size_of_input_variables = len(input_variables)
     isInvariant = opts.is_invariant
     clustering_method = opts.clustering_method
     stepM = opts.lmm_step_size # 2 for engine-timing  #  the step size of Linear Multi-step Method (step M)
+
+    annotations : AnnotationTbl = convert_annotation_dict(input_variables, output_variables, opts.annotations)
 
     # Concatenate all the trajectories.
     t : MATRIX # times, 1D 
@@ -105,7 +110,7 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
     npoints : int
     A, b1, b2, Y, npoints = diff_method_backandfor(y, maxorder, list_of_trajectories.stepsize, stepM)
     # L_y: length (nrows) of y
-    L_y = len(opts.input_variables) + len(opts.output_variables)
+    L_y = len(input_variables) + len(output_variables)
 
     # ********* Debugging ***********************
     # output_derivatives(b1, b2, Y, size_of_input_variables)
@@ -151,7 +156,7 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
 
     P_modes : list[list[Segment]]
     G : list[MATRIX]
-    P_modes, G = select_clustering(segments, A, b1, clfs, Y, t, L_y, opts, stepM) # when len(res) < 2 compute P and G for the single mode
+    P_modes, G = select_clustering(segments, A, b1, clfs, Y, t, L_y, input_variables, opts, stepM) # when len(res) < 2 compute P and G for the single mode
 
     # print("Fixing Dropped points ...") # I dont need to fix
     # P, Drop = dropclass(P, G, drop, A, b1, Y, ep, stepsize)  # appends the dropped point to a cluster that fits well
@@ -201,8 +206,8 @@ def infer_model(list_of_trajectories : Trajectories, opts : Options) -> Raw:
               initial_location= init_location,
               ode_degree= opts.ode_degree,
               guard_degree= opts.guard_degree,
-              input_variables= opts.input_variables,
-              output_variables= opts.output_variables
+              input_variables= input_variables,
+              output_variables= output_variables
               )
 
     return typecheck_ha(raw)

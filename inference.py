@@ -1,14 +1,47 @@
 import os
 import json
 from dataclasses import asdict
+import argparse
 
 from hybridlearner.inference import infer_model
 from hybridlearner.obsolete.model_printer.print_HA import print_HA
 from hybridlearner import HA
-from hybridlearner.inference.options import get_options
+from hybridlearner.common import options as common_options
+from hybridlearner.inference import options as inference_options
 from hybridlearner.trajectory import parse_trajectories_files
 import hybridlearner.utils.io as utils_io
 from hybridlearner.slx_compiler import compile, OdeSolverType, InvariantMode
+
+from pydantic.dataclasses import dataclass
+from typeguard import typechecked
+
+@dataclass
+class Options(common_options.Options,
+              inference_options.Options):
+    input_filenames : list[str]
+
+@typechecked
+def get_options() -> Options:
+    parser = argparse.ArgumentParser(description="Hybrid Automaton inference")
+    inference_options.add_argument_group(parser)
+    common_options.add_argument_group(parser)
+    parser.add_argument('-i', '--input-filename', help='input trajectory filename (OBSOLETE)', type=str, required=False)
+    parser.add_argument('input-filenames', help='Input trajectory filenames', type=list[str], nargs='*')
+
+    args = vars(parser.parse_args())
+
+    # input_filenames
+    if 'input_filename' in args and 'input_filenames' in args:
+        assert False, "--input-filename and input-filenames cannot coexist"
+
+    if 'input_filename' in args:
+        args['input_filenames'] = [args['input_filename']]
+        del args['input_filename']
+
+    if not 'input_filenames' in args:
+        assert False, "At least one input filename must be given"
+         
+    return Options(**args)
 
 def runLearnHA() -> None:  # Calling the implementation from project BBC4CPS
     '''
@@ -21,7 +54,7 @@ def runLearnHA() -> None:  # Calling the implementation from project BBC4CPS
 
     list_of_trajectories = parse_trajectories_files(opts.input_filenames)
 
-    raw = infer_model(list_of_trajectories, opts)
+    raw = infer_model(list_of_trajectories, opts.input_variables, opts.output_variables, opts)
 
     outputfilename = os.path.join(opts.output_directory, "learned_HA.txt")
     with utils_io.open_for_write(outputfilename) as f_out:

@@ -13,6 +13,15 @@ class SignalType(Enum):
     # SPLINE = "spline"
     # SINE_WAVE = "sine-wave"
 
+def parse_signal_types(s : str) -> dict[str,SignalType]:
+    def parse_vt(s : str) -> tuple[str,SignalType]:
+        match s.split(":"):
+            case (var, vt):
+                return (var, SignalType(vt))
+            case _:
+                assert False, "Invalid number of var type: " + s
+    return dict([parse_vt(s) for s in s.split(",")])
+
 Signal = list[tuple[float, float]]  # (time, value)
 
 @dataclass

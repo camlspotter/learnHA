@@ -18,7 +18,8 @@ class Constant:
     constant : float
 
 Annotation = Union[Continuous, Pool, Constant]
-AnnotationTbl = dict[int, Annotation] # list[tuple[int, str, Optional[Annotation]]]
+AnnotationDict = dict[str, Annotation]
+AnnotationTbl = dict[int, Annotation]  # AnnotationDict replaced its variable names by variable indices
 
 def expr_to_annotation(e : Expr) -> Annotation:
     def num(a : Expr) -> float:
@@ -40,7 +41,7 @@ def expr_to_annotation(e : Expr) -> Annotation:
 def parse_annotation(s : str) -> Annotation:
     return expr_to_annotation(parse_expr(s))
 
-def expr_to_annotation_list(e : Expr) -> dict[str, Annotation]:
+def expr_to_annotation_dict(e : Expr) -> AnnotationDict:
     match e:
         case Dict(kvs):
             def var(k : Expr) -> str:
@@ -54,19 +55,18 @@ def expr_to_annotation_list(e : Expr) -> dict[str, Annotation]:
         case _:
             assert False, f"Invalid annotation list: {unparse_expr(e)}"
 
-def parse_annotation_list(s : str) -> dict[str, Annotation]:
+def parse_annotation_dict(s : str) -> AnnotationDict:
     if s == "":
         return {}
     else:
-        return expr_to_annotation_list(parse_expr(s))
+        return expr_to_annotation_dict(parse_expr(s))
 
-def parse_annotation_tbl(input_variables : list[str], output_variables : list[str], s : str) -> AnnotationTbl:
+def convert_annotation_dict(input_variables : list[str], output_variables : list[str], ad : AnnotationDict) -> AnnotationTbl:
     tbl = { v : i for (i, v) in enumerate(input_variables + output_variables) }
-    annotation_list = parse_annotation_list(s)
     try:
-        return { tbl[v] : a for (v, a) in annotation_list.items() }
+        return { tbl[v] : a for (v, a) in ad.items() }
     except KeyError as e:
-        print(f"Annotation {annotation_list} contains unknown variable {e}")
+        print(f"Annotation {ad} contains unknown variable {e}")
         raise
     
 def annotation_to_expr(a : Annotation) -> Expr:

@@ -23,6 +23,7 @@ def select_clustering(segmented_traj : list[Segment],
                       Y : NDArray[np.float64],
                       t : NDArray[np.float64],
                       L_y : int,
+                      input_variables : list[str],
                       opts : Options,
                       stepM : int) -> tuple[list[list[Segment]], list[NDArray[np.float64]]]:
     r"""
@@ -56,7 +57,7 @@ def select_clustering(segmented_traj : list[Segment],
     maxorder = opts.ode_degree
     num_mode = opts.modes
     ep = opts.segmentation_error_tol
-    size_of_input_variables = len(opts.input_variables)
+    size_of_input_variables = len(input_variables)
     method = opts.clustering_method
     maximum_ode_prune_factor = opts.ode_speedup
     correl_threshold = opts.threshold_correlation

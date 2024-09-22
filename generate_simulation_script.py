@@ -1,19 +1,8 @@
 # Usage examples
 #
-# pipenv run python ./generate_simulation_script.py \
-#   --script-file original_model_simulate.m.bypython \
-#   --simulink-model-file ../src/test_cases/engine/learn_ha_loop/ex_sldemo_bounce_Input.slx \
-#   --output-file _result/bball/AfterAnnotation/original_model_simulation_step.txt \
-#   --time-horizon 10 --sampling-time 0.01 --fixed-interval-data False \
-#   --input-variables "u" --output-variables "x,v"
-#
-# pipenv run python ./generate_simulation_script.py \
-#   --script-file learned_model_simulate0.m.bypython \
-#   --simulink-model-file learned_model0.slx \
-#   --output-file _result/bball/AfterAnnotation/learned_model_traces0.txt \
-#   --time-horizon 13.000000 --sampling-time 0.001000 --fixed-interval-data False \
-#   --input-variables "x0" --output-variables "x1,x2"
+# pipenv run python ./generate_simulation_script.py --script-file _out/original_model_simulate.m.bypython --simulink-model-file ../src/test_cases/engine/learn_ha_loop/ex_sldemo_bounce_Input.slx  --time-horizon 10 --sampling-time 0.01 --fixed-interval-data False --input-variables "u" --output-variables "x,v"
 
+import os
 import argparse
 from typeguard import typechecked
 from pydantic.dataclasses import dataclass
@@ -21,36 +10,30 @@ from pydantic.dataclasses import dataclass
 import hybridlearner.utils.io as utils_io
 from hybridlearner.simulation.script import generate_simulation_script
 from hybridlearner.utils.argparse_bool import argparse_bool
+from hybridlearner.common import options as common_options
 
 @dataclass
-class Options:
+class Options(common_options.Options):
     title : str
     script_file : str
     simulink_model_file : str
     time_horizon : float
     sampling_time : float
     fixed_interval_data : bool
-    input_variables : list[str]
-    output_variables : list[str]
 
 @typechecked
 def get_options() -> Options:
     parser = argparse.ArgumentParser(description="Simulation runner builder")
+    common_options.add_argument_group(parser)
     parser.add_argument('--title', help='Title', type=str, default= "DefaultTitle", required=False)
     parser.add_argument('--script-file', help='Script file destination', type=str, required=True)
-    parser.add_argument('--simulink-model-file', help='SLX model file', type=str, required=True)
+    parser.add_argument('--simulink-model-file', help='SLX model file', type=os.path.abspath, required=True)
     parser.add_argument('-Z', '--time-horizon', help='The global time horizon of computation', type=float, required=True)
     parser.add_argument('-s', '--sampling-time', help='The sampling time (time-step)', type=float, required=True)
     # Beware! argparse's type=bool is broken
     parser.add_argument('--fixed-interval-data', help='Extract simulation data as fixed interval.  False:data extracted based on the solver in the model.  True:data extracted as fixed time-step(recommended for equivalence testing)', type=argparse_bool, default=True, required=False)
-    parser.add_argument('--input-variables', help='Input variables', type=str, required=True)
-    parser.add_argument('--output-variables', help='Output variables', type=str, required=True)
-    args = vars(parser.parse_args())
 
-    args['input_variables'] = [] if args['input_variables'] == "" else args['input_variables'].split(",")
-    args['output_variables'] = [] if args['output_variables'] == "" else args['output_variables'].split(",")
-
-    return Options(**args)
+    return Options(**vars(parser.parse_args()))
 
 def run() -> None:
     opt = get_options()
