@@ -19,16 +19,13 @@ def simulate(script_file : str,
     matlab_engine.setvar("result_filename", output_file)
 
     for (var, v) in input.initial_output_values.items():
-        print("setvar", f"a{variable_index[var]}")
         matlab_engine.setvar(f"a{variable_index[var]}", v)
         
     for (var, ts) in input.input_value_ts.items():
         vs = matlab.double([v for (_, v) in ts])
-        print("setvar", f"{var}_input")
         matlab_engine.setvar(f"{var}_input", vs)
 
         ts = matlab.double([t for (t, _) in ts])
-        print("setvar", f"{var}_time")
         matlab_engine.setvar(f"{var}_time", ts)
 
     matlab_engine.run(script_file)
