@@ -14,4 +14,4 @@ eval "pipenv run python simulate.py $VARIABLE_OPTS $SIMULATION_OPTS --simulink-m
 
 eval "pipenv run python simulate.py $VARIABLE_OPTS $SIMULATION_OPTS --simulink-model-file _out/learned_HA.slx -o _out/learned0.txt -S 0 -n 64"
 
-pipenv run python distance.py --output-variables 'x,y' _out/bball0.txt _out/learned0.txt
+eval "pipenv run python distance.py $VARIABLE_OPTS _out/bball0.txt _out/learned0.txt"

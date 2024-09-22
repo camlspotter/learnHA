@@ -12,23 +12,20 @@ from hybridlearner.trajectory.distance import trajectory_dtw_distance
 from hybridlearner.trajectory import parse_trajectories
 import hybridlearner.parser
 import hybridlearner.utils.io as utils_io
+from hybridlearner.common import options as common_options
 
 @dataclass
-class Options:
+class Options(common_options.Options):
     file_a : str
     file_b : str
-    output_variables : list[str]
 
 @typechecked
 def get_options() -> Options:
     parser = argparse.ArgumentParser(description="Timeseries distance")
+    common_options.add_argument_group(parser)
     parser.add_argument('file_a', help='Timeseries file A', type=str)
     parser.add_argument('file_b', help='Timeseries file B', type=str)
-    parser.add_argument('--output-variables',
-                        help='Output variable names separated by commas',
-                        type=hybridlearner.parser.comma_separated_variables, required=True)
-    args = vars(parser.parse_args())
-    return Options(**args)
+    return Options(**vars(parser.parse_args()))
 
 opts = get_options()
 
