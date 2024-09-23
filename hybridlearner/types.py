@@ -46,6 +46,7 @@ def instance_of_invariant(rng : random.Random, inv : Invariant) -> dict[str,floa
 def invariant_of_string(s : str) -> Invariant:
     return cast(Invariant, parser.check_invariant(parser.invariant.parse_string(s, parse_all=True)))
 
+# XXX For now supports only 1st degree polynomials
 Polynomial = dict[str,float] # Σ_i1x_i +c
 
 def string_of_polynomial(p : Polynomial) -> str:
