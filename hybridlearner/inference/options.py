@@ -1,3 +1,4 @@
+import os
 from enum import Enum
 import argparse
 from typing import Optional, Any
@@ -35,7 +36,7 @@ class Options():
 def add_argument_group(parser : argparse.ArgumentParser) -> None:
     group = parser.add_argument_group('Inference options', 'Inference options')
 
-    group.add_argument('--output-directory', help='output directory', required=True)
+    group.add_argument('--output-directory', type=os.path.abspath, help='output directory', required=True)
     group.add_argument('-c', '--clustering-method', help='Clustering Algorithm. Options are: dtw (default), dbscan, piecelinear', type=ClusteringMethod, default=ClusteringMethod.DTW, required=False)
     group.add_argument('-d', '--ode-degree', help='Degree of polynomial in ODE. Set to 1 by default', type=int, default=1, required=False)
     group.add_argument('-m', '--modes', help='Number of modes. Used only in piecelinear clustering algorithm. Set to 1 by default',
