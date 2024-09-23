@@ -4,7 +4,6 @@ import numpy as np
 from numpy.typing import NDArray
 from pydantic.dataclasses import dataclass
 import random
-from hybridlearner import parser
 
 MATRIX = NDArray[np.float64]
 
@@ -41,10 +40,6 @@ def string_of_invariant(inv : Invariant) -> str:
 
 def instance_of_invariant(rng : random.Random, inv : Invariant) -> dict[str,float]:
     return { k : range.pick_random_point(rng) for (k, range) in inv.items() }
-
-@typechecked
-def invariant_of_string(s : str) -> Invariant:
-    return cast(Invariant, parser.check_invariant(parser.invariant.parse_string(s, parse_all=True)))
 
 # XXX For now supports only 1st degree polynomials
 Polynomial = dict[str,float] # Σ_i1x_i +c

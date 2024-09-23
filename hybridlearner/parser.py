@@ -1,6 +1,7 @@
 import pyparsing as pp
+from typing import cast
 from hybridlearner.astdsl import parse_expr, Variable, Expr, Tuple
-from hybridlearner.types import Range
+from hybridlearner.types import Invariant, Range
 
 variable = pp.Word(pp.alphas, pp.alphanums+"_")
 
@@ -81,3 +82,6 @@ def check_invariant(inv):
             return invariant
         case _:
             assert False
+
+def parse_invariant(s : str) -> Invariant:
+    return cast(Invariant, check_invariant(invariant.parse_string(s, parse_all=True)))

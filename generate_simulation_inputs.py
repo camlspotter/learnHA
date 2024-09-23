@@ -13,7 +13,8 @@ from pydantic.dataclasses import dataclass
 
 from hybridlearner.simulation.input import generate_simulation_input, SignalType, parse_signal_types
 import hybridlearner.utils.io as utils_io
-from hybridlearner.types import Invariant, invariant_of_string
+from hybridlearner.types import Invariant
+from hybridlearner.parser import parse_invariant
 from hybridlearner.common import options as common_options
 from hybridlearner.simulation import options as simulation_options
 
@@ -34,7 +35,7 @@ def get_options() -> Options:
     parser.add_argument('--seed', '-s', help='Random seed', type=int, default=None, required=False)
     parser.add_argument('--num-inputs', '-n', help='Number of inputs to be generated', type=int, required=True)
     parser.add_argument('-Z', '--time-horizon', help='The global time horizon of computation', type=float, required=True)
-    parser.add_argument('--invariant', help='Invariant', type=invariant_of_string, required=True)
+    parser.add_argument('--invariant', help='Invariant', type=parse_invariant, required=True)
     parser.add_argument('--number-of-cps', help='Number of control points', type=simulation_options.parse_number_of_cps, required=True)
     parser.add_argument('--signal-types', help='Variable types', type=parse_signal_types, required=True)
     parser.add_argument('--output-file', '-o', help='Output filename', type=str, default= None, required=False)
