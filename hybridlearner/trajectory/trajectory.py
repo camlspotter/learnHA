@@ -34,7 +34,7 @@ class Trajectories:
         for traj in self.trajectories:
             np.savetxt(oc, np.column_stack(traj), delimiter='\t', fmt='%.16g')
 
-def parse_trajectories(path : str) -> Trajectories:
+def load_trajectories(path : str) -> Trajectories:
     """
     Load trajectories from a tsv file.
     
@@ -61,13 +61,13 @@ def parse_trajectories(path : str) -> Trajectories:
 
         return Trajectories(trajectories, stepsize)
 
-def parse_trajectories_files(paths : list[str]) -> Trajectories:
+def load_trajectories_files(paths : list[str]) -> Trajectories:
     """
     Load trajectories from tsv files.
     
     - No check of stepsize uniqueness
     """
-    trs_list = [ parse_trajectories(path) for path in paths ]
+    trs_list = [ load_trajectories(path) for path in paths ]
 
     stepsize = trs_list[0].stepsize
     nvars = trs_list[0].trajectories[0][1].shape[1]

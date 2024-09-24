@@ -8,7 +8,7 @@ from hybridlearner.obsolete.model_printer.print_HA import print_HA
 from hybridlearner import automaton
 from hybridlearner.common import options as common_options
 from hybridlearner.inference import options as inference_options
-from hybridlearner.trajectory import parse_trajectories_files
+from hybridlearner.trajectory import load_trajectories_files
 import hybridlearner.utils.io as utils_io
 from hybridlearner.slx_compiler import compile, OdeSolverType, InvariantMode
 
@@ -52,7 +52,7 @@ def runLearnHA() -> None:  # Calling the implementation from project BBC4CPS
     '''
     opts = get_options()
 
-    list_of_trajectories = parse_trajectories_files(opts.input_filenames)
+    list_of_trajectories = load_trajectories_files(opts.input_filenames)
 
     raw = infer_model(list_of_trajectories, opts.input_variables, opts.output_variables, opts)
 

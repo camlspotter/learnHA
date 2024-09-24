@@ -9,7 +9,7 @@ from hybridlearner.inference import infer_model
 from hybridlearner import automaton
 from hybridlearner.obsolete.model_printer.print_HA import print_HA
 from hybridlearner.inference.options import ClusteringMethod, Options
-from hybridlearner.trajectory import parse_trajectories
+from hybridlearner.trajectory import load_trajectories
 import hybridlearner.utils.io as utils_io
 from hybridlearner.inference.annotation import Continuous, Constant
 
@@ -32,7 +32,7 @@ class TestLearnHA(unittest.TestCase):
     def doit(self, ps, golden_dir):
         opts = Options(**ps)
 
-        list_of_trajectories = parse_trajectories(opts.input_filename)
+        list_of_trajectories = load_trajectories(opts.input_filename)
         
         raw = infer_model(list_of_trajectories, opts)
         write_HA(opts, raw)  # prints an HA model file

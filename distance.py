@@ -9,7 +9,7 @@ from typing import Optional, cast
 from typeguard import typechecked
 from pydantic.dataclasses import dataclass
 from hybridlearner.trajectory.distance import trajectory_dtw_distance
-from hybridlearner.trajectory import parse_trajectories
+from hybridlearner.trajectory import load_trajectories
 import hybridlearner.parser
 import hybridlearner.utils.io as utils_io
 from hybridlearner.common import options as common_options
@@ -29,8 +29,8 @@ def get_options() -> Options:
 
 opts = get_options()
 
-a = parse_trajectories(opts.file_a)
-b = parse_trajectories(opts.file_b)
+a = load_trajectories(opts.file_a)
+b = load_trajectories(opts.file_b)
 
 assert a.stepsize == b.stepsize, f"Non equal stepsizes: {a.stepsize}, {b.stepsize}"
 assert len(a.trajectories) == len(b.trajectories), f"Non equal number of trajectories: {len(a.trajectories)} {len(b.trajectories)}"

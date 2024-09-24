@@ -17,7 +17,7 @@ from hybridlearner.simulation import simulate_list
 from hybridlearner.simulation.input import generate_simulation_input
 from hybridlearner.simulation.script import generate_simulation_script
 
-from hybridlearner.trajectory import parse_trajectories_files, Trajectories
+from hybridlearner.trajectory import load_trajectories_files, Trajectories
 from hybridlearner.inference import infer_model
 from hybridlearner import automaton
 from hybridlearner.automaton import HybridAutomaton
@@ -88,7 +88,7 @@ def simulate(rng : random.Random,
 def inference(opts : Options,
               trajectories_files : list[str],
               outputfilename : str) -> None:
-    list_of_trajectories = parse_trajectories_files(trajectories_files)
+    list_of_trajectories = load_trajectories_files(trajectories_files)
 
     print(f"Loaded {len(list_of_trajectories.trajectories)} trajectories")
 
@@ -154,8 +154,8 @@ for i in range(0, 10):
 
     # Find counter examples
 
-    original_trajectories = parse_trajectories_files([original_trajectories_file])
-    learned_trajectories = parse_trajectories_files([learned_trajectories_file])
+    original_trajectories = load_trajectories_files([original_trajectories_file])
+    learned_trajectories = load_trajectories_files([learned_trajectories_file])
 
     counter_examples = []
     for (ot, lt) in zip(original_trajectories.trajectories, learned_trajectories.trajectories):
