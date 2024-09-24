@@ -1,6 +1,6 @@
 # Usage examples
 #
-# pipenv run python ./generate_simulation_script.py --script-file _out/original_model_simulate.m.bypython --simulink-model-file ../src/test_cases/engine/learn_ha_loop/ex_sldemo_bounce_Input.slx  --time-horizon 10 --sampling-time 0.01 --fixed-interval-data False --input-variables "u" --output-variables "x,v"
+# pipenv run python ./generate_simulation_script.py --script-file _out/original_model_simulate.m.bypython --simulink-model-file data/models/ex_sldemo_bounce_Input.slx  --time-horizon 10 --sampling-time 0.01 --fixed-interval-data False --input-variables "u" --output-variables "x,v"
 
 import os
 import argparse

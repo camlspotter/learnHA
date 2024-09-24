@@ -7,7 +7,7 @@ eval "pipenv run python loop.py \
      \
      $VARIABLE_OPTS \
      \
-     $SIMULATION_OPTS --simulink-model-file ../../src/test_cases/engine/learn_ha_loop/ex_sldemo_bounce_Input.slx -n 10 \
+     $SIMULATION_OPTS --simulink-model-file data/models/ex_sldemo_bounce_Input.slx -n 10 \
      \
      --output-directory _out -c dtw -d 1 -m 1 -b 1 --segmentation-error-tol 0.1 --segmentation-fine-error-tol 0.9 --threshold-distance 9.0 --threshold-correlation 0.8 --dbscan-eps-dist 0.01 --dbscan-min-samples 2 --lmm-step-size 5 --is-invariant False --filter-last-segment True --annotations '{u:continuous,x:constant(0)}'" \
      \

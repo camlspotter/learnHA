@@ -1,3 +1,4 @@
+# Example: having _out/learned_HA.json,
 # pipenv run python compile_ha.py --ode-solver-type fixed --ode-solver FixedStepAuto --invariant-mode 2 _out/learned_HA.json
 from os import path
 import json
