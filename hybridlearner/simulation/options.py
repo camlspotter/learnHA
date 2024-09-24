@@ -37,14 +37,17 @@ def parse_number_of_cps(s: str) -> dict[str, int]:
 
 
 def add_argument_group(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument(
+    group = parser.add_argument_group(
+        'Simulation options', 'Simulation options'
+    )
+    group.add_argument(
         '-Z',
         '--time-horizon',
         help='The global time horizon of computation',
         type=float,
         required=True,
     )
-    parser.add_argument(
+    group.add_argument(
         '-s',
         '--sampling-time',
         help='The sampling time (time-step)',
@@ -52,26 +55,26 @@ def add_argument_group(parser: argparse.ArgumentParser) -> None:
         required=True,
     )
     # Beware! argparse's type=bool is broken
-    parser.add_argument(
+    group.add_argument(
         '--fixed-interval-data',
         help='Extract simulation data as fixed interval.  False:data extracted based on the solver in the model.  True:data extracted as fixed time-step(recommended for equivalence testing)',
         type=argparse_bool,
         default=True,
         required=False,
     )
-    parser.add_argument(
+    group.add_argument(
         '--invariant', help='Invariant', type=parse_invariant, required=True
     )
-    parser.add_argument(
+    group.add_argument(
         '--number-of-cps',
         help='Number of control points',
         type=parse_number_of_cps,
         required=True,
     )
-    parser.add_argument(
+    group.add_argument(
         '--signal-types',
         help='Variable signal types',
         type=parse_signal_types,
         required=True,
     )
-    parser.add_argument('-S', '--seed', help='Seed', type=int, required=False)
+    group.add_argument('-S', '--seed', help='Seed', type=int, required=False)
