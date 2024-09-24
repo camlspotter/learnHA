@@ -12,9 +12,10 @@ from operator import itemgetter
 from hybridlearner.segmentation import Segment
 from hybridlearner.types import Span, MATRIX
 
-def compute_invariant (L_y : int,
-                       P_modes : list[list[Segment]],
-                       Y : MATRIX) -> list[list[tuple[float,float]]]:
+
+def compute_invariant(
+    L_y: int, P_modes: list[list[Segment]], Y: MATRIX
+) -> list[list[tuple[float, float]]]:
     """
     This function computes the invariant for each mode/cluster.
 
@@ -30,9 +31,9 @@ def compute_invariant (L_y : int,
 
     """
 
-    P : list[list[Span]] = [ [ seg.exact for seg in mode ] for mode in P_modes ]
+    P: list[list[Span]] = [[seg.exact for seg in mode] for mode in P_modes]
 
-    x_pts : list[dict[int, float]] = []
+    x_pts: list[dict[int, float]] = []
 
     '''
     Example:
@@ -51,14 +52,22 @@ def compute_invariant (L_y : int,
     print ("Mode invariant = ", mode_inv)
     '''
 
-    #for each mode i
-    mode_inv : list[list[tuple[float,float]]] = []
-    for spans in P:   # This loop runs for each mode. Also, used to obtain Mode invariants
-        x_pts = [ {dim + 1: Y[id0, dim] for dim in range(L_y)} for span in spans for id0 in span.range() ] 
+    # for each mode i
+    mode_inv: list[list[tuple[float, float]]] = []
+    for (
+        spans
+    ) in P:  # This loop runs for each mode. Also, used to obtain Mode invariants
+        x_pts = [
+            {dim + 1: Y[id0, dim] for dim in range(L_y)}
+            for span in spans
+            for id0 in span.range()
+        ]
 
-        invariant : list[tuple[float,float]] = []
-        for var_dim in range(L_y):  # invariant consists of list of bounds on the variables. The order is maintained
-            x_dim_list = list(map(itemgetter(var_dim+1), x_pts))
+        invariant: list[tuple[float, float]] = []
+        for var_dim in range(
+            L_y
+        ):  # invariant consists of list of bounds on the variables. The order is maintained
+            x_dim_list = list(map(itemgetter(var_dim + 1), x_pts))
             upperBound = max(x_dim_list)
             lowerBound = min(x_dim_list)
             invariant.append((lowerBound, upperBound))

@@ -4,13 +4,16 @@ from typing import cast, Any
 from hybridlearner.segmentation import Segment
 from hybridlearner.types import MATRIX, Span
 
-def get_signal_data(segmented_traj : list[Segment],
-                    Y : MATRIX,
-                    b1 : MATRIX,
-                    L_y : int,
-                    t : MATRIX,
-                    size_of_input_variables : int,
-                    stepM : int) -> tuple[list[list[list[float]]], list[list[float]]]:
+
+def get_signal_data(
+    segmented_traj: list[Segment],
+    Y: MATRIX,
+    b1: MATRIX,
+    L_y: int,
+    t: MATRIX,
+    size_of_input_variables: int,
+    stepM: int,
+) -> tuple[list[list[list[float]]], list[list[float]]]:
     """
     This is a pre-processing function to obtain the actual signal points of the segmented trajectories.
 
@@ -34,22 +37,26 @@ def get_signal_data(segmented_traj : list[Segment],
     t_ode = []
     # print("len of res=", len(res))
     for seg_element in segmented_traj:
-
         time_data = []
         # print("leg(segData) is ", len(segData))
         signalData = []
         # ToDo: instead of taking the exact points, for better ODE comparison use segment excluding boundary-points
         for pos_id in seg_element.exact.range():
-            signalData.append([Y[pos_id, dim] for dim in range(size_of_input_variables, L_y)])  # ignore input-variables. * Y contain the actual data-points
+            signalData.append(
+                [Y[pos_id, dim] for dim in range(size_of_input_variables, L_y)]
+            )  # ignore input-variables. * Y contain the actual data-points
             # signalData.append([b1[pos_id, dim] for dim in range(size_of_input_variables, L_y)])  # ignore input-variables. * b1 contain the backward derivatives
 
-            time_data.append(t[pos_id + stepM])  # since Y values are after leaving 5 point from start and -5 at the end
+            time_data.append(
+                t[pos_id + stepM]
+            )  # since Y values are after leaving 5 point from start and -5 at the end
         f_ode.append(signalData)
         t_ode.append(time_data)  # computing time only for plotting reason
 
     return f_ode, t_ode
 
-def check_correlation_compatible(M1 : MATRIX, M2 : MATRIX) -> tuple[MATRIX, MATRIX]:
+
+def check_correlation_compatible(M1: MATRIX, M2: MATRIX) -> tuple[MATRIX, MATRIX]:
     """
     Checks if the numpy array M1 and M2 are compatible for the computation of np.corrcoef() function. There can be cases
     when no variance, for any variable, in the data (rows of M1 or M2 in our case) exits. In such a case calling the
@@ -64,13 +71,15 @@ def check_correlation_compatible(M1 : MATRIX, M2 : MATRIX) -> tuple[MATRIX, MATR
 
     # XXX Here, variables go between list and ndarray freely and very hard to make it typed.
 
-    dim = len(M1[1])    # any row will have the same dimension # XXX why not 0?
+    dim = len(M1[1])  # any row will have the same dimension # XXX why not 0?
     # print("dim =", dim)
-    newData : list | MATRIX = []
-    data : list | MATRIX = []
+    newData: list | MATRIX = []
+    data: list | MATRIX = []
     for i in range(0, dim):
-        d1 : Any = M1[:, i]  # XXX not sure
-        standard_deviation = round(np.std(d1), 10)  # rounding for very small standard deviation value
+        d1: Any = M1[:, i]  # XXX not sure
+        standard_deviation = round(
+            np.std(d1), 10
+        )  # rounding for very small standard deviation value
         # XXX This code is fishy...
         if standard_deviation != 0:
             data = np.vstack(d1)
@@ -78,7 +87,7 @@ def check_correlation_compatible(M1 : MATRIX, M2 : MATRIX) -> tuple[MATRIX, MATR
             newData = data
         elif standard_deviation != 0:
             newData = np.column_stack((newData, data))
-            
+
     M1 = cast(MATRIX, newData)
 
     newData = []
@@ -98,7 +107,10 @@ def check_correlation_compatible(M1 : MATRIX, M2 : MATRIX) -> tuple[MATRIX, MATR
 
     return M1, M2
 
-def compute_correlation(path : list[float], signal1 : list[list[float]], signal2 : list[list[float]]) -> int:
+
+def compute_correlation(
+    path: list[float], signal1: list[list[float]], signal2: list[list[float]]
+) -> int:
     """
     This function computes the minimum correlation values of all the variables in the two input signals. The data values
     for computing the correlation are obtained from the two signals (signal1 and signal2). The path gives the
@@ -122,8 +134,8 @@ def compute_correlation(path : list[float], signal1 : list[list[float]], signal2
     M2_ = []
     for id in path1[:, 1]:
         M2_.append(signal2[id])
-    M1 : MATRIX = np.array(M1_)
-    M2 : MATRIX = np.array(M2_)
+    M1: MATRIX = np.array(M1_)
+    M2: MATRIX = np.array(M2_)
 
     M1, M2 = check_correlation_compatible(M1, M2)
 
@@ -133,36 +145,42 @@ def compute_correlation(path : list[float], signal1 : list[list[float]], signal2
         return 1
 
     # ******** We use numpy correlation coefficient function ******
-    corel_value = np.corrcoef(M1, M2, rowvar=False) # rowvar=False will consider column as variables and
-                                                    # rows as observations for those variables. See document
+    corel_value = np.corrcoef(
+        M1, M2, rowvar=False
+    )  # rowvar=False will consider column as variables and
+    # rows as observations for those variables. See document
     # print("corel_value=", corel_value)
     offset_M1 = M1.shape[1]  # shape[1] gives the dimension of the signal
     offset_M2 = M2.shape[1]
-    offset = min(offset_M1, offset_M2) #in case M1 and M2 are reduced separately in dimensions due to compatible check
+    offset = min(
+        offset_M1, offset_M2
+    )  # in case M1 and M2 are reduced separately in dimensions due to compatible check
     # print("dim1=",offset_M1, "  dim2=",offset_M2, "  offset=", offset)
     correl_per_variable_wise = np.diagonal(corel_value, offset)
     # print("correl_per_variable_wise=", correl_per_variable_wise)
-    correlation_value : int = min(correl_per_variable_wise)
+    correlation_value: int = min(correl_per_variable_wise)
     # print("min correlation value =", correlation_value)
 
     return correlation_value
 
-# Used in cluster_by_dtw.py
-def create_simple_modes_positions_for_ODE_with_pruned_segments(P_modes : list[list[Segment]],
-                                                               maximum_ode_prune_factor : int) -> list[list[Span]]:
-    """
-     This function transforms/creates a "simple data" structure from P_modes. This simple structure is a list of modes.
-     Each mode in the list holding only the position values of data points as a single concatenated list. Unlike the
-     input argument P_modes is a structure with list of modes and each mode has one or more segments in the mode-list.
-     In addition, in each mode we now only consider total number of segments decided by value maximum_ode_prune_factor.
 
-     :param P_modes: holds a list of modes. Each mode is a list of structures; we call it a segment.
-         Thus, P = [mode-1, mode-2, ... , mode-n] where mode-1 = [ segment-1, ... , segment-n] and segments are
-         of type ([start_ode, end_ode], [start_exact, end_exact], [p1, ..., p_n]).
-     :return:
-         P: holds a list of modes. Each mode is a list of positions.
-         Note here we return all the positions of points that lies inside the boundary (excluding the exact points). The
-         total number of segments in each mode is equal to maximum_ode_prune_factor.
+# Used in cluster_by_dtw.py
+def create_simple_modes_positions_for_ODE_with_pruned_segments(
+    P_modes: list[list[Segment]], maximum_ode_prune_factor: int
+) -> list[list[Span]]:
+    """
+    This function transforms/creates a "simple data" structure from P_modes. This simple structure is a list of modes.
+    Each mode in the list holding only the position values of data points as a single concatenated list. Unlike the
+    input argument P_modes is a structure with list of modes and each mode has one or more segments in the mode-list.
+    In addition, in each mode we now only consider total number of segments decided by value maximum_ode_prune_factor.
+
+    :param P_modes: holds a list of modes. Each mode is a list of structures; we call it a segment.
+        Thus, P = [mode-1, mode-2, ... , mode-n] where mode-1 = [ segment-1, ... , segment-n] and segments are
+        of type ([start_ode, end_ode], [start_exact, end_exact], [p1, ..., p_n]).
+    :return:
+        P: holds a list of modes. Each mode is a list of positions.
+        Note here we return all the positions of points that lies inside the boundary (excluding the exact points). The
+        total number of segments in each mode is equal to maximum_ode_prune_factor.
     """
 
     # Cannot use list comprehension with print :-(
@@ -170,9 +188,13 @@ def create_simple_modes_positions_for_ODE_with_pruned_segments(P_modes : list[li
     for mode in P_modes:
         if len(mode) >= maximum_ode_prune_factor:
             print("performance_prune_count=", maximum_ode_prune_factor)
-        data_pos = [ Span(seg.ode.start, seg.ode.end-1) # xxx Jun: Not +1 for end_ode?  The original code is like this.
-                     # This slicing helps in pruning same segments for performance of ODE computaion
-                     for seg in mode[:maximum_ode_prune_factor] ]
+        data_pos = [
+            Span(
+                seg.ode.start, seg.ode.end - 1
+            )  # xxx Jun: Not +1 for end_ode?  The original code is like this.
+            # This slicing helps in pruning same segments for performance of ODE computaion
+            for seg in mode[:maximum_ode_prune_factor]
+        ]
         P.append(data_pos)
 
     return P

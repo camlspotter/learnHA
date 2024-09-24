@@ -19,12 +19,13 @@ fastdtw = "*"
 matplotlib = "*"
 libsvm-official = "==3.32.0"
 typeguard = "*"
-pylint = "*"
 pydantic = "*"
 # https://pypi.org/project/matlabengine/9.13.11/
 matlabengine = "==9.13.11"
 mypy = "*"
 pyparsing = "*"
+ruff = "*"
+format = "*"
 
 [dev-packages]
 pytest = "*"

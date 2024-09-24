@@ -1,15 +1,23 @@
 import numpy as np
 
-from hybridlearner.inference.annotation import Continuous, Pool, Constant, Annotation, AnnotationTbl
+from hybridlearner.inference.annotation import (
+    Continuous,
+    Pool,
+    Constant,
+    Annotation,
+    AnnotationTbl,
+)
 from hybridlearner.types import MATRIX
 from .assignment import Assignment
 from .connection import ConnectionPoint
 
-def apply_annotation(Y : MATRIX,
-                     variable_types : AnnotationTbl,
-                     list_connection_pt : list[ConnectionPoint],
-                     assignment : Assignment
-                     ) -> Assignment:
+
+def apply_annotation(
+    Y: MATRIX,
+    variable_types: AnnotationTbl,
+    list_connection_pt: list[ConnectionPoint],
+    assignment: Assignment,
+) -> Assignment:
     """
     Type Annotation function. Type annotation is performed on the assignments based on the variable's type.
 
@@ -38,19 +46,26 @@ def apply_annotation(Y : MATRIX,
 
 
     """
-    
+
     (assignment_coeff, assignment_intercept) = assignment
 
     size = len(assignment_coeff[0])
 
-    for (var_index, var_type) in variable_types.items():  # accessing each variable details
+    for (
+        var_index,
+        var_type,
+    ) in variable_types.items():  # accessing each variable details
         match var_type:
             case Continuous():
-                assignment_coeff[var_index] = [ 1 if var_index == i else 0 for i in range(0, size)]
+                assignment_coeff[var_index] = [
+                    1 if var_index == i else 0 for i in range(0, size)
+                ]
                 assignment_intercept[var_index] = 0
 
             case Pool(pool_values):
-                frequency_count = [0] * len(pool_values)  # List of zero values of size=number of pool values
+                frequency_count = [0] * len(
+                    pool_values
+                )  # List of zero values of size=number of pool values
                 for connection_pt in list_connection_pt:
                     dest_loc_position = connection_pt.dst_start
                     pv = Y[dest_loc_position, var_index]
@@ -73,7 +88,7 @@ def apply_annotation(Y : MATRIX,
 
             # elif var_type == "t4":
             #     print("Suggest to consider type t4 as t2 if values are known. Otherwise linear regression is performed")
-            # 
+            #
             # elif var_type == "t5":
             #     print("we have to use Linear Regression for type t5 variables")
 

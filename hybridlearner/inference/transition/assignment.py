@@ -3,12 +3,15 @@ import numpy as np
 from hybridlearner.types import MATRIX
 from .connection import ConnectionPoint
 
-Assignment = tuple[MATRIX, # coeffs, 2d
-                   MATRIX] # intercepts 1d
+Assignment = tuple[
+    MATRIX,  # coeffs, 2d
+    MATRIX,
+]  # intercepts 1d
 
-def compute_assignment(list_connection_pt : list[ConnectionPoint],
-                       L_y : int,
-                       Y : MATRIX) -> Assignment:
+
+def compute_assignment(
+    list_connection_pt: list[ConnectionPoint], L_y: int, Y: MATRIX
+) -> Assignment:
     """
     Type Annotation function. Type annotation is performed on the assignments based on the variable's type.
 
@@ -18,10 +21,14 @@ def compute_assignment(list_connection_pt : list[ConnectionPoint],
     :return: the coefficients and intercept values of the assignment equations.
 
     """
-    x_pts = [ [ Y [ connection_pt.src_end, dim ] for dim in range(L_y) ]
-              for connection_pt in list_connection_pt ]
-    y_pts = [ [ Y [ connection_pt.dst_start, dim ] for dim in range(L_y) ]
-              for connection_pt in list_connection_pt ]
+    x_pts = [
+        [Y[connection_pt.src_end, dim] for dim in range(L_y)]
+        for connection_pt in list_connection_pt
+    ]
+    y_pts = [
+        [Y[connection_pt.dst_start, dim] for dim in range(L_y)]
+        for connection_pt in list_connection_pt
+    ]
 
     # print("x_pts =", x_pts)
     # print()

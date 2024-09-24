@@ -10,7 +10,11 @@ from pydantic.dataclasses import dataclass
 from typing import Optional
 
 from hybridlearner.simulation import simulate_list
-from hybridlearner.simulation.input import generate_simulation_input, parse_signal_types, SignalType
+from hybridlearner.simulation.input import (
+    generate_simulation_input,
+    parse_signal_types,
+    SignalType,
+)
 from hybridlearner.simulation.script import generate_simulation_script
 from hybridlearner.utils.argparse_bool import argparse_bool
 import hybridlearner.utils.io as utils_io
@@ -18,53 +22,82 @@ from hybridlearner.types import Invariant
 from hybridlearner.common import options as common_options
 from hybridlearner.simulation import options as simulation_options
 
+
 @dataclass
 class Options(common_options.Options, simulation_options.Options):
-    simulink_model_file : str
-    output_file : str
-    nsimulations : int
+    simulink_model_file: str
+    output_file: str
+    nsimulations: int
+
 
 @typechecked
 def get_options() -> Options:
     parser = argparse.ArgumentParser(description="SLX model Simulator")
-    parser.add_argument('--simulink-model-file', help='SLX model file', type=os.path.abspath, required=True)
+    parser.add_argument(
+        '--simulink-model-file',
+        help='SLX model file',
+        type=os.path.abspath,
+        required=True,
+    )
 
     common_options.add_argument_group(parser)
     simulation_options.add_argument_group(parser)
-    parser.add_argument('--output-file', '-o', help='Output filename', type=os.path.abspath, required=True)
-    parser.add_argument('-n', '--nsimulations', help='Number of simulations', type=int, default=1, required=False)
+    parser.add_argument(
+        '--output-file',
+        '-o',
+        help='Output filename',
+        type=os.path.abspath,
+        required=True,
+    )
+    parser.add_argument(
+        '-n',
+        '--nsimulations',
+        help='Number of simulations',
+        type=int,
+        default=1,
+        required=False,
+    )
 
     return Options(**vars(parser.parse_args()))
 
+
 opts = get_options()
 
-script_file= os.path.join(os.path.dirname(opts.output_file), "simulate_model.m")
+script_file = os.path.join(os.path.dirname(opts.output_file), "simulate_model.m")
 
 with utils_io.open_for_write(script_file) as out:
-    generate_simulation_script(out= out,
-                               title= 'Title',
-                               simulink_model_file= opts.simulink_model_file,
-                               time_horizon= opts.time_horizon,
-                               sampling_time= opts.sampling_time,
-                               fixed_interval_data= opts.fixed_interval_data,
-                               input_variables= opts.input_variables,
-                               output_variables = opts.output_variables)
+    generate_simulation_script(
+        out=out,
+        title='Title',
+        simulink_model_file=opts.simulink_model_file,
+        time_horizon=opts.time_horizon,
+        sampling_time=opts.sampling_time,
+        fixed_interval_data=opts.fixed_interval_data,
+        input_variables=opts.input_variables,
+        output_variables=opts.output_variables,
+    )
 
 print("Random seed", opts.seed)
 
-rng= random.Random() if opts.seed is None else random.Random(opts.seed)
+rng = random.Random() if opts.seed is None else random.Random(opts.seed)
 
-inputs = [ generate_simulation_input(rng,
-                                     time_horizon= opts.time_horizon,
-                                     invariant= opts.invariant,
-                                     number_of_cps= opts.number_of_cps,
-                                     signal_types= opts.signal_types,
-                                     input_variables= opts.input_variables,
-                                     output_variables= opts.output_variables)
-           for _ in range(opts.nsimulations) ]
+inputs = [
+    generate_simulation_input(
+        rng,
+        time_horizon=opts.time_horizon,
+        invariant=opts.invariant,
+        number_of_cps=opts.number_of_cps,
+        signal_types=opts.signal_types,
+        input_variables=opts.input_variables,
+        output_variables=opts.output_variables,
+    )
+    for _ in range(opts.nsimulations)
+]
 
-simulate_list(script_file= script_file,
-              output_file= opts.output_file,
-              input_variables= opts.input_variables,
-              output_variables= opts.output_variables,
-              inputs= inputs)
+simulate_list(
+    script_file=script_file,
+    output_file=opts.output_file,
+    input_variables=opts.input_variables,
+    output_variables=opts.output_variables,
+    inputs=inputs,
+)

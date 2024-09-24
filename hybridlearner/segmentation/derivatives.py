@@ -5,10 +5,13 @@ This module computes the derivatives
 from typing import cast
 import numpy as np
 from numpy.typing import NDArray
-from hybridlearner.utils import generator as generate # generate_complete_polynomial
+from hybridlearner.utils import generator as generate  # generate_complete_polynomial
 from hybridlearner.types import MATRIX
 
-def BDF_backward_version(stepM : int, stepsize : float, y_points : MATRIX, index : int) -> float:
+
+def BDF_backward_version(
+    stepM: int, stepsize: float, y_points: MATRIX, index: int
+) -> float:
     """
     Computes an approximate derivatives using backwards differentiation formula (BDF) derived from Linear Multi-step
     Method (LMM) with the step size as M. This function computes the backward version of BDF.
@@ -19,31 +22,59 @@ def BDF_backward_version(stepM : int, stepsize : float, y_points : MATRIX, index
     @return:
     """
 
-    backward_derivative : float
+    backward_derivative: float
     match stepM:
         case 2:
-            backward_derivative = (3 * y_points[index] - 4 * y_points[index - 1] + 1 * y_points[index - 2]) / (2 * stepsize)
+            backward_derivative = (
+                3 * y_points[index] - 4 * y_points[index - 1] + 1 * y_points[index - 2]
+            ) / (2 * stepsize)
         case 3:
-            backward_derivative = (11 * y_points[index] - 18 * y_points[index - 1] + 9 * y_points[index - 2] - 2 * y_points[index - 3]) / (6 * stepsize)
-    
+            backward_derivative = (
+                11 * y_points[index]
+                - 18 * y_points[index - 1]
+                + 9 * y_points[index - 2]
+                - 2 * y_points[index - 3]
+            ) / (6 * stepsize)
+
         case 4:
-            backward_derivative = (25 * y_points[index] - 48 * y_points[index - 1] + 36 * y_points[index - 2] - 16 * y_points[index - 3] + 3 * y_points[index - 4]) / (12 * stepsize)
-    
+            backward_derivative = (
+                25 * y_points[index]
+                - 48 * y_points[index - 1]
+                + 36 * y_points[index - 2]
+                - 16 * y_points[index - 3]
+                + 3 * y_points[index - 4]
+            ) / (12 * stepsize)
+
         case 5:
-            backward_derivative = (137 * y_points[index] - 300 * y_points[index - 1] + 300 * y_points[index - 2] - 200 *
-                                   y_points[index - 3] + 75 * y_points[index - 4] - 12 * y_points[index - 5]) / (60 * stepsize)
-    
+            backward_derivative = (
+                137 * y_points[index]
+                - 300 * y_points[index - 1]
+                + 300 * y_points[index - 2]
+                - 200 * y_points[index - 3]
+                + 75 * y_points[index - 4]
+                - 12 * y_points[index - 5]
+            ) / (60 * stepsize)
+
         case 6:
-            backward_derivative = (147 * y_points[index] - 360 * y_points[index - 1] + 450 * y_points[index - 2] - 400 *
-                                   y_points[index - 3] + 225 * y_points[index - 4] - 72 * y_points[index - 5] + 10 * y_points[index - 6]) / (60 * stepsize)
-    
+            backward_derivative = (
+                147 * y_points[index]
+                - 360 * y_points[index - 1]
+                + 450 * y_points[index - 2]
+                - 400 * y_points[index - 3]
+                + 225 * y_points[index - 4]
+                - 72 * y_points[index - 5]
+                + 10 * y_points[index - 6]
+            ) / (60 * stepsize)
+
         case _:
             assert False, "invalid stepM"
 
     return backward_derivative
 
 
-def BDF_forward_version(stepM : int, stepsize : float, y_points : MATRIX, index : int) -> float:
+def BDF_forward_version(
+    stepM: int, stepsize: float, y_points: MATRIX, index: int
+) -> float:
     """
     Computes an approximate derivatives using backwards differentiation formula (BDF) derived from Linear Multi-step
     Method (LMM) with the step size as M. This function computes the forward version of BDF.
@@ -54,24 +85,50 @@ def BDF_forward_version(stepM : int, stepsize : float, y_points : MATRIX, index 
     @return:
     """
 
-    forward_derivative : float
+    forward_derivative: float
     match stepM:
         case 2:
-            forward_derivative = (-3 * y_points[index] + 4 * y_points[index + 1] - 1 * y_points[index + 2]) / (2 * stepsize)
+            forward_derivative = (
+                -3 * y_points[index] + 4 * y_points[index + 1] - 1 * y_points[index + 2]
+            ) / (2 * stepsize)
 
         case 3:
-            forward_derivative = (-11 * y_points[index] + 18 * y_points[index + 1] - 9 * y_points[index + 2] + 2 * y_points[index + 3]) / (6 * stepsize)
+            forward_derivative = (
+                -11 * y_points[index]
+                + 18 * y_points[index + 1]
+                - 9 * y_points[index + 2]
+                + 2 * y_points[index + 3]
+            ) / (6 * stepsize)
 
         case 4:
-            forward_derivative = (-25 * y_points[index] + 48 * y_points[index + 1] - 36 * y_points[index + 2] + 16 * y_points[index + 3] - 3 * y_points[index + 4]) / (12 * stepsize)
+            forward_derivative = (
+                -25 * y_points[index]
+                + 48 * y_points[index + 1]
+                - 36 * y_points[index + 2]
+                + 16 * y_points[index + 3]
+                - 3 * y_points[index + 4]
+            ) / (12 * stepsize)
 
         case 5:
-            forward_derivative = (-137 * y_points[index] + 300 * y_points[index + 1] - 300 * y_points[index + 2] + 200 * y_points[index + 3] - 75 * y_points[index + 4] + 12 * y_points[index + 5]) / (60 * stepsize)
+            forward_derivative = (
+                -137 * y_points[index]
+                + 300 * y_points[index + 1]
+                - 300 * y_points[index + 2]
+                + 200 * y_points[index + 3]
+                - 75 * y_points[index + 4]
+                + 12 * y_points[index + 5]
+            ) / (60 * stepsize)
 
         case 6:
-            forward_derivative = (-147 * y_points[index] + 360 * y_points[index + 1] - 450 * y_points[index + 2] + 400 *
-                                  y_points[index + 3] - 225 * y_points[index + 4] + 72 * y_points[index + 5] - 10 *
-                                  y_points[index + 6]) / (60 * stepsize)
+            forward_derivative = (
+                -147 * y_points[index]
+                + 360 * y_points[index + 1]
+                - 450 * y_points[index + 2]
+                + 400 * y_points[index + 3]
+                - 225 * y_points[index + 4]
+                + 72 * y_points[index + 5]
+                - 10 * y_points[index + 6]
+            ) / (60 * stepsize)
 
         case _:
             assert False, "invalid stepM"
@@ -79,15 +136,12 @@ def BDF_forward_version(stepM : int, stepsize : float, y_points : MATRIX, index 
     return forward_derivative
 
 
-
-def diff_method_backandfor(y : MATRIX, # value timeseries. 2D
-                           order : int,
-                           stepsize : float,
-                           stepM : int) -> tuple[ MATRIX,
-                                                  MATRIX,
-                                                  MATRIX,
-                                                  MATRIX,
-                                                  int ]:
+def diff_method_backandfor(
+    y: MATRIX,  # value timeseries. 2D
+    order: int,
+    stepsize: float,
+    stepM: int,
+) -> tuple[MATRIX, MATRIX, MATRIX, MATRIX, int]:
     r"""Using multi-step backwards differentiation formula (BDF) to calculate the
     coefficient matrix. We have concatenated all the trajectories into a single list because this helped us discard fewer data than
     considering trajectories as a list of independent trajectories. This is because, for the first M points (M the
@@ -123,22 +177,30 @@ def diff_method_backandfor(y : MATRIX, # value timeseries. 2D
     L_p = gene.shape[0]
     # print("Value of L_p = ", L_p)  # L_p = total number of terms in the mapping function \Phi as in the paper (depending on the order-size and dimension)
 
-    L_t = len(y) # nsamples
+    L_t = len(y)  # nsamples
 
     D = L_t - stepM  # Discarding the last M-points
 
-    A_matrix = np.zeros((D - stepM, L_p), dtype=np.double)  # stores the mapping function \Phi as in the paper
-    b1_matrix = np.zeros((D - stepM, L_y), dtype=np.double)  # stores the backward_BDF using LMM as in the paper
-    b2_matrix = np.zeros((D - stepM, L_y), dtype=np.double)  # stores the forward_BDF using LMM  as in the paper
+    A_matrix = np.zeros(
+        (D - stepM, L_p), dtype=np.double
+    )  # stores the mapping function \Phi as in the paper
+    b1_matrix = np.zeros(
+        (D - stepM, L_y), dtype=np.double
+    )  # stores the backward_BDF using LMM as in the paper
+    b2_matrix = np.zeros(
+        (D - stepM, L_y), dtype=np.double
+    )  # stores the forward_BDF using LMM  as in the paper
     y_matrix = np.zeros((D - stepM, L_y), dtype=np.double)  # slice of y. [stepM:-stepM]
-    coef_matrix = np.ones((L_t, L_p), dtype=np.double)  # stores the coefficient F as in the paper
+    coef_matrix = np.ones(
+        (L_t, L_p), dtype=np.double
+    )  # stores the coefficient F as in the paper
     for i in range(0, L_t):
         for j in range(0, L_p):
             for l in range(0, L_y):
                 coef_matrix[i][j] = coef_matrix[i][j] * (y[i][l] ** gene[j][l])
     # For all the points i: For each variable, the mapping function \Phi is computed (monomials)
 
-    for i in range(stepM, D):      #//Discarding the first M-points
+    for i in range(stepM, D):  # //Discarding the first M-points
         # forward
         A_matrix[i - stepM] = coef_matrix[i]
         # b1_matrix[i - 5] = (137 * y[i] - 300 * y[i - 1] + 300 * y[i - 2] -
@@ -160,4 +222,3 @@ def diff_method_backandfor(y : MATRIX, # value timeseries. 2D
     npoints = D - stepM
 
     return A_matrix, b1_matrix, b2_matrix, y_matrix, npoints
-

@@ -11,8 +11,13 @@ from hybridlearner.types import MATRIX
 # from random import seed
 # from random import randrange
 
-def gridSearchStart(x : MATRIX, y : list[int], param_grid : dict[str,object]) -> tuple[int, float, int]: #XXXobject?
-    grid = GridSearchCV(SVC(), param_grid, refit = True, verbose = 0)   #verbose option 0 to 3
+
+def gridSearchStart(
+    x: MATRIX, y: list[int], param_grid: dict[str, object]
+) -> tuple[int, float, int]:  # XXXobject?
+    grid = GridSearchCV(
+        SVC(), param_grid, refit=True, verbose=0
+    )  # verbose option 0 to 3
     # fitting the model for grid search
     # print("x=",x)
     # print("y=",y)
@@ -28,7 +33,12 @@ def gridSearchStart(x : MATRIX, y : list[int], param_grid : dict[str,object]) ->
     # # print classification report
     # print(classification_report(y, grid_predictions))
 
-    return grid.best_params_['C'], grid.best_params_['gamma'], grid.best_params_['coef0']
+    return (
+        grid.best_params_['C'],
+        grid.best_params_['gamma'],
+        grid.best_params_['coef0'],
+    )
+
 
 #
 # x = list([randrange(-10, 11), randrange(-10, 11)] for i in range(10))

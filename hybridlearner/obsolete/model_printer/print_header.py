@@ -1,5 +1,3 @@
-
-
 def print_header(f_out, num_mode, system_dim, transitions):
     """
 
@@ -30,6 +28,8 @@ def print_header(f_out, num_mode, system_dim, transitions):
     #         total_trans = num_mode - 1
 
     total_trans = len(transitions)
-    modes_dim_transitions = str(num_mode) + " " + str(system_dim) + " " + str(total_trans) + "\n"
+    modes_dim_transitions = (
+        str(num_mode) + " " + str(system_dim) + " " + str(total_trans) + "\n"
+    )
     f_out.write(modes_dim_transitions)
     #    print("\n")

@@ -6,13 +6,14 @@ from hybridlearner.types import MATRIX
 from hybridlearner.utils import math as myUtil
 from hybridlearner.utils import io
 
-def create_data(output_filename : str,
-                srcData : list[int],
-                destData : list[int],
-                L_y : int,
-                Y : NDArray[np.float64]) -> tuple[ list[dict[int, MATRIX]],
-                                                   list[int],
-                                                   list[list[MATRIX]] ]:
+
+def create_data(
+    output_filename: str,
+    srcData: list[int],
+    destData: list[int],
+    L_y: int,
+    Y: NDArray[np.float64],
+) -> tuple[list[dict[int, MATRIX]], list[int], list[list[MATRIX]]]:
     """
     Implementation of an equal number of positive and negative data and the size of these data are not very high. It is
     equal to the number of connecting points.
@@ -39,7 +40,7 @@ def create_data(output_filename : str,
             xx = [Y[id0, dim] for dim in range(L_y)]
             x_gs.append(xx)
             x_p.append({dim + 1: Y[id0, dim] for dim in range(L_y)})
-    
+
             for dim in range(L_y):
                 str1 += str(dim + 1) + ":" + str(Y[id0, dim]) + " "
                 # str1 += str(dim + 1) + ":" + "{0:.3f}".format(Y[id0, dim]) + " "
@@ -55,14 +56,14 @@ def create_data(output_filename : str,
             for dim in range(L_y):
                 str1 += str(dim + 1) + ":" + str(Y[id1, dim]) + " "
                 # str1 += str(dim + 1) + ":" + "{0:.3f}".format(Y[id1, dim]) + " "
-    
+
             str1 += "\n"
             f_out.write(str1)
 
     return x, y, x_gs
 
 
-def makeCompatibleCoefficient(p_coeff : MATRIX, boundary_degree : int) -> list[float]:
+def makeCompatibleCoefficient(p_coeff: MATRIX, boundary_degree: int) -> list[float]:
     """
     Computes new coefficient expression of the form (p_coeff)^boundary_degree.
     Note since SVM consider kernel of the form (gamma.U.V + 1)^boundary_degree, so we have to use the same formula for
@@ -76,25 +77,36 @@ def makeCompatibleCoefficient(p_coeff : MATRIX, boundary_degree : int) -> list[f
     """
     # newCoeff = []
     dim_p_coeff = len(p_coeff)
-    coeff_expansion : list[tuple[float, list[int]]] = myUtil.multinomial(dim_p_coeff + 1, boundary_degree)  # this coeff_expansion include multinomial coefficients
+    coeff_expansion: list[tuple[float, list[int]]] = myUtil.multinomial(
+        dim_p_coeff + 1, boundary_degree
+    )  # this coeff_expansion include multinomial coefficients
     # print("coeff_expansion is ", coeff_expansion)
 
     # I see this same code in data_scaling.py, guards.py and print_transition.py
-    def get_prod(coeff : float, term : list[int]) -> float:
+    def get_prod(coeff: float, term: list[int]) -> float:
         prod = coeff
-        for (index, termi) in enumerate(term):
+        for index, termi in enumerate(term):
             if index < len(p_coeff):
                 prod *= pow(p_coeff[index], cast(float, termi))
         return prod
-    newCoeff = [ get_prod(coeff, term) for (coeff, term) in coeff_expansion ]
+
+    newCoeff = [get_prod(coeff, term) for (coeff, term) in coeff_expansion]
 
     # print("newCoeff =", newCoeff)
     l = len(newCoeff) - 1
-    newCoeff = newCoeff[:l] # discarding the last term which is 1 in the kernel expression (gamma.U.V + 1)^2
+    newCoeff = newCoeff[
+        :l
+    ]  # discarding the last term which is 1 in the kernel expression (gamma.U.V + 1)^2
     # print("newCoeff without last term =", newCoeff)
     return newCoeff
 
-def inverse_scale(guard_coeff : list[float], scale_param : dict[str,Any], L_y : int, boundary_degree : int) -> list[float]:
+
+def inverse_scale(
+    guard_coeff: list[float],
+    scale_param: dict[str, Any],
+    L_y: int,
+    boundary_degree: int,
+) -> list[float]:
     """
     Implementation of an equal number of positive and negative data and the size of these data are not very high. It is
     equal to the number of connecting points.
@@ -117,8 +129,8 @@ def inverse_scale(guard_coeff : list[float], scale_param : dict[str,Any], L_y : 
     '''
     # print("scale_param is ", scale_param)
     # print("Scaled guard_coeff is ", guard_coeff)
-    p_coeff : MATRIX = scale_param['coef']
-    p_offset : MATRIX = scale_param['offset']
+    p_coeff: MATRIX = scale_param['coef']
+    p_offset: MATRIX = scale_param['offset']
     # print("p_offset is ", p_offset)
     # print("p_coeff is ", p_coeff)
     # print("L_y+1 is ", L_y+1)
@@ -126,8 +138,8 @@ def inverse_scale(guard_coeff : list[float], scale_param : dict[str,Any], L_y : 
 
     # assert (L_y+1 == len(guard_coeff))  #todo enable later
 
-    a = guard_coeff[:L_y]   # extracting the coefficients
-    b = guard_coeff[L_y]    # extracting the intercept term
+    a = guard_coeff[:L_y]  # extracting the coefficients
+    b = guard_coeff[L_y]  # extracting the intercept term
     # Note that if the data value x has all zeros in its last dimensions/columns then p_coeff and p_offset will discard
     # all these data and will have its dimension reduced by the number of last zero columns (This may be because scaling
     # works with csr_matrix(sparse matrix)).
@@ -147,12 +159,11 @@ def inverse_scale(guard_coeff : list[float], scale_param : dict[str,Any], L_y : 
     # print("guard_coeff is ", guard_coeff)
 
     if boundary_degree == 1:
-
         term1 = np.multiply(a, p_coeff)
-        term2 = np.dot(a,p_offset) + b
+        term2 = np.dot(a, p_offset) + b
 
         coef_size = L_y + 1
-        coef = [0.] * coef_size
+        coef = [0.0] * coef_size
         for i in range(0, L_y):
             coef[i] = term1[i]
         coef[L_y] = term2
@@ -160,12 +171,11 @@ def inverse_scale(guard_coeff : list[float], scale_param : dict[str,Any], L_y : 
         # ********* Inverse Scaling Result ************
         return coef
 
-
     if boundary_degree >= 2:
         # create new a and b and also create new compatible p_coeff by (p_coeff)^2
         size = len(guard_coeff) - 1
-        a = guard_coeff[:size]   # extracting the coefficients
-        b = guard_coeff[size]    # extracting the intercept term
+        a = guard_coeff[:size]  # extracting the coefficients
+        b = guard_coeff[size]  # extracting the intercept term
         # print("guard_coeff = ", guard_coeff)
         # print("a =", a)
         # print("b =", b)

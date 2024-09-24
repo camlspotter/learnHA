@@ -16,16 +16,19 @@ from hybridlearner.segmentation import Segment
 from .cluster_by_dtw import cluster_by_dtw
 from .cluster_by_others import dbscan_cluster, merge_cluster_tol2
 
-def select_clustering(segmented_traj : list[Segment],
-                      A : NDArray[np.float64],
-                      b1 : NDArray[np.float64],
-                      clfs : list[NDArray[np.float64]],
-                      Y : NDArray[np.float64],
-                      t : NDArray[np.float64],
-                      L_y : int,
-                      input_variables : list[str],
-                      opts : Options,
-                      stepM : int) -> tuple[list[list[Segment]], list[NDArray[np.float64]]]:
+
+def select_clustering(
+    segmented_traj: list[Segment],
+    A: NDArray[np.float64],
+    b1: NDArray[np.float64],
+    clfs: list[NDArray[np.float64]],
+    Y: NDArray[np.float64],
+    t: NDArray[np.float64],
+    L_y: int,
+    input_variables: list[str],
+    opts: Options,
+    stepM: int,
+) -> tuple[list[list[Segment]], list[NDArray[np.float64]]]:
     r"""
     A wrapper module that enables the selection of different approaches to the clustering algorithm.
 
@@ -65,12 +68,12 @@ def select_clustering(segmented_traj : list[Segment],
     dbscan_eps_dist = opts.dbscan_eps_dist
     dbscan_min_samples = opts.dbscan_min_samples
 
-    P_modes : list[list[Segment]] = []
-    G : list[NDArray[np.float64]] = []
+    P_modes: list[list[Segment]] = []
+    G: list[NDArray[np.float64]] = []
 
     # Choice of Clustering Algorithm
     match method:
-        case  ClusteringMethod.PIECELINEAR:
+        case ClusteringMethod.PIECELINEAR:
             if len(segmented_traj) > num_mode:
                 assert False, "We do not support piecelinear clustering algorithm!!"
                 # P_modes, G = merge_cluster_tol2(res, A, b1, num_mode, ep)  # This is Algo-2:InferByMerge function in Jin et al.
@@ -84,8 +87,19 @@ def select_clustering(segmented_traj : list[Segment],
 
         case ClusteringMethod.DTW:
             # print("Running clustering using  DTW algorithm!!")
-            P_modes, G = cluster_by_dtw(segmented_traj, A, b1, Y, t, L_y, correl_threshold,
-                                        distance_threshold, size_of_input_variables, stepM, maximum_ode_prune_factor) # t_list only used for debugging using plot
+            P_modes, G = cluster_by_dtw(
+                segmented_traj,
+                A,
+                b1,
+                Y,
+                t,
+                L_y,
+                correl_threshold,
+                distance_threshold,
+                size_of_input_variables,
+                stepM,
+                maximum_ode_prune_factor,
+            )  # t_list only used for debugging using plot
             print("Total Clusters after DTW algorithm = ", len(P_modes))
 
     return P_modes, G

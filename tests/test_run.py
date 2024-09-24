@@ -27,13 +27,13 @@ def write_HA(opts, raw):
     with utils_io.open_for_write(outputfilename) as f_out:
         f_out.write(json.dumps(asdict(ha), indent=2))
 
-class TestLearnHA(unittest.TestCase):
 
+class TestLearnHA(unittest.TestCase):
     def doit(self, ps, golden_dir):
         opts = Options(**ps)
 
         list_of_trajectories = load_trajectories(opts.input_filename)
-        
+
         raw = infer_model(list_of_trajectories, opts)
         write_HA(opts, raw)  # prints an HA model file
 
@@ -43,8 +43,9 @@ class TestLearnHA(unittest.TestCase):
 
         backup_file = os.path.join(golden_dir, "learned_HA.json")
         test_generated_file = os.path.join(opts.output_directory, 'learned_HA.json')
-        assert filecmp.cmp(backup_file, test_generated_file, shallow=False), \
-            f"Golden test fails: golden: {backup_file} generated: {test_generated_file}"
+        assert filecmp.cmp(
+            backup_file, test_generated_file, shallow=False
+        ), f"Golden test fails: golden: {backup_file} generated: {test_generated_file}"
 
     def test_runLearnHA_osci_withoutAnnotate(self):
         print("Running test runLearnHA module")
@@ -74,7 +75,9 @@ class TestLearnHA(unittest.TestCase):
         self.doit(ps, "data/test_output/oscillator_2_withoutAnnotate")
 
     def test_runLearnHA_osci_withAnnotate(self):
-        print("Running test runLearnHA module with Oscillator model with type annotation")
+        print(
+            "Running test runLearnHA module with Oscillator model with type annotation"
+        )
         ps = {}
         ps['input_filename'] = "data/test_data/simu_oscillator_2.txt"
         ps['output_directory'] = "_test/oscillator_2_withAnnotate"
@@ -101,7 +104,9 @@ class TestLearnHA(unittest.TestCase):
         self.doit(ps, "data/test_output/oscillator_2_withAnnotate")
 
     def test_runLearnHA_bball_withAnnotate(self):
-        print("Running test runLearnHA module with Bouncing Ball model with type annotation")
+        print(
+            "Running test runLearnHA module with Bouncing Ball model with type annotation"
+        )
         ps = {}
         ps['input_filename'] = "data/test_data/simu_bball_4.txt"
         ps['output_directory'] = "_test/bball_4"
@@ -127,6 +132,7 @@ class TestLearnHA(unittest.TestCase):
         ps['annotations'] = {'x0': Continuous(), 'x1': Constant(0)}
 
         self.doit(ps, "data/test_output/bball_4")
+
 
 if __name__ == '__main__':
     unittest.main()

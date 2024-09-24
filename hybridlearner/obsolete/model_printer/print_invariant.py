@@ -1,4 +1,3 @@
-
 def print_invariant(f_out, mode_inv, modeID):
     """
     :param f_out: file pointer where the output is printed.
@@ -15,11 +14,23 @@ def print_invariant(f_out, mode_inv, modeID):
     else:
         inv_bounds = mode_inv[modeID]
         inv_str = ""
-        for dim in range(0, len(inv_bounds)):  # for each dimension forming a row of ODEs
+        for dim in range(
+            0, len(inv_bounds)
+        ):  # for each dimension forming a row of ODEs
             var_bounds = inv_bounds[dim]
             low_bound = var_bounds[0]  # access the lower bound
             high_bound = var_bounds[1]  # access the upper bound
-            inv_str += "x" + str(dim) + " >= " + str(low_bound) + " & " + "x" + str(dim) + " <= " + str(high_bound)
+            inv_str += (
+                "x"
+                + str(dim)
+                + " >= "
+                + str(low_bound)
+                + " & "
+                + "x"
+                + str(dim)
+                + " <= "
+                + str(high_bound)
+            )
             if dim != (len(inv_bounds) - 1):
                 inv_str += " & "
         inv_str += "\n"

@@ -1,4 +1,3 @@
-
 def print_assignment(f_out, assignment):
     """
 
@@ -10,8 +9,9 @@ def print_assignment(f_out, assignment):
     (assign_coeffs, intercepts) = assignment
     # **** Printing Jump-Reset equations ***** Todo: poly of degree n
     trans_assign = "reset:\n"
-    for dim in range(0,
-                     len(assign_coeffs)):  # for each dimension. coeffs is a list of values for each dependent variable
+    for dim in range(
+        0, len(assign_coeffs)
+    ):  # for each dimension. coeffs is a list of values for each dependent variable
         coeffs_per_variable = assign_coeffs[dim]
         intercept_term = intercepts[dim]
         trans_assign_per_variable = "x" + str(dim) + "' = "

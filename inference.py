@@ -15,18 +15,27 @@ from hybridlearner.slx_compiler import compile, OdeSolverType, InvariantMode
 from pydantic.dataclasses import dataclass
 from typeguard import typechecked
 
+
 @dataclass
-class Options(common_options.Options,
-              inference_options.Options):
-    input_filenames : list[str]
+class Options(common_options.Options, inference_options.Options):
+    input_filenames: list[str]
+
 
 @typechecked
 def get_options() -> Options:
     parser = argparse.ArgumentParser(description="Hybrid Automaton inference")
     inference_options.add_argument_group(parser)
     common_options.add_argument_group(parser)
-    parser.add_argument('-i', '--input-filename', help='input trajectory filename (OBSOLETE)', type=str, required=False)
-    parser.add_argument('input-filenames', help='Input trajectory filenames', type=list[str], nargs='*')
+    parser.add_argument(
+        '-i',
+        '--input-filename',
+        help='input trajectory filename (OBSOLETE)',
+        type=str,
+        required=False,
+    )
+    parser.add_argument(
+        'input-filenames', help='Input trajectory filenames', type=list[str], nargs='*'
+    )
 
     args = vars(parser.parse_args())
 
@@ -40,8 +49,9 @@ def get_options() -> Options:
 
     if not 'input_filenames' in args:
         assert False, "At least one input filename must be given"
-         
+
     return Options(**args)
+
 
 def runLearnHA() -> None:  # Calling the implementation from project BBC4CPS
     '''
@@ -54,7 +64,9 @@ def runLearnHA() -> None:  # Calling the implementation from project BBC4CPS
 
     list_of_trajectories = load_trajectories_files(opts.input_filenames)
 
-    raw = infer_model(list_of_trajectories, opts.input_variables, opts.output_variables, opts)
+    raw = infer_model(
+        list_of_trajectories, opts.input_variables, opts.output_variables, opts
+    )
 
     outputfilename = os.path.join(opts.output_directory, "learned_HA.txt")
     with utils_io.open_for_write(outputfilename) as f_out:
@@ -64,6 +76,7 @@ def runLearnHA() -> None:  # Calling the implementation from project BBC4CPS
     outputfilename = os.path.join(opts.output_directory, "learned_HA.json")
     with utils_io.open_for_write(outputfilename) as f_out:
         f_out.write(json.dumps(asdict(ha), indent=2))
+
 
 if __name__ == '__main__':
     runLearnHA()

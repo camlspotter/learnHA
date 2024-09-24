@@ -13,7 +13,8 @@ import hybridlearner.automaton as HA
 from hybridlearner.inference.options import Options
 from hybridlearner.utils import io
 
-def print_HA(f_out : TextIOWrapper, raw : HA.Raw) -> None:
+
+def print_HA(f_out: TextIOWrapper, raw: HA.Raw) -> None:
     """
 
     :param P_modes: holds a list of modes. Each mode is a list of structures; we call it a segment.
@@ -50,7 +51,11 @@ def print_HA(f_out : TextIOWrapper, raw : HA.Raw) -> None:
 
     maxorder = raw.ode_degree
     boundary_order = raw.guard_degree
-    total_ode_coeff = G[0].shape[1] # total columns of 1st location's ODE. Size is dimension + constant-intercept term
+    total_ode_coeff = G[
+        0
+    ].shape[
+        1
+    ]  # total columns of 1st location's ODE. Size is dimension + constant-intercept term
 
     total_ode_rows = G[0].shape[0]  # total row of 1st location's ODE. Size is dimension
     system_dim = total_ode_rows
@@ -75,17 +80,17 @@ def print_HA(f_out : TextIOWrapper, raw : HA.Raw) -> None:
         number_of_var_per_term = 0
         for j in range(0, gene.shape[1]):
             power = gene[i][j]
-            if (power != 0.):
-                if (number_of_var_per_term > 0):
+            if power != 0.0:
+                if number_of_var_per_term > 0:
                     term = "* "
 
-                if (power > 1):
+                if power > 1:
                     term += "(x" + str(j) + ")^" + str(power) + " "
                 else:  # meaning power is 1
                     term += "x" + str(j) + " "
                 expression += term
                 number_of_var_per_term += 1
-        if (i == (gene.shape[0] - 1)):
+        if i == (gene.shape[0] - 1):
             pass
         else:
             expression = expression + " + "
@@ -97,8 +102,8 @@ def print_HA(f_out : TextIOWrapper, raw : HA.Raw) -> None:
     # print ("After calling P is ", P)
     # print("After calling G is ", G)
 
-# with io.open_for_write(outputfilename) as f_out:
-#    outputfilename = os.path.join(learning_parameters.output_directory, "learned_HA.txt")
+    # with io.open_for_write(outputfilename) as f_out:
+    #    outputfilename = os.path.join(learning_parameters.output_directory, "learned_HA.txt")
     print_header(f_out, num_mode, system_dim, transitions)
     print_location(f_out, G, mode_inv, Exp, initial_location)
     print_transition(f_out, transitions, system_dim, boundary_order)

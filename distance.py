@@ -14,10 +14,12 @@ import hybridlearner.parser
 import hybridlearner.utils.io as utils_io
 from hybridlearner.common import options as common_options
 
+
 @dataclass
 class Options(common_options.Options):
-    file_a : str
-    file_b : str
+    file_a: str
+    file_b: str
+
 
 @typechecked
 def get_options() -> Options:
@@ -27,22 +29,25 @@ def get_options() -> Options:
     parser.add_argument('file_b', help='Timeseries file B', type=str)
     return Options(**vars(parser.parse_args()))
 
+
 opts = get_options()
 
 a = load_trajectories(opts.file_a)
 b = load_trajectories(opts.file_b)
 
 assert a.stepsize == b.stepsize, f"Non equal stepsizes: {a.stepsize}, {b.stepsize}"
-assert len(a.trajectories) == len(b.trajectories), f"Non equal number of trajectories: {len(a.trajectories)} {len(b.trajectories)}"
+assert len(a.trajectories) == len(
+    b.trajectories
+), f"Non equal number of trajectories: {len(a.trajectories)} {len(b.trajectories)}"
 
 a_nvars = a.trajectories[0][1].shape[1]
 b_nvars = b.trajectories[0][1].shape[1]
 assert a_nvars == b_nvars, f"Non equal number of variables: {a_nvars}, {b_nvars}"
 
-for (at, bt) in zip(a.trajectories, b.trajectories):
+for at, bt in zip(a.trajectories, b.trajectories):
     assert len(at[0]) == len(bt[0]), f"Non equal number of samples for a trajectory"
-    aovs = at[1][:,-len(opts.output_variables):]
-    bovs = bt[1][:,-len(opts.output_variables):]
+    aovs = at[1][:, -len(opts.output_variables) :]
+    bovs = bt[1][:, -len(opts.output_variables) :]
     print("Comparing")
     print(aovs)
     print(bovs)

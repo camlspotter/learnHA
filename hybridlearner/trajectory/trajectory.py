@@ -9,65 +9,80 @@ from pydantic import ConfigDict
 from hybridlearner.types import Span
 
 # Timeseries.
-# 
+#
 # The first element of the tuple is a 1D array of timestamps. The timestamps
 # are assumed to be an arithmetic sequence starts from 0.
-# 
-# The second element of the tuple is a 2D matrix of values.  Its number of 
+#
+# The second element of the tuple is a 2D matrix of values.  Its number of
 # the columns must be equal to the length of the timestamp array.
 
-Trajectory = tuple[ np.ndarray,  # time part of timeseries. 1D array
-                    np.ndarray ] # values part of timeseries 2D array
+Trajectory = tuple[
+    np.ndarray,  # time part of timeseries. 1D array
+    np.ndarray,
+]  # values part of timeseries 2D array
 
 # Trajectories
 #
 # Trajectories is a set of Trajectory.  All the trajectories must share
 # the same timestamp gap, here called stepsize.
 
+
 # config is required to carry np.ndarray in pydantic's dataclass
 @dataclass(config=ConfigDict(arbitrary_types_allowed=True))
 class Trajectories:
-    trajectories : list[ Trajectory ]
-    stepsize : float
+    trajectories: list[Trajectory]
+    stepsize: float
 
-    def output(self, oc : TextIOWrapper) -> None:
+    def output(self, oc: TextIOWrapper) -> None:
         for traj in self.trajectories:
             np.savetxt(oc, np.column_stack(traj), delimiter='\t', fmt='%.16g')
 
-def load_trajectories(path : str) -> Trajectories:
+
+def load_trajectories(path: str) -> Trajectories:
     """
     Load trajectories from a tsv file.
-    
+
     - No check of stepsize uniqueness
     """
     with open(path, 'r') as ic:
         reader = csv.reader(ic, delimiter='\t')
 
-        tvs_list : list[tuple[float, list[float]]] = \
-            list(map(lambda ss: (float(ss[0]), [float(s) for s in ss[1:]]), reader))
+        tvs_list: list[tuple[float, list[float]]] = list(
+            map(lambda ss: (float(ss[0]), [float(s) for s in ss[1:]]), reader)
+        )
 
-        zero_poses : list[int] = [ i for (i, (t,_vs)) in enumerate(tvs_list) if t == 0.0 ]
-        ranges : list[tuple[int,int]] = \
-            [ (zero_poses[i], zero_poses[i+1] if i + 1 < len(zero_poses) else len(tvs_list))
-              for (i,_) in enumerate(zero_poses) ]
+        zero_poses: list[int] = [i for (i, (t, _vs)) in enumerate(tvs_list) if t == 0.0]
+        ranges: list[tuple[int, int]] = [
+            (
+                zero_poses[i],
+                zero_poses[i + 1] if i + 1 < len(zero_poses) else len(tvs_list),
+            )
+            for (i, _) in enumerate(zero_poses)
+        ]
 
-        tvs_group : list[list[tuple[float, list[float]]]] = [ tvs_list[start:end] for (start, end) in ranges ]
+        tvs_group: list[list[tuple[float, list[float]]]] = [
+            tvs_list[start:end] for (start, end) in ranges
+        ]
 
-        trajectories : list[Trajectory] = [ ( np.array([t for (t, _) in tvs]),
-                                               np.array([vs for (_, vs) in tvs]) )
-                                             for tvs in tvs_group ]
+        trajectories: list[Trajectory] = [
+            (np.array([t for (t, _) in tvs]), np.array([vs for (_, vs) in tvs]))
+            for tvs in tvs_group
+        ]
 
-        stepsize = tvs_group[0][1][0] - tvs_group[0][0][0] # diff of the first 2 times in the first tvs
+        stepsize = (
+            tvs_group[0][1][0] - tvs_group[0][0][0]
+        )  # diff of the first 2 times in the first tvs
 
         return Trajectories(trajectories, stepsize)
 
-def load_trajectories_files(paths : list[str]) -> Trajectories:
+
+def load_trajectories_files(paths: list[str]) -> Trajectories:
     """
     Load trajectories from tsv files.
-    
+
     - No check of stepsize uniqueness
     """
-    trs_list = [ load_trajectories(path) for path in paths ]
+    trs_list = [load_trajectories(path) for path in paths]
 
     stepsize = trs_list[0].stepsize
     nvars = trs_list[0].trajectories[0][1].shape[1]
@@ -75,15 +90,18 @@ def load_trajectories_files(paths : list[str]) -> Trajectories:
     if not all(lambda trs: trs.stepsize == stepsize for trs in trs_list):
         assert False, "Trajectories files must have a unique stepsize"
 
-    if not all(lambda trs: trs.trajectories[0][1].shape[1] == nvars for trs in trs_list):
+    if not all(
+        lambda trs: trs.trajectories[0][1].shape[1] == nvars for trs in trs_list
+    ):
         assert False, "Trajectories files must have the same number of variables"
 
-    trajectories = [ tr for trs in trs_list for tr in trs.trajectories ]
+    trajectories = [tr for trs in trs_list for tr in trs.trajectories]
     return Trajectories(trajectories, stepsize)
 
-def preprocess_trajectories(list_of_trajectories : list[Trajectory]) -> tuple[ NDArray[np.float64],
-                                                                               NDArray[np.float64],
-                                                                               list[Span] ]:
+
+def preprocess_trajectories(
+    list_of_trajectories: list[Trajectory],
+) -> tuple[NDArray[np.float64], NDArray[np.float64], list[Span]]:
     '''
     Concatenate the trajectories.
 
@@ -95,15 +113,15 @@ def preprocess_trajectories(list_of_trajectories : list[Trajectory]) -> tuple[ N
         ranges: the ranges of the Trajectories in the lists.
     '''
 
-    sizes = [ len(ts) for traj in list_of_trajectories for ts in [traj[0]] ]
+    sizes = [len(ts) for traj in list_of_trajectories for ts in [traj[0]]]
 
-    position : list[Span] = []
-    for (i,size) in enumerate(sizes):
-        last_position = position[i-1].end if i > 0 else -1
+    position: list[Span] = []
+    for i, size in enumerate(sizes):
+        last_position = position[i - 1].end if i > 0 else -1
         position.append(Span(last_position + 1, last_position + size))
 
     # XXX Why does this returns singleton lists?
-    t = np.concatenate([ traj[0] for traj in list_of_trajectories ])
-    y = np.vstack([ traj[1] for traj in list_of_trajectories ])
+    t = np.concatenate([traj[0] for traj in list_of_trajectories])
+    y = np.vstack([traj[1] for traj in list_of_trajectories])
 
     return t, y, position
