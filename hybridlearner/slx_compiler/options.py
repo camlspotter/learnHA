@@ -7,7 +7,6 @@ from typeguard import typechecked
 import hybridlearner.utils.io as utils_io
 from hybridlearner.slx_compiler import OdeSolverType, InvariantMode, compile
 from hybridlearner.automaton import HybridAutomaton
-from hybridlearner.matlab_engine import matlab_engine
 
 @dataclass
 class Options:

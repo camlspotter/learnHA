@@ -9,7 +9,7 @@ import hybridlearner.utils.io as utils_io
 from hybridlearner.slx_compiler import OdeSolverType, InvariantMode, compile
 from hybridlearner.slx_compiler import options as compiler_options
 from hybridlearner.automaton import HybridAutomaton
-from hybridlearner.matlab_engine import matlab_engine
+from hybridlearner import matlab
 
 @dataclass
 class Options(compiler_options.Options):
@@ -51,7 +51,7 @@ def run() -> None:
                 opt.simulink_model_name,
                 opt.invariant_mode)
 
-    matlab_engine.run(opt.output_matlab_script)
+    matlab.engine.run(opt.output_matlab_script)
 
 if __name__ == '__main__':
     run()

@@ -1,5 +1,6 @@
 from typing import Optional, Any
 import matlab.engine
+from matlab import double
 
 MatlabEngine = Any
 
@@ -30,4 +31,4 @@ class Matlab():
         _eng = self.engine()
         return _eng.eval(var, nargout=1)
 
-matlab_engine = Matlab()
+engine = Matlab()

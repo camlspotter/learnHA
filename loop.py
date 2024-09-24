@@ -25,7 +25,7 @@ import json
 from dataclasses import asdict
 
 from hybridlearner import slx_compiler
-from hybridlearner.matlab_engine import matlab_engine
+from hybridlearner import matlab
 
 from hybridlearner.trajectory.distance import trajectory_dtw_distance
 
@@ -115,7 +115,7 @@ def compile(opts : Options, learned_model_file : str) -> str:
                              simulink_model_name,
                              opts.invariant_mode)
 
-    matlab_engine.run(output_matlab_script)
+    matlab.engine.run(output_matlab_script)
 
     return output_slx_file
 
