@@ -6,7 +6,7 @@ import json
 from dataclasses import asdict
 
 from hybridlearner.inference import infer_model
-from hybridlearner import HA
+from hybridlearner import automaton
 from hybridlearner.obsolete.model_printer.print_HA import print_HA
 from hybridlearner.inference.options import ClusteringMethod, Options
 from hybridlearner.trajectory import parse_trajectories
@@ -22,7 +22,7 @@ def write_HA(opts, raw):
     with utils_io.open_for_write(outputfilename) as f_out:
         print_HA(f_out, raw)
 
-    ha = HA.build(raw)
+    ha = automaton.build(raw)
     outputfilename = os.path.join(opts.output_directory, "learned_HA.json")
     with utils_io.open_for_write(outputfilename) as f_out:
         f_out.write(json.dumps(asdict(ha), indent=2))
@@ -96,7 +96,7 @@ class TestLearnHA(unittest.TestCase):
         ps['is_invariant'] = True
         ps['filter_last_segment'] = True
         ps['lmm_step_size'] = 5
-        ps['annotations'] = {0: Continuous(), 1: Continuous()}
+        ps['annotations'] = {'x0': Continuous(), 'x1': Continuous()}
 
         self.doit(ps, "data/test_output/oscillator_2_withAnnotate")
 
@@ -124,7 +124,7 @@ class TestLearnHA(unittest.TestCase):
         ps['ode_speedup'] = 50
         ps['is_invariant'] = False
         ps['filter_last_segment'] = True
-        ps['annotations'] = {0: Continuous(), 1: Constant(0)}
+        ps['annotations'] = {'x0': Continuous(), 'x1': Constant(0)}
 
         self.doit(ps, "data/test_output/bball_4")
 
