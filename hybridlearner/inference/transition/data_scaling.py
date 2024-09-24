@@ -77,9 +77,10 @@ def makeCompatibleCoefficient(p_coeff: MATRIX, boundary_degree: int) -> list[flo
     """
     # newCoeff = []
     dim_p_coeff = len(p_coeff)
+    # this coeff_expansion include multinomial coefficients
     coeff_expansion: list[tuple[float, list[int]]] = myUtil.multinomial(
         dim_p_coeff + 1, boundary_degree
-    )  # this coeff_expansion include multinomial coefficients
+    )
     # print("coeff_expansion is ", coeff_expansion)
 
     # I see this same code in data_scaling.py, guards.py and print_transition.py
@@ -94,9 +95,8 @@ def makeCompatibleCoefficient(p_coeff: MATRIX, boundary_degree: int) -> list[flo
 
     # print("newCoeff =", newCoeff)
     l = len(newCoeff) - 1
-    newCoeff = newCoeff[
-        :l
-    ]  # discarding the last term which is 1 in the kernel expression (gamma.U.V + 1)^2
+    # discarding the last term which is 1 in the kernel expression (gamma.U.V + 1)^2
+    newCoeff = newCoeff[:l]
     # print("newCoeff without last term =", newCoeff)
     return newCoeff
 

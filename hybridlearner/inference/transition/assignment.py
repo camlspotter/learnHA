@@ -5,8 +5,8 @@ from .connection import ConnectionPoint
 
 Assignment = tuple[
     MATRIX,  # coeffs, 2d
-    MATRIX,
-]  # intercepts 1d
+    MATRIX,  # intercepts 1d
+]
 
 
 def compute_assignment(

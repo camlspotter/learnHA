@@ -20,9 +20,9 @@ def plot_timeseries_multi(
     tv_list: list[
         tuple[
             MATRIX,  # 1D times
-            MATRIX,
+            MATRIX,  # 2D values
         ]
-    ],  # 2D values
+    ],
     space: float,
 ) -> None:
     """

@@ -99,7 +99,7 @@ def select_clustering(
                 size_of_input_variables,
                 stepM,
                 maximum_ode_prune_factor,
-            )  # t_list only used for debugging using plot
+            )
             print("Total Clusters after DTW algorithm = ", len(P_modes))
 
     return P_modes, G

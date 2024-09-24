@@ -54,9 +54,8 @@ def compute_invariant(
 
     # for each mode i
     mode_inv: list[list[tuple[float, float]]] = []
-    for (
-        spans
-    ) in P:  # This loop runs for each mode. Also, used to obtain Mode invariants
+
+    for spans in P:
         x_pts = [
             {dim + 1: Y[id0, dim] for dim in range(L_y)}
             for span in spans
@@ -64,9 +63,8 @@ def compute_invariant(
         ]
 
         invariant: list[tuple[float, float]] = []
-        for var_dim in range(
-            L_y
-        ):  # invariant consists of list of bounds on the variables. The order is maintained
+        # invariant consists of list of bounds on the variables. The order is maintained
+        for var_dim in range(L_y):
             x_dim_list = list(map(itemgetter(var_dim + 1), x_pts))
             upperBound = max(x_dim_list)
             lowerBound = min(x_dim_list)

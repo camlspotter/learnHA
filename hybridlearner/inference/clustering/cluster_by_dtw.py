@@ -59,9 +59,8 @@ def get_desired_ODE_coefficients(
     # print("DTW: Total clusters = ", len(length_and_modepts))
 
     #  ***************************************************************
-    num_mode = len(
-        length_and_modepts
-    )  # Made this change after Paper submission (in the paper engineTiming which was 42
+    num_mode = len(length_and_modepts)
+    # Made this change after Paper submission (in the paper engineTiming which was 42
     # reduced to 20 although this will not have effect, since only the first 4 modes were used to generate trajectories
     # now we removed from the argument passing num_mode as user decided argument
     #  ***************************************************************
@@ -168,9 +167,8 @@ def cluster_by_dtw(
     myClusterCount = 0
     while i < count:
         j = i + 1
-        mode = [
-            res1[i]
-        ]  # to hold list of segments per mode; initialize the first segmented_traj
+        # to hold list of segments per mode; initialize the first segmented_traj
+        mode = [res1[i]]
         delete_position = []
         while j < count:  #  runs once for each f_ode_[i]
             # print("i=", i, " :f_ode[i] is ", f_ode[i])
@@ -203,19 +201,19 @@ def cluster_by_dtw(
             # Debugging ******************
 
             # This feature can also be used, when distance-threshold is not considered as parameter
-            if (
-                correlValue >= correl_threshold and distance_threshold == 0
-            ):  # distance_threshold is disabled or ignored
+            # distance_threshold is disabled or ignored
+            if correlValue >= correl_threshold and distance_threshold == 0:
                 # print("******************************************** Found *******************************")
                 # print("i=", i, " and j=", j, " : Ignored distance = ", distance, "   and   correlation = ", correlValue)
-
                 mode.append(res1[j])
                 delete_position.append(j)
 
+            # distance is also compared. distance_threshold is threshold value to be supplied wisely
             if (
                 correlValue >= correl_threshold
-                and (distance_threshold > 0 and distance < distance_threshold)
-            ):  # distance is also compared. distance_threshold is threshold value to be supplied wisely
+                and distance_threshold > 0
+                and distance < distance_threshold
+            ):
                 # print("i=", i, " and j=", j, " :  distance1 = ", distance1, " :  distance = ", distance
                 #       "   and   correlation = ", correlValue)
                 # print("******************************************** Found *******************************")
@@ -226,9 +224,8 @@ def cluster_by_dtw(
 
             j = j + 1
 
-        P.append(
-            mode
-        )  # creating the list of modes, with each mode as a list of segments
+        # creating the list of modes, with each mode as a list of segments
+        P.append(mode)
 
         # for all delete_position now delete list and update for next iterations
         for val in reversed(delete_position):

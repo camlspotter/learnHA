@@ -51,10 +51,8 @@ def apply_annotation(
 
     size = len(assignment_coeff[0])
 
-    for (
-        var_index,
-        var_type,
-    ) in variable_types.items():  # accessing each variable details
+    # accessing each variable details
+    for var_index, var_type in variable_types.items():
         match var_type:
             case Continuous():
                 assignment_coeff[var_index] = [

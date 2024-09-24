@@ -15,11 +15,10 @@ from hybridlearner.inference.transition.assignment import Assignment
 Transition = tuple[
     int,  # src
     int,  # dest
-    list[
-        float
-    ],  # guard coeffs [ci], defines the guard:  x1 * c1 + x2 * c2 + .. + 1 * cn <= 0
-    Assignment,
+    # guard coeffs [ci], defines the guard:  x1 * c1 + x2 * c2 + .. + 1 * cn <= 0
+    list[float],
     # x'j = x1 * cj1 + x2 * cj2 + .. + xn *cjn + ij
+    Assignment,
 ]
 
 

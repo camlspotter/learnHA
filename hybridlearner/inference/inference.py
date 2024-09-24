@@ -36,9 +36,8 @@ sys.setrecursionlimit(1000000)  # this is the limit
 @dataclass(config=ConfigDict(arbitrary_types_allowed=True))
 class Raw:
     num_mode: int  # num_mode
-    G: list[
-        np.ndarray
-    ]  # ODE coeffs and intercepts, called Flow in the paper.  The array size is (#v + 1) * #o
+    # ODE coeffs and intercepts, called Flow in the paper.  The array size is (#v + 1) * #o
+    G: list[np.ndarray]
     mode_inv: list[list[tuple[float, float]]]  # Variable invariants per mode
     transitions: list[Transition]
     initial_location: int
@@ -97,9 +96,8 @@ def infer_model(
     size_of_input_variables = len(input_variables)
     isInvariant = opts.is_invariant
     clustering_method = opts.clustering_method
-    stepM = (
-        opts.lmm_step_size
-    )  # 2 for engine-timing  #  the step size of Linear Multi-step Method (step M)
+    # the step size of Linear Multi-step Method (step M)
+    stepM = opts.lmm_step_size
 
     annotations: AnnotationTbl = convert_annotation_dict(
         input_variables, output_variables, opts.annotations
@@ -108,9 +106,8 @@ def infer_model(
     # Concatenate all the trajectories.
     t: MATRIX  # times, 1D
     y: MATRIX  # values, 2D
-    traj_spans: list[
-        Span
-    ]  # The positions of the original trajectories in the concatenated one
+    # The positions of the original trajectories in the concatenated one
+    traj_spans: list[Span]
     t, y, traj_spans = preprocess_trajectories(list_of_trajectories.trajectories)
 
     # plot of preprocessed trajectories
@@ -176,16 +173,15 @@ def infer_model(
 
     # Group the segments by trajectories.
     # The last segment of each trajectory is dropped since it is often truncated.
-    filter_last_segment = (
-        opts.filter_last_segment
-    )  # True to delete the last segment and False NOT to delete
+
+    # True to delete the last segment and False NOT to delete
+    filter_last_segment = opts.filter_last_segment
     segmentedTrajectories: list[list[Span]]
     segmentedTrajectories, segments, clfs = segmented_trajectories(
         clfs, segments, traj_spans, clustering_method, filter_last_segment
     )
-    assert len(segmentedTrajectories) == len(
-        traj_spans
-    )  # 1 segmentedTrajectory per trajectory
+    # 1 segmentedTrajectory per trajectory
+    assert len(segmentedTrajectories) == len(traj_spans)
 
     # plot_data_values(segmentedTrajectories, Y, L_y)
     # ********* Plotting/Visualizing various points for debugging *************************
@@ -200,9 +196,10 @@ def infer_model(
 
     P_modes: list[list[Segment]]
     G: list[MATRIX]
+    # when len(res) < 2 compute P and G for the single mode
     P_modes, G = select_clustering(
         segments, A, b1, clfs, Y, t, L_y, input_variables, opts, stepM
-    )  # when len(res) < 2 compute P and G for the single mode
+    )
 
     # print("Fixing Dropped points ...") # I dont need to fix
     # P, Drop = dropclass(P, G, drop, A, b1, Y, ep, stepsize)  # appends the dropped point to a cluster that fits well
@@ -288,9 +285,8 @@ def get_initial_location(P_modes: list[list[Segment]]) -> list[int]:
     """
     P: list[list[Span]] = [[seg.exact for seg in mode] for mode in P_modes]
 
-    minkey: int = min(enumerate(P), key=lambda x: x[1][0].start)[
-        0
-    ]  # [1] to get P's element
+    # x[1] to get P's element
+    minkey: int = min(enumerate(P), key=lambda x: x[1][0].start)[0]
 
     # ToDo: to find all initial location/mode, use the structure segments: 1st position of each trajectory
     return [minkey]

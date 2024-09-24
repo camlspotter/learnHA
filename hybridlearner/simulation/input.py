@@ -49,7 +49,6 @@ def linear_signal(time_horizon: float, cps: list[float]) -> Signal:
 
     data_vector: list[float] = cps
 
-    # return Signal(times= time_vector, data= data_vector)
     return list(zip(time_vector, data_vector))
 
 
@@ -73,7 +72,6 @@ def fixed_step_signal(time_horizon: float, cps: list[float]) -> Signal:
 
     data_vector: list[float] = [v for vv in data_vectors for v in vv]
 
-    # return Signal(times= time_vector, data= data_vector)
     return list(zip(time_vector, data_vector))
 
 

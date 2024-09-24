@@ -18,8 +18,8 @@ from hybridlearner.types import Span
 
 Trajectory = tuple[
     np.ndarray,  # time part of timeseries. 1D array
-    np.ndarray,
-]  # values part of timeseries 2D array
+    np.ndarray,  # values part of timeseries 2D array
+]
 
 # Trajectories
 #
@@ -69,9 +69,8 @@ def load_trajectories(path: str) -> Trajectories:
             for tvs in tvs_group
         ]
 
-        stepsize = (
-            tvs_group[0][1][0] - tvs_group[0][0][0]
-        )  # diff of the first 2 times in the first tvs
+        # diff of the first 2 times in the first tvs
+        stepsize = tvs_group[0][1][0] - tvs_group[0][0][0]
 
         return Trajectories(trajectories, stepsize)
 

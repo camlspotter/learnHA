@@ -13,7 +13,6 @@ import os
 from libsvm.commonutil import svm_read_problem, csr_find_scale_param, csr_scale
 from libsvm.svmutil import svm_save_model, svm_predict
 
-# from libsvm.svmutil import *
 from hybridlearner.utils.math import rel_diff
 from hybridlearner.utils import math as myUtil
 from hybridlearner.types import MATRIX
@@ -54,18 +53,16 @@ def getGuard_inequality(
 
     """
 
-    output_filename = os.path.join(
-        output_dir, "guard_data_scale"
-    )  # This file is also used for SVM scaling
+    # This file is also used for SVM scaling
+    output_filename = os.path.join(output_dir, "guard_data_scale")
     _x, _y, x_gs = create_data(output_filename, srcData, destData, L_y, Y)
     data_length = len(srcData)  # or len(destData)
     # print("data size for SVM =", data_length)
     # ******* scaling data ************
     # print('Before Storing data in file for conversion to csr_matrix')
     # print(_x)
-    y, x = svm_read_problem(
-        output_filename, return_scipy=True
-    )  # y: ndarray, x: csr_matrix
+    # y: ndarray, x: csr_matrix
+    y, x = svm_read_problem(output_filename, return_scipy=True)
     # print('After scaling data')
     # print(x)
     # print('label y is ', y)
@@ -101,9 +98,8 @@ def getGuard_inequality(
         rel_difference = rel_diff(np.array(a1), np.array(b1))
         # print("a1=", a1, "    b1=",b1, "     relative_diff=", relative_difference)
         if rel_difference < relative_difference:
-            relative_difference = (
-                rel_difference  # stores the smallest relative difference
-            )
+            # stores the smallest relative difference
+            relative_difference = rel_difference
         if relative_difference <= 0.0001:
             count_small_rel_diff += 1
     # **********
@@ -112,9 +108,8 @@ def getGuard_inequality(
     if relative_difference <= 0.0001:  # increasing the original analysed value 0.0001
         # print("******* we found ", count_small_rel_diff,  "  small relative difference =", relative_difference, " *****")
         c_value = 1
-        skipGridSearch = (
-            True  # Also skip grid search as this will also give problem for grid search
-        )
+        # Also skip grid search as this will also give problem for grid search
+        skipGridSearch = True  #
 
     # ******** Checking Data size and Data similarity ********
 
@@ -134,12 +129,10 @@ def getGuard_inequality(
         coef_optimal = 1
         # print("Default parameter:- C: 100, gamma:",gamma_value_optimal, ", coef0:", coef_optimal)
     else:
-        endTime = (
-            time.time()
-        )  # endTime: variable creation and start recording but will not be use
-        startTime = (
-            time.time()
-        )  # variable creation and started recording the current time
+        # endTime: variable creation and start recording but will not be use
+        endTime = time.time()
+        # variable creation and started recording the current time
+        startTime = time.time()
         gamma_value_optimal = float(1 / L_y)
         param_grid = {
             'C': [0.1, 1, 10, 100, 1000],
@@ -151,15 +144,15 @@ def getGuard_inequality(
         scaler = preprocessing.StandardScaler().fit(x_gs)
         # https://scikit-learn.org/stable/modules/preprocessing.html#standardization-or-mean-removal-and-variance-scaling
         x_gs_scaled = scaler.transform(x_gs)
+        # libsvm as backend
         c_value_optimal, gamma_value_optimal, coef_optimal = gridSearchStart(
             x_gs_scaled, y, param_grid
-        )  # libsvm as backend
+        )
         # print("x_gs=", x_gs_scaled)
         # c_value_optimal, gamma_value_optimal, coef_optimal = gridSearchStart(x_gs, y, param_grid)   # using sklean here which take libsvm as backend
 
-        endTime = (
-            time.time()
-        )  # recording the current time also replaces the previous value
+        # recording the current time also replaces the previous value
+        endTime = time.time()
         searchTime = endTime - startTime
         # print ("  C=", c_value_optimal, ", Gamma=",gamma_value_optimal, ", coef0=",coef_optimal)
         # print ("Search Time (secs): ", searchTime)
@@ -170,9 +163,8 @@ def getGuard_inequality(
     )
 
     svm_save_model(os.path.join(output_dir, "guard_svm_model_file"), m)
-    guard_coeff = get_coeffs(
-        L_y, m, gamma_value_optimal, order=boundary_order
-    )  # this gives the hyperplane coefficients
+    # this gives the hyperplane coefficients
+    guard_coeff = get_coeffs(L_y, m, gamma_value_optimal, order=boundary_order)
 
     # print("guard_coeff is ", guard_coeff)
     p_label, p_acc, p_val = svm_predict(y, x, m, '-q')
@@ -230,9 +222,8 @@ def get_coeffs(
     # Due to the Poly kernel, SVM has formula: (gamma.U'.V + 1)^degree. So, in addition to the dimension of V we
     # have + 1 an extra term so the last term is considered as 1 for Eg. in (a+b+c)^degree, the last term c==1.
     # Similarly, this is done in the calling module run.py to construct/print the guard equation.
-    coeff_expansion = myUtil.multinomial(
-        L_y + 1, order
-    )  # this coeff_expansion include multinomial coefficients
+    # this coeff_expansion include multinomial coefficients
+    coeff_expansion = myUtil.multinomial(L_y + 1, order)
     # print("coeff_expansion is ", coeff_expansion)
 
     list_a: list[float] = [0.0] * len(coeff_expansion)
@@ -251,8 +242,7 @@ def get_coeffs(
             list_a[coeff_index] += svc[i][0] * (gamma**g_power) * coeff * sv_product
 
     # print("Before list_a is ", list_a)
-    list_a[len(coeff_expansion) - 1] = (
-        g  # replacing the last computed value of list_a by this g
-    )
+    # replacing the last computed value of list_a by this g
+    list_a[len(coeff_expansion) - 1] = g
     # print("After list_a is ", list_a)
     return list_a

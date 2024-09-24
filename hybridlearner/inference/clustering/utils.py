@@ -42,14 +42,15 @@ def get_signal_data(
         signalData = []
         # ToDo: instead of taking the exact points, for better ODE comparison use segment excluding boundary-points
         for pos_id in seg_element.exact.range():
+            # ignore input-variables. * Y contain the actual data-points
             signalData.append(
                 [Y[pos_id, dim] for dim in range(size_of_input_variables, L_y)]
-            )  # ignore input-variables. * Y contain the actual data-points
-            # signalData.append([b1[pos_id, dim] for dim in range(size_of_input_variables, L_y)])  # ignore input-variables. * b1 contain the backward derivatives
+            )
+            # signalData.append([b1[pos_id, dim] for dim in range(size_of_input_variables, L_y)])
+            # ignore input-variables. * b1 contain the backward derivatives
 
-            time_data.append(
-                t[pos_id + stepM]
-            )  # since Y values are after leaving 5 point from start and -5 at the end
+            # since Y values are after leaving 5 point from start and -5 at the end
+            time_data.append(t[pos_id + stepM])
         f_ode.append(signalData)
         t_ode.append(time_data)  # computing time only for plotting reason
 
@@ -77,9 +78,8 @@ def check_correlation_compatible(M1: MATRIX, M2: MATRIX) -> tuple[MATRIX, MATRIX
     data: list | MATRIX = []
     for i in range(0, dim):
         d1: Any = M1[:, i]  # XXX not sure
-        standard_deviation = round(
-            np.std(d1), 10
-        )  # rounding for very small standard deviation value
+        # rounding for very small standard deviation value
+        standard_deviation = round(np.std(d1), 10)
         # XXX This code is fishy...
         if standard_deviation != 0:
             data = np.vstack(d1)
@@ -145,16 +145,14 @@ def compute_correlation(
         return 1
 
     # ******** We use numpy correlation coefficient function ******
-    corel_value = np.corrcoef(
-        M1, M2, rowvar=False
-    )  # rowvar=False will consider column as variables and
+    corel_value = np.corrcoef(M1, M2, rowvar=False)
+    # rowvar=False will consider column as variables and
     # rows as observations for those variables. See document
     # print("corel_value=", corel_value)
     offset_M1 = M1.shape[1]  # shape[1] gives the dimension of the signal
     offset_M2 = M2.shape[1]
-    offset = min(
-        offset_M1, offset_M2
-    )  # in case M1 and M2 are reduced separately in dimensions due to compatible check
+    # in case M1 and M2 are reduced separately in dimensions due to compatible check
+    offset = min(offset_M1, offset_M2)
     # print("dim1=",offset_M1, "  dim2=",offset_M2, "  offset=", offset)
     correl_per_variable_wise = np.diagonal(corel_value, offset)
     # print("correl_per_variable_wise=", correl_per_variable_wise)
@@ -189,9 +187,8 @@ def create_simple_modes_positions_for_ODE_with_pruned_segments(
         if len(mode) >= maximum_ode_prune_factor:
             print("performance_prune_count=", maximum_ode_prune_factor)
         data_pos = [
-            Span(
-                seg.ode.start, seg.ode.end - 1
-            )  # xxx Jun: Not +1 for end_ode?  The original code is like this.
+            # xxx Jun: Not +1 for end_ode?  The original code is like this.
+            Span(seg.ode.start, seg.ode.end - 1)
             # This slicing helps in pruning same segments for performance of ODE computaion
             for seg in mode[:maximum_ode_prune_factor]
         ]

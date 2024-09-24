@@ -105,9 +105,10 @@ def two_fold_segmentation(
         while high < max_id:
             # print("b1[high]:",b1[high], "   and b1[high,2] =", b1[high,2], "   and b1[high, 1:] =", b1[high, 1:])
             # diff_val = rel_diff(b1[high,2], b2[high,2])  # print("pos:",high,"  diff-val:",diff_val)
+            # ignore input-variables note: zero-based indexing
             diff_val = rel_diff(
                 b1[high, size_of_input_variables:], b2[high, size_of_input_variables:]
-            )  # ignore input-variables note: zero-based indexing
+            )
             # print("pos:",high,"  (b1-b2) diff-val:",diff_val)
             if diff_val < ep_FwdBwd:
                 high += 1
@@ -116,46 +117,45 @@ def two_fold_segmentation(
                 break
 
         # I have here low and high but I want high to take some extra near the actual-boundary
-        near_high = (
-            high - 1
-        )  # This is the boundary end-point. upto (high - 1) points lie in the current segment where as high hits the guard condition.
+        # This is the boundary end-point. upto (high - 1) points lie in the current segment where as high hits the guard condition.
+        near_high = high - 1
         good_high = high - 1  # this will be improved
         next_good_low = high  # this will be improved
-        while (
-            high < max_id
-        ):  # moving high further to find the end of boundary point i.e., the next start-point.
+        # moving high further to find the end of boundary point i.e., the next start-point.
+        while high < max_id:
+            # rel diff between backward and forward derivatives
             diff_val = rel_diff(
                 b1[high, size_of_input_variables:], b2[high, size_of_input_variables:]
-            )  # rel diff between backward and forward derivatives
+            )
 
             # relDiff_data_value = rel_diff(Y[high, size_of_input_variables:],
             #                 Y[(high - 1), size_of_input_variables:]) # rel diff: current and previous data-values
 
+            # compute relative diff: current and previous
             relDiff_backward = rel_diff(
                 b1[high, size_of_input_variables:],
                 b1[(high - 1), size_of_input_variables:],
-            )  # compute relative diff: current and previous
+            )
 
-            if (
-                (high + 1) == max_id
-            ):  # at the last position we do not want to have index out of bounds error
+            if (high + 1) == max_id:
+                # at the last position we do not want to have index out of bounds error
+                # the last point will not be used, so does not matter
                 relDiff_forward = rel_diff(
                     b2[high, size_of_input_variables:],
                     b2[high, size_of_input_variables:],
-                )  # the last point will not be used, so does not matter
+                )
             else:
+                # rel diff: current and next forward-derivatives
                 relDiff_forward = rel_diff(
                     b2[high, size_of_input_variables:],
                     b2[(high + 1), size_of_input_variables:],
-                )  # rel diff: current and next forward-derivatives
+                )
 
-            if (
-                diff_val >= ep_FwdBwd
-            ):  # high difference.    This will detect and store all boundary points
+            if diff_val >= ep_FwdBwd:
+                # high difference.    This will detect and store all boundary points
                 # position_diffValue.append([high, relDiff_backward, relDiff_forward, relDiff_data_value]) # recording position and diff-value
-                position_diffValue.append(
-                    (high, relDiff_backward, relDiff_forward)
-                )  # recording position and diff-value
+                # recording position and diff-value
+                position_diffValue.append((high, relDiff_backward, relDiff_forward))
                 high += 1
             else:  # low difference so same segment
                 break
@@ -172,10 +172,10 @@ def two_fold_segmentation(
                 # value_relDiff_data = position_diffValue[index][3]
                 if (found_last_point == 0) and (
                     value_relDiff_backward_derivative >= ep_backward
-                ):  # found the exact change-point or the boundary point
-                    good_high = (
-                        value_position - 1
-                    )  # the previous position is the last/end-point of the previous segment
+                ):
+                    # found the exact change-point or the boundary point
+                    # the previous position is the last/end-point of the previous segment
+                    good_high = value_position - 1
                     next_good_low = value_position  # the current position is the start-point for the next segment.
                     break  # this will stop searching further
 
@@ -195,9 +195,8 @@ def two_fold_segmentation(
         #     print("************ This block will be exectued only once. Since we have both the check  diff_val < ep_FwdBwd and diff_val >= ep_FwdBwd ************")
 
         # if (good_high - good_low) >= stepM:   this is not safe
-        if (
-            near_high - near_low >= stepM
-        ):  # when segment size is >= M points, where M is the step size of LMM
+        if near_high - near_low >= stepM:
+            # when segment size is >= M points, where M is the step size of LMM
             segment = Segment(Span(near_low, near_high), Span(good_low, good_high))
             segmented_traj.append(segment)
 
@@ -212,9 +211,8 @@ def two_fold_segmentation(
     for seg_element in segmented_traj:
         lst_positions = seg_element.exact.range()
         all_pts = all_pts.union(set(lst_positions))
-    drop = list(
-        set(range(max_id)) - all_pts
-    )  # set(range(max_id)): creates set from 0 to max_id. operation - all_pts (all_pts contains the segemented set)
+    # set(range(max_id)): creates set from 0 to max_id. operation - all_pts (all_pts contains the segemented set)
+    drop = list(set(range(max_id)) - all_pts)
 
     # Fit each segment
     clfs: list[MATRIX] = []
@@ -278,9 +276,8 @@ def segmented_trajectories(
 
     """
 
-    total_trajectories = len(
-        positions
-    )  # gives the total number of trajectories supplied as input
+    # the total number of trajectories supplied as input
+    total_trajectories = len(positions)
     total_segments = len(segmented_traj)  # total segments after segmentation process
 
     # found single-segment-per-trajectory or not,
@@ -292,9 +289,8 @@ def segmented_trajectories(
 
     # We create a list of segments positions of the form [start, pre-end, end] for each segment.
 
-    segments_per_traj: list[
-        Span
-    ] = []  # contain list of all start and end position for each trajectory. Note each trajectory has the overall start and end position value
+    # list of all start and end position for each trajectory. Note each trajectory has the overall start and end position value
+    segments_per_traj: list[Span] = []
     segmentedTrajectories = []  # contain list of all segments of all the trajectories.
 
     traj_id = 0
@@ -388,9 +384,8 @@ def segment_and_fit(
     all_pts: set[int] = set()
     for lst in res:
         all_pts = all_pts.union(set(lst))
-    drop = list(
-        set(range(max_id)) - all_pts
-    )  # set(range(max_id)): creates set from 0 to max_id. operation - all_pts (all_pts contains the segemented set)
+    # set(range(max_id)): creates set from 0 to max_id. operation - all_pts (all_pts contains the segemented set)
+    drop = list(set(range(max_id)) - all_pts)
 
     # Fit each segment
     clfs = []
@@ -485,9 +480,10 @@ def two_fold_segmentation_new(
         while high < max_id:
             # print("b1[high]:",b1[high], "   and b1[high,2] =", b1[high,2], "   and b1[high, 1:] =", b1[high, 1:])
             # diff_val = rel_diff(b1[high,2], b2[high,2])  # print("pos:",high,"  diff-val:",diff_val)
+            # ignore input-variables note: zero-based indexing
             diff_val = rel_diff(
                 b1[high, size_of_input_variables:], b2[high, size_of_input_variables:]
-            )  # ignore input-variables note: zero-based indexing
+            )
             # print("pos:",high,"  (b1-b2) diff-val:",diff_val)
             if diff_val < ep:
                 high += 1
@@ -501,17 +497,16 @@ def two_fold_segmentation_new(
             diff_val = rel_diff(
                 b1[high, size_of_input_variables:], b2[high, size_of_input_variables:]
             )
+            # relative difference between current and previous
             relDiff_backward = rel_diff(
                 b1[high, size_of_input_variables:],
                 b1[(high - 1), size_of_input_variables:],
-            )  # compute relative difference between current and previous
+            )
 
-            if (
-                diff_val >= ep
-            ):  # high difference.    This will detect all boundary points
-                position_diffValue.append(
-                    (high, relDiff_backward)
-                )  # recording position and diff-value
+            if diff_val >= ep:
+                # high difference.    This will detect all boundary points
+                # recording position and diff-value
+                position_diffValue.append((high, relDiff_backward))
                 high += 1
             else:  # low difference so same segment
                 break
@@ -519,15 +514,12 @@ def two_fold_segmentation_new(
             arr_len = len(position_diffValue)
             next_low_search = 0
             for value_position, value_backward in position_diffValue:
-                if (
-                    value_backward >= lowDifference
-                ):  # found the exact change-point or the boundary point
-                    good_high = (
-                        value_position  # this is the point where difference found
-                    )
-                    good_high = (
-                        value_position - 1
-                    )  # Thus -1 point is the last point in the segment before jump-reset
+                if value_backward >= lowDifference:
+                    # found the exact change-point or the boundary point
+                    # this is the point where difference found
+                    good_high = value_position
+                    # Thus -1 point is the last point in the segment before jump-reset
+                    good_high = value_position - 1
                     next_low = value_position
                     break  # found both good_high and next_low so break the for loop from check forward as they will all satisfy
             print(
@@ -552,16 +544,14 @@ def two_fold_segmentation_new(
     all_pts: set[int] = set()
     for lst in res:
         all_pts = all_pts.union(set(lst))
-    drop = list(
-        set(range(max_id)) - all_pts
-    )  # set(range(max_id)): creates set from 0 to max_id. operation - all_pts (all_pts contains the segemented set)
+    # set(range(max_id)): creates set from 0 to max_id. operation - all_pts (all_pts contains the segemented set)
+    drop = list(set(range(max_id)) - all_pts)
 
     all_pts_modified: set[int] = set()
     for lst in res_modified:
         all_pts_modified = all_pts_modified.union(set(lst))
-    drop = list(
-        set(range(max_id)) - all_pts_modified
-    )  # set(range(max_id)): creates set from 0 to max_id. operation - all_pts (all_pts contains the segemented set)
+    # set(range(max_id)): creates set from 0 to max_id. operation - all_pts (all_pts contains the segemented set)
+    drop = list(set(range(max_id)) - all_pts_modified)
 
     # Fit each segment
     clfs = []
@@ -569,9 +559,8 @@ def two_fold_segmentation_new(
     # cluster_by_DTW = True
     # if cluster_by_DTW == False: # for DTW we do not need clfs computation at this stage but for dbscan/linearpiece we need
 
-    if (
-        method != ClusteringMethod.DTW
-    ):  # for DTW we do not need clfs computation at this stage but for dbscan/linearpiece we need
+    if method != ClusteringMethod.DTW:
+        # for DTW we do not need clfs computation at this stage but for dbscan/linearpiece we need
         # print ("len of res", len(res))
         for lst in res:
             # print("List in res is ", lst)

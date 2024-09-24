@@ -255,9 +255,7 @@ def addFilteringCode(out: TextIOWrapper) -> None:
         )
     )
 
-    out.write(
-        "t = t_temp1;\n"
-    )  # replacing the filtered data back to the original variable t
-    out.write(
-        "y = y_temp1;\n"
-    )  # replacing the filtered data back to the original variable y
+    # replacing the filtered data back to the original variable t
+    out.write("t = t_temp1;\n")
+    # replacing the filtered data back to the original variable y
+    out.write("y = y_temp1;\n")

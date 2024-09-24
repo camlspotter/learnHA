@@ -250,9 +250,8 @@ def addTransitions(out: TextIOWrapper, ha: HA, invariant_mode: InvariantMode) ->
         trans = ha.outgoing_transitions(loc.id)
         out.write(f"\n%%Transitions for Location loc{loc_id}\n")
         exec_order: int = 1
-        sourceOClock = (
-            3.1 + different_position
-        )  # start value Todo: proper calculation needed
+        # start value Todo: proper calculation needed
+        sourceOClock = 3.1 + different_position
         different_position += 1.1
         # If the model is a Single Location with no Transitions this Loop will not be executed
         transition_count: int = 0
@@ -265,9 +264,8 @@ def addTransitions(out: TextIOWrapper, ha: HA, invariant_mode: InvariantMode) ->
             # ************* Using the Modified Guard which replace Equality guard into inequality guard for fixing MATLAB's issue *********
             # Note: converted equality into range by epsilon
             inequality_guard = ha.string_of_polynomial(tr.guard) + " <= 0"
-            reset_statement_for_tr = resetPrinter2(
-                ha, tr.assignments
-            )  # Prints reset equations from a list of reset equations
+            # Prints reset equations from a list of reset equations
+            reset_statement_for_tr = resetPrinter2(ha, tr.assignments)
             reset_statement_for_tr = reset_statement_for_tr
 
             if loc.id == tr.dst:  # this means it's a Loop Transition
@@ -286,9 +284,8 @@ def addTransitions(out: TextIOWrapper, ha: HA, invariant_mode: InvariantMode) ->
                 out.write(f"    t{tr.id} = Stateflow.Transition(ch);\n")
                 out.write(f"    t{tr.id}.Source = loc{loc_id};\n")
                 out.write(f"    t{tr.id}.Destination = loc{tr.dst+1};\n")
-                out.write(
-                    f"    t{tr.id}.ExecutionOrder = {exec_order};\n"
-                )  # XXX It is a contant!!
+                # XXX It is a constant!!
+                out.write(f"    t{tr.id}.ExecutionOrder = {exec_order};\n")
                 out.write(f"    t{tr.id}.SourceOClock = {sourceOClock}; \n")
                 out.write(
                     f"    t{tr.id}.LabelPosition = [{x_pos} {y_pos} 31 {next_height}];\n"
@@ -297,6 +294,7 @@ def addTransitions(out: TextIOWrapper, ha: HA, invariant_mode: InvariantMode) ->
                 out.write(
                     f"    t{tr.id}.LabelString = '[ {inequality_guard} ]{reset_statement_for_tr}';"
                 )
+
                 # ************* Using the Modified Guard which replace Equality guard into inequality guard for fixing MATLAB's issue *********
 
             exec_order += 1
@@ -307,9 +305,8 @@ def addTransitions(out: TextIOWrapper, ha: HA, invariant_mode: InvariantMode) ->
         # exec_order this will be for loop-transtions now
 
         # ****** addLoopTransitions(out); #This is the Invariant Loop ******
-        out.write(
-            "\n\n"
-        )  # Adding blank lines before Invariants handling (using Connectives-Self Loops)
+        # Adding blank lines before Invariants handling (using Connectives-Self Loops)
+        out.write("\n\n")
         out.write("%% Adding Loop Transition to represent Invariant Condition\n")
         out.write(f"c{loc_id}_{number_of_loop_trans} = Stateflow.Junction(ch);\n")
         out.write(
@@ -334,9 +331,8 @@ def addTransitions(out: TextIOWrapper, ha: HA, invariant_mode: InvariantMode) ->
             f"cb{loc_id}_{number_of_loop_trans}.LabelPosition = [{pos_x - 20} 10 31 {next_height}];\n"
         )
 
-        reset_statement_identity = resetPrinter(
-            ha
-        )  # Prints a simple identity reset equations. This is used below, in the invariant-loop-transition
+        # Prints a simple identity reset equations. This is used below, in the invariant-loop-transition
+        reset_statement_identity = resetPrinter(ha)
 
         if transition_count == 0:
             out.write(
@@ -414,9 +410,8 @@ def addDefaultTransition(out: TextIOWrapper, ha: HA) -> None:
     out.write("%% Default or Initial Transition\n")
     out.write(f"init{init_mode+1} = Stateflow.Transition(ch);\n")
     out.write(f"init{init_mode+1}.Destination = loc{init_mode+1};\n")
-    out.write(
-        f"init{init_mode+1}.LabelString = '{initial_values}';\n"
-    )  # Note a0, a1 are the initial values for the variable;
+    # Note a0, a1 are the initial values for the variable;
+    out.write(f"init{init_mode+1}.LabelString = '{initial_values}';\n")
     out.write(f"init{init_mode+1}.DestinationOClock = 0;\n")
     out.write(
         f"init{init_mode+1}.SourceEndpoint = init{init_mode+1}.DestinationEndpoint - [0 30];\n"
@@ -577,9 +572,8 @@ def addLoopTransitions(
     trans_junction_to_loc = f"cb{sourceLoc+1}_{number_loop_trans}"
 
     # exec_order this will be for loop-transtions now
-    out.write(
-        "\n\n"
-    )  # Adding blank lines before Invariants handling (using Connectives-Self Loops)
+    # Adding blank lines before Invariants handling (using Connectives-Self Loops)
+    out.write("\n\n")
     out.write("%% Adding Loop Transition to represent Invariant Condition\n")
     out.write(f"{junction_object_name} = Stateflow.Junction(ch);\n")
     out.write(f"{junction_object_name}.Position.Center = [{pos_x - 20} 0];\n")

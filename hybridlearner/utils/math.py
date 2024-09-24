@@ -30,9 +30,7 @@ def permut(n: int, k: int) -> list[list[int]]:
         # else:
         #     pass
 
-        for i in range(
-            start, n + 1
-        ):  # n+1 because for-in-range in python does not include 'end' in range(0,end)
+        for i in range(start, n + 1):  # to include n
             comb.append(i)
             backtrack(start, comb)  # everytime the combination starts from 0
             comb.pop()

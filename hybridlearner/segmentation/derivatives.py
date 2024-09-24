@@ -181,19 +181,15 @@ def diff_method_backandfor(
 
     D = L_t - stepM  # Discarding the last M-points
 
-    A_matrix = np.zeros(
-        (D - stepM, L_p), dtype=np.double
-    )  # stores the mapping function \Phi as in the paper
-    b1_matrix = np.zeros(
-        (D - stepM, L_y), dtype=np.double
-    )  # stores the backward_BDF using LMM as in the paper
-    b2_matrix = np.zeros(
-        (D - stepM, L_y), dtype=np.double
-    )  # stores the forward_BDF using LMM  as in the paper
+    # the mapping function \Phi as in the paper
+    A_matrix = np.zeros((D - stepM, L_p), dtype=np.double)
+    # the backward_BDF using LMM as in the paper
+    b1_matrix = np.zeros((D - stepM, L_y), dtype=np.double)
+    # the forward_BDF using LMM  as in the paper
+    b2_matrix = np.zeros((D - stepM, L_y), dtype=np.double)
     y_matrix = np.zeros((D - stepM, L_y), dtype=np.double)  # slice of y. [stepM:-stepM]
-    coef_matrix = np.ones(
-        (L_t, L_p), dtype=np.double
-    )  # stores the coefficient F as in the paper
+    # the coefficient F as in the paper
+    coef_matrix = np.ones((L_t, L_p), dtype=np.double)
     for i in range(0, L_t):
         for j in range(0, L_p):
             for l in range(0, L_y):

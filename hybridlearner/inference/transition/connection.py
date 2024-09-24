@@ -56,30 +56,24 @@ def create_connection(
         return any(span.start <= x <= span.end for span in spans)
 
     # Below computes connecting points when the number of clusters > 1. But not for single mode system
-    connections: list[
-        Connection
-    ] = []  # Structure containing [src, dest, list of connecting-points]
+    connections: list[Connection] = []
     for i in range(0, cluster_len):
         for j in range(i, cluster_len):  # modified j in range(i, cluster_len) from i+1
             # Code for Forward-Transitions
             links = []
             for t in range(0, traj_size):  # Loop for all trajectories
-                segment_size = len(
-                    segmentedTrajectories[t]
-                )  # total number of segments in each trajectory
+                # total number of segments in each trajectory
+                segment_size = len(segmentedTrajectories[t])
                 for g in range(0, segment_size - 1):
                     # last start-point is compared with previous end-point
-                    end_posi: int = segmentedTrajectories[t][
-                        g
-                    ].end  # the end-pt of the trajectory t and segment g
+                    # the end-pt of the trajectory t and segment g
+                    end_posi: int = segmentedTrajectories[t][g].end
                     pre_end_posi = end_posi - 1
                     if spans_contain(mode_spans[i], end_posi):  # TRUE
-                        start_posi = segmentedTrajectories[t][
-                            g + 1
-                        ].start  # the start-pt of the trajectory t and segment g+1
-                        if spans_contain(
-                            mode_spans[j], start_posi
-                        ):  # if this also returns TRUE
+                        # the start-pt of the trajectory t and segment g+1
+                        start_posi = segmentedTrajectories[t][g + 1].start
+                        if spans_contain(mode_spans[j], start_posi):
+                            # if this also returns TRUE
                             # print ("Store. (end,start)=(", end_posi,",",start_posi,") in transition(i,j)=(", i, ",",j,") \n")
                             # connections.append([i, j, [end_posi, start_posi]])
                             # Now we apppend 3 points, links.append([end_posi, start_posi])
@@ -92,19 +86,16 @@ def create_connection(
             if i != j:  # loop is to be done only one
                 links = []
                 for t in range(0, traj_size):  # Loop for all trajectories
-                    segment_size = len(
-                        segmentedTrajectories[t]
-                    )  # Length of each segmented trajectory
-                    for g in range(
-                        0, segment_size - 1
-                    ):  # last start-point is compared with previous end-point
+                    # Length of each segmented trajectory
+                    segment_size = len(segmentedTrajectories[t])
+                    # last start-point is compared with previous end-point
+                    for g in range(0, segment_size - 1):
                         end_posi = segmentedTrajectories[t][g].end
                         pre_end_posi = end_posi - 1
                         if spans_contain(mode_spans[j], end_posi):  # TRUE
                             start_posi = segmentedTrajectories[t][g + 1].start
-                            if spans_contain(
-                                mode_spans[i], start_posi
-                            ):  # if this also returns TRUE
+                            if spans_contain(mode_spans[i], start_posi):
+                                # if this also returns TRUE
                                 # print("Store. (end,start)=(", end_posi, ",", start_posi,") in transition(j,i)=(", j, ",", i, ") \n")
                                 # connections.append([j, i, [end_posi, start_posi]])
                                 # now we have 3points: links.append([end_posi, start_posi])

@@ -16,8 +16,11 @@ def gridSearchStart(
     x: MATRIX, y: list[int], param_grid: dict[str, object]
 ) -> tuple[int, float, int]:  # XXXobject?
     grid = GridSearchCV(
-        SVC(), param_grid, refit=True, verbose=0
-    )  # verbose option 0 to 3
+        SVC(),
+        param_grid,
+        refit=True,
+        verbose=0,  # verbose option 0 to 3
+    )
     # fitting the model for grid search
     # print("x=",x)
     # print("y=",y)
