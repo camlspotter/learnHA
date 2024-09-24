@@ -16,7 +16,7 @@ class Test(unittest.TestCase):
         # pipenv run python simulate.py --simulink-model-file  --time-horizon 13.0 --sampling-time 0.001 --fixed-interval-data False --input-variables 'u' --output-variables 'x,v' --invariant '-9.9 <= u && u <= -9.5 && 10.2 <= x && x <= 10.5 && 15 <= v && v <= 15' --number-of-cps 'u:4' --signal-types 'u:linear' -o model_simulation.txt -S 0 -n 64
 
         script_file= "_test/simulate_model.m"
-        simulink_model_file= os.path.abspath("../../src/test_cases/engine/learn_ha_loop/ex_sldemo_bounce_Input.slx")
+        simulink_model_file= os.path.abspath("data/models/ex_sldemo_bounce_Input.slx")
         output_file= os.path.abspath("_test/test_simulate.txt")
         time_horizon= 13.0
         sampling_time= 0.001
