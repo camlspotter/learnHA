@@ -1,3 +1,4 @@
+from io import TextIOWrapper
 import csv
 import numpy as np
 from numpy.typing import NDArray
@@ -28,6 +29,10 @@ Trajectory = tuple[ np.ndarray,  # time part of timeseries. 1D array
 class Trajectories:
     trajectories : list[ Trajectory ]
     stepsize : float
+
+    def output(self, oc : TextIOWrapper) -> None:
+        for traj in self.trajectories:
+            np.savetxt(oc, np.column_stack(traj), delimiter='\t', fmt='%.16g')
 
 def parse_trajectories(path : str) -> Trajectories:
     """

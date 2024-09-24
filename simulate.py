@@ -20,15 +20,19 @@ from hybridlearner.simulation import options as simulation_options
 
 @dataclass
 class Options(common_options.Options, simulation_options.Options):
+    simulink_model_file : str
     output_file : str
+    nsimulations : int
 
 @typechecked
 def get_options() -> Options:
     parser = argparse.ArgumentParser(description="SLX model Simulator")
+    parser.add_argument('--simulink-model-file', help='SLX model file', type=os.path.abspath, required=True)
 
     common_options.add_argument_group(parser)
     simulation_options.add_argument_group(parser)
     parser.add_argument('--output-file', '-o', help='Output filename', type=os.path.abspath, required=True)
+    parser.add_argument('-n', '--nsimulations', help='Number of simulations', type=int, default=1, required=False)
 
     return Options(**vars(parser.parse_args()))
 

@@ -6,14 +6,12 @@ from dataclasses import dataclass
 from typeguard import typechecked
 import hybridlearner.utils.io as utils_io
 from hybridlearner.slx_compiler import OdeSolverType, InvariantMode, compile
+from hybridlearner.slx_compiler import options as compiler_options
 from hybridlearner.automaton import HybridAutomaton
 from hybridlearner.matlab_engine import matlab_engine
 
 @dataclass
-class Options:
-    ode_solver_type : OdeSolverType
-    ode_solver : str
-    invariant_mode : InvariantMode
+class Options(compiler_options.Options):
     ha_json_file : str             # aaa/bbb/learned_ha.json
     output_matlab_script : str     # aaa/bbb/learned_ha_compile.m
     simulink_model_name : str      # aaa/bbb/learned_ha
@@ -21,30 +19,19 @@ class Options:
 @typechecked
 def get_options() -> Options:
     parser = argparse.ArgumentParser(description="Hybrid Automaton to SLX compiler")
+    compiler_options.add_argument_group(parser)
     parser.add_argument('ha_json_file', metavar='ha.json', type=str, help='Hybrid Automaton definition JSON path')
-    parser.add_argument('--ode-solver-type', help='ODE solver type',
-                        type=str, choices= [t.value for t in OdeSolverType], required=True)
-    parser.add_argument('--ode-solver', help='ODE solver', type=str, required=True)
     parser.add_argument('--output-file', "-o", metavar='ha.slx', help='Output SLX model path', type=str, default= '', required=False)
-    parser.add_argument('--invariant-mode', help='Invariant mode',
-                        type=int, choices= [m.value for m in InvariantMode], required=True)
+
     args = vars(parser.parse_args())
 
-    args['ode_solver_type'] = OdeSolverType(args['ode_solver_type'])
-    args['invariant_mode'] = InvariantMode(args['invariant_mode'])
-
-    assert path.splitext(args['ha_json_file'])[1] == ".json", "Hybrid Automaton definition path must have extension .json"
+    assert path.splitext(args['ha_json_file'])[1] == ".json", \
+        f"Hybrid Automaton definition path must have extension .json: {args['ha_json_file']}"
     args['output_file'] = path.splitext(args['ha_json_file'])[0] + ".slx" if args['output_file'] == "" else args['output_file']
     output_file_body_ext = path.splitext(args['output_file'])
     assert output_file_body_ext[1] == ".slx", "Output SLX model path must have extension .slx"
     args['output_matlab_script'] = output_file_body_ext[0] + "_compile.m"
     args['simulink_model_name'] = path.basename(output_file_body_ext[0])
-
-    print("source:", args['ha_json_file'])
-    print("output:", args['output_file'])
-    print("compile_script:", args['output_matlab_script'])
-    print("simulink_model_name:", args['simulink_model_name'])
-
     del args['output_file']
 
     return Options(**args)
