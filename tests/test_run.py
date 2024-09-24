@@ -1,14 +1,19 @@
 import unittest
-
+from typing import Any
+from typeguard import typechecked
 import filecmp
 import os
 import json
 from dataclasses import asdict
+from pydantic.dataclasses import dataclass
+
+from hybridlearner.common import options as common_options
+from hybridlearner.inference import options as inference_options
 
 from hybridlearner.inference import infer_model
 from hybridlearner import automaton
 from hybridlearner.obsolete.model_printer.print_HA import print_HA
-from hybridlearner.inference.options import ClusteringMethod, Options
+from hybridlearner.inference.options import ClusteringMethod
 from hybridlearner.trajectory import load_trajectories
 import hybridlearner.utils.io as utils_io
 from hybridlearner.inference.annotation import Continuous, Constant
@@ -16,6 +21,13 @@ from hybridlearner.inference.annotation import Continuous, Constant
 # To execute this test from the project folder "learnHA" type the command
 # amit@amit-Alienware-m15-R4:~/MyPythonProjects/learningHA/learnHA$ python -m unittest discover -v
 
+@dataclass
+class Options(common_options.Options, inference_options.Options):
+    input_filename: str
+
+@typechecked
+def get_options(ps : dict[str,Any]) -> Options:
+    return Options(**ps)
 
 def write_HA(opts, raw):
     outputfilename = os.path.join(opts.output_directory, "learned_HA.txt")
@@ -30,11 +42,11 @@ def write_HA(opts, raw):
 
 class TestLearnHA(unittest.TestCase):
     def doit(self, ps, golden_dir):
-        opts = Options(**ps)
+        opts = get_options(ps)
 
         list_of_trajectories = load_trajectories(opts.input_filename)
 
-        raw = infer_model(list_of_trajectories, opts)
+        raw = infer_model(list_of_trajectories, opts.input_variables, opts.output_variables, opts)
         write_HA(opts, raw)  # prints an HA model file
 
         backup_file = os.path.join(golden_dir, "learned_HA.txt")
