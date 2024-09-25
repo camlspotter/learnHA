@@ -1,10 +1,14 @@
 # HybridLearner in Python
 
-## Install
+## Preparation
 
 - Install pipenv
-- pipenv --python 3.10
-- pipenv install
+- `pipenv --python 3.10`
+- `pipenv install`
+
+### Cleaning
+
+- `pipenv --rm`
 
 ## Programs
 
