@@ -3,6 +3,10 @@ import numpy as np
 from hybridlearner.types import MATRIX
 from .connection import ConnectionPoint
 
+# Assignment is a set of 1st order polynomials indexed by variables:
+# new_x = c_{xx} * x + c_{xy} * y + .. + c_{x1} * 1
+# new_y = c_{yx} * x + c_{yy} * y + .. + c_{y1} * 1
+# ...
 Assignment = tuple[
     MATRIX,  # coeffs, 2d
     MATRIX,  # intercepts 1d

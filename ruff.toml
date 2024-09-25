@@ -1,0 +1,4 @@
+[format]
+quote-style = "preserve"
+skip-magic-trailing-comma = true
+

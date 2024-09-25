@@ -1,3 +1,5 @@
+"""Simple DSL using Python AST"""
+
 import ast
 from typing import Union, cast
 from pydantic import ConfigDict

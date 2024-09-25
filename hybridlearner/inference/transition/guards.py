@@ -180,7 +180,7 @@ def get_coeffs(
     L_y: int,
     svm_model: Any,  # svm model object
     gamma_value_optimal: float,
-    order: int = 1,
+    order,
 ) -> list[float]:
     """
     Implementation of an equal number of positive and negative data and the size of these data are not very high. It is

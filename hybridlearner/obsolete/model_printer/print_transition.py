@@ -15,36 +15,35 @@ def print_transition(f_out, transitions, system_dim, boundary_order):
 
     # I have to loop through transitions to access all the transitions
     # **** Computing the polynomial expression for guard ****
-    coeff_expansion = myUtil.multinomial(
-        system_dim + 1, boundary_order
-    )  # same formula as in getcoeff Function in SVM
+    # same formula as in getcoeff Function in SVM
+    coeff_expansion = myUtil.multinomial(system_dim + 1, boundary_order)
     gExp = [""] * int(len(coeff_expansion))
     # gExp = [""] * int(len(coeff_expansion)+1)   #todo testing
     coef_index = 0
     for coeff, term_ in coeff_expansion:
-        # He used hetero list and we recover it here !!!!!!!!!!!!
+        # The original author used hetero list and we recover it here !!!!!!!!!!!!
         # Awful but no point to fix it since this printer is obsolete.
         term = [coeff] + term_
         number_of_var_per_term = 0
         term_index = 0
         aa = ""
+        # Ignoring the 1st element which is the computed coefficient, Also, last term is 1
         for each_var_power in term:
-            if (
-                (term_index != 0) and (term_index != (len(term) - 1))
-            ):  # Ignoring the 1st element which is the computed coefficient, Also, last term is 1
+            if (term_index != 0) and (term_index != (len(term) - 1)):
                 # if (term_index != 0) and (term_index != (len(gExp) - 1)):  # todo: testing
                 if each_var_power != 0.0:
                     if number_of_var_per_term > 0:
                         aa += "* "
 
                     if each_var_power > 1:
+                        # -1 since variable indices begins with x0, x1, etc
                         aa += (
                             "(x"
                             + str(term_index - 1)
                             + ")^"
                             + str(each_var_power)
                             + " "
-                        )  # -1 since variable indices begins with x0, x1, etc
+                        )
                     else:
                         aa += "x" + str(term_index - 1) + " "
 
@@ -60,8 +59,7 @@ def print_transition(f_out, transitions, system_dim, boundary_order):
     gExp[len(coeff_expansion) - 1] = "1"
     # print("Expression is ", gExp)
 
-    for tr in range(0, len(transitions)):
-        (src, dest, guard_coeff, assignment) = transitions[tr]
+    for (tr, (src, dest, guard_coeff, assignment)) in enumerate(transitions):
 
         trans_detail = "Transition-ID " + str(tr) + "\n"
         trans_detail += "Trans-Src-Dest " + str(src + 1) + " => " + str(dest + 1) + "\n"

@@ -37,9 +37,7 @@ def parse_number_of_cps(s: str) -> dict[str, int]:
 
 
 def add_argument_group(parser: argparse.ArgumentParser) -> None:
-    group = parser.add_argument_group(
-        'Simulation options', 'Simulation options'
-    )
+    group = parser.add_argument_group('Simulation options', 'Simulation options')
     group.add_argument(
         '-Z',
         '--time-horizon',
