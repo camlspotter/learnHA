@@ -45,19 +45,3 @@ def string_of_invariant(inv: Invariant) -> str:
 
 def instance_of_invariant(rng: random.Random, inv: Invariant) -> dict[str, float]:
     return {k: range.pick_random_point(rng) for (k, range) in inv.items()}
-
-
-# XXX For now supports only 1st degree polynomials
-Polynomial = dict[str, float]  # Σ_i1x_i +c
-
-
-def string_of_polynomial(p: Polynomial) -> str:
-    return " + ".join([(f"{v}" if k == "1" else f"{v} * {k}") for (k, v) in p.items()])
-
-
-def build_polynomial(vars: list[str], coeffs_and_intercept: list[float]) -> Polynomial:
-    assert len(vars) + 1 == len(coeffs_and_intercept)
-    return {
-        (vars[i] if i < len(coeffs_and_intercept) - 1 else "1"): c
-        for (i, c) in enumerate(coeffs_and_intercept)
-    }

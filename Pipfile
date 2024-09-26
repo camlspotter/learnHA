@@ -15,6 +15,7 @@ pydantic = "*"
 # https://pypi.org/project/matlabengine/9.13.11/
 matlabengine = "==9.13.11"
 pyparsing = "*"
+frozenlist = "*"
 
 [dev-packages]
 pytest = "*"

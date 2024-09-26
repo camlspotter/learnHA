@@ -4,11 +4,11 @@ from typeguard import typechecked
 from pydantic.dataclasses import dataclass
 from pydantic import ConfigDict
 import numpy as np
-from hybridlearner.types import Invariant, Range, Polynomial, build_polynomial
+from hybridlearner.types import Invariant, Range
 from hybridlearner.inference.transition import Transition as RawTransition
 from hybridlearner.inference.transition.assignment import Assignment
 from hybridlearner.inference import Raw
-
+from hybridlearner.polynomial import Polynomial, build_polynomial
 
 @dataclass
 class Transition:
@@ -20,7 +20,7 @@ class Transition:
 
 
 def build_assignments(
-    vars: list[str], output_vars: list[str], assignment: Assignment
+        vars: list[str], output_vars: list[str], assignment: Assignment
 ) -> dict[str, Polynomial]:
     (coeffs, intercepts) = assignment
     (nvs1, nvs2) = coeffs.shape
@@ -28,18 +28,19 @@ def build_assignments(
     assert nvs1 == nvs2
     assert nvs1 == nvs3
     assignments = [
-        build_polynomial(vars, list(coeffs) + [intercept])
+        # Assignments are degree 1 polynomials since obtained from linear regression
+        build_polynomial(vars, 1, list(coeffs) + [intercept])
         for (coeffs, intercept) in zip(coeffs, intercepts)
     ]
     return {vars[i]: a for (i, a) in enumerate(assignments) if vars[i] in output_vars}
 
 
 def build_Transition(
-    id: int, vars: list[str], output_vars: list[str], trans: RawTransition
+        id: int, vars: list[str], output_vars: list[str], degree : int, trans: RawTransition
 ) -> Transition:
     (src, dst, guard_coeffs, assignment) = trans
 
-    guard = build_polynomial(vars, guard_coeffs)
+    guard = build_polynomial(vars, degree, guard_coeffs)
     assignments = build_assignments(vars, output_vars, assignment)
     return Transition(id=id, src=src, dst=dst, guard=guard, assignments=assignments)
 
@@ -55,27 +56,25 @@ def build_invariant(vars: list[str], inv: list[tuple[float, float]]) -> Invarian
     return {vars[i]: Range(min, max) for (i, (min, max)) in enumerate(inv)}
 
 
-# XXX Very simliar to build_guard
-def build_ode(vars: list[str], ode: np.ndarray) -> Polynomial:
-    return {(vars[i] if i < len(ode) - 1 else "1"): c for (i, c) in enumerate(ode)}
-
-
 def build_odes(
-    vars: list[str], output_vars: list[str], odes: np.ndarray
+        vars: list[str], output_vars: list[str], degree : int, odes: np.ndarray
 ) -> dict[str, Polynomial]:
     iodes = [(i, ode) for (i, ode) in enumerate(odes) if vars[i] in output_vars]
-    return {vars[i]: build_ode(vars, ode) for (i, ode) in iodes}
+    return {vars[i]: build_polynomial(vars, degree, ode) for (i, ode) in iodes}
+
+
 
 
 def build_Mode(
     id: int,
     vars: list[str],
     output_vars: list[str],
+    degree : int,
     inv: list[tuple[float, float]],
     odes: np.ndarray,
 ) -> Mode:
     invariant = build_invariant(vars, inv)
-    flow = build_odes(vars, output_vars, odes)
+    flow = build_odes(vars, output_vars, degree, odes)
     return Mode(id=id, invariant=invariant, flow=flow)
 
 
@@ -102,12 +101,12 @@ def build(raw: Raw) -> HybridAutomaton:
     vars = raw.input_variables + raw.output_variables
 
     modes = [
-        build_Mode(id, vars, raw.output_variables, inv, odes)
+        build_Mode(id, vars, raw.output_variables, raw.ode_degree, inv, odes)
         for (id, (inv, odes)) in enumerate(zip(mode_inv, raw.G))
     ]
 
     transs: list[Transition] = [
-        build_Transition(id, vars, raw.output_variables, trans)
+        build_Transition(id, vars, raw.output_variables, raw.guard_degree, trans)
         for (id, trans) in enumerate(raw.transitions)
     ]
 

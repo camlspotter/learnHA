@@ -4,9 +4,10 @@ import textwrap
 from dataclasses import dataclass
 
 from hybridlearner.automaton import HybridAutomaton
-from hybridlearner.types import Invariant, Polynomial
+from hybridlearner.types import Invariant
 import hybridlearner.types
 import hybridlearner.automaton
+from hybridlearner.polynomial import Polynomial, variable_annotated_to_polynomial, polynomial_to_variable_annotated
 
 oneVersusOne_oneVersusRest: int = 1  # XXX enum?
 
@@ -40,12 +41,11 @@ class HA(HybridAutomaton):
         return v in self.output_variables
 
     def string_of_polynomial(self, p: Polynomial) -> str:
-        return hybridlearner.types.string_of_polynomial(
-            {
-                ("1" if k == "1" else f"x{self.variable_rev_dict[k]}"): v
-                for (k, v) in p.items()
-            }
-        )
+        # Damn, we must rename variables!
+        def rename(k : dict[str,int]) -> dict[str,int]:
+            return { f"x{self.variable_rev_dict[x]}" : i for (x, i) in k.items() }
+        p2 = variable_annotated_to_polynomial([ (rename(k), f) for (k, f) in polynomial_to_variable_annotated(p) ])
+        return p2.string
 
     def string_of_invariant(self, inv: Invariant) -> str:
         return hybridlearner.types.string_of_invariant(
