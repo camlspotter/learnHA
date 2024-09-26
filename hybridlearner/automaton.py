@@ -10,6 +10,7 @@ from hybridlearner.inference.transition.assignment import Assignment
 from hybridlearner.inference import Raw
 from hybridlearner.polynomial import Polynomial, build_polynomial
 
+
 @dataclass
 class Transition:
     id: int
@@ -20,7 +21,7 @@ class Transition:
 
 
 def build_assignments(
-        vars: list[str], output_vars: list[str], assignment: Assignment
+    vars: list[str], output_vars: list[str], assignment: Assignment
 ) -> dict[str, Polynomial]:
     (coeffs, intercepts) = assignment
     (nvs1, nvs2) = coeffs.shape
@@ -36,7 +37,7 @@ def build_assignments(
 
 
 def build_Transition(
-        id: int, vars: list[str], output_vars: list[str], degree : int, trans: RawTransition
+    id: int, vars: list[str], output_vars: list[str], degree: int, trans: RawTransition
 ) -> Transition:
     (src, dst, guard_coeffs, assignment) = trans
 
@@ -57,19 +58,17 @@ def build_invariant(vars: list[str], inv: list[tuple[float, float]]) -> Invarian
 
 
 def build_odes(
-        vars: list[str], output_vars: list[str], degree : int, odes: np.ndarray
+    vars: list[str], output_vars: list[str], degree: int, odes: np.ndarray
 ) -> dict[str, Polynomial]:
     iodes = [(i, ode) for (i, ode) in enumerate(odes) if vars[i] in output_vars]
     return {vars[i]: build_polynomial(vars, degree, ode) for (i, ode) in iodes}
-
-
 
 
 def build_Mode(
     id: int,
     vars: list[str],
     output_vars: list[str],
-    degree : int,
+    degree: int,
     inv: list[tuple[float, float]],
     odes: np.ndarray,
 ) -> Mode:

@@ -59,8 +59,7 @@ def print_transition(f_out, transitions, system_dim, boundary_order):
     gExp[len(coeff_expansion) - 1] = "1"
     # print("Expression is ", gExp)
 
-    for (tr, (src, dest, guard_coeff, assignment)) in enumerate(transitions):
-
+    for tr, (src, dest, guard_coeff, assignment) in enumerate(transitions):
         trans_detail = "Transition-ID " + str(tr) + "\n"
         trans_detail += "Trans-Src-Dest " + str(src + 1) + " => " + str(dest + 1) + "\n"
         f_out.write(trans_detail)
