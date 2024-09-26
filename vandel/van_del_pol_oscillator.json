@@ -1,0 +1,41 @@
+{
+  "init_mode": 0,
+  "modes": [
+    {
+      "id": 0,
+      "invariant": {},
+      "flow": {
+        "x": {
+          "string": "y"
+        },
+        "y": {
+          "string": "0.5 + x * x * y * -0.5 + x * -1 + 0"
+        }
+      }
+    }
+  ],
+  "transitions": [
+    {
+      "id": 0,
+      "src": 0,
+      "dst": 0,
+      "guard": {
+        "string": "x * 1.0 + y * 1.0 + 1000.0"
+      },
+      "assignments": {
+        "x": {
+          "string": "x * 1.0"
+        },
+        "y": {
+          "string": "y * 1.0"
+        }
+      }
+    }
+  ],
+  "input_variables": [
+  ],
+  "output_variables": [
+    "x",
+    "y"
+  ]
+}

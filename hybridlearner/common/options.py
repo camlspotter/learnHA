@@ -11,6 +11,8 @@ class Options:
 
 def parse_variables(s: str) -> list[str]:
     # XXX must have handling of whitespace etc
+    if s == "":
+        return []
     return s.split(",")
 
 
