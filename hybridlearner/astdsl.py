@@ -12,6 +12,12 @@ class App:
     args: list['Expr']
 
 
+@dataclass
+class BinOp:
+    left: 'Expr'
+    op: str
+    right: 'Expr'
+
 @dataclass(config=ConfigDict(arbitrary_types_allowed=True))
 class Value:
     value: Union[int, float]
@@ -42,7 +48,17 @@ class Variable:
     id: str
 
 
-Expr = Union[App, Value, List, Variable, Tuple, Dict, Set]
+Expr = Union[App, BinOp, Value, List, Variable, Tuple, Dict, Set]
+
+binops_name_symbol : dict[str, str] = {
+    'Mult' : '*',
+    'Add' : '+',
+}
+
+binops_symbol_value : dict[str, ast.operator] = {
+    '*' : ast.Mult(),
+    '+' : ast.Add(),
+}
 
 
 def expr(e: ast.expr) -> Expr:
@@ -53,6 +69,8 @@ def expr(e: ast.expr) -> Expr:
             assert False, f"Call but func is not Name?! f{ast.dump(e)}"
         args = [expr(e2) for e2 in e.args]
         return App(f, args)
+    elif isinstance(e, ast.BinOp):
+        return BinOp(expr(e.left), binops_name_symbol[type(e.op).__name__], expr(e.right))
     elif isinstance(e, ast.Constant):
         return Value(e.value)
     elif isinstance(e, ast.List):
@@ -88,6 +106,8 @@ def unparse_expr(e: Expr) -> str:
         match e:
             case App(f, args):
                 return ast.Call(ast.Name(f), [unparse(a) for a in args], keywords=[])
+            case BinOp(left, op, right):
+                return ast.BinOp(unparse(left), binops_symbol_value[op], unparse(right))
             case Value(a):
                 return ast.Constant(a)
             case List(es):
