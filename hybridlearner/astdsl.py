@@ -51,9 +51,13 @@ class Variable:
 
 Expr = Union[App, BinOp, Value, List, Variable, Tuple, Dict, Set]
 
-binops_name_symbol: dict[str, str] = {'Mult': '*', 'Add': '+'}
+binops_name_symbol: dict[str, str] = {'Mult': '*', 'Add': '+', 'Sub': '-'}
 
-binops_symbol_value: dict[str, ast.operator] = {'*': ast.Mult(), '+': ast.Add()}
+binops_symbol_value: dict[str, ast.operator] = {
+    '*': ast.Mult(),
+    '+': ast.Add(),
+    '-': ast.Sub(),
+}
 
 
 def expr(e: ast.expr) -> Expr:
@@ -74,7 +78,7 @@ def expr(e: ast.expr) -> Expr:
                 match expr(e.operand):
                     case Value(v):
                         return Value(-v)
-                    case e:
+                    case _:
                         assert False, f"Unsupported unary op argument {e}"
             case n:
                 assert False, f"Unsupported unary op {n}"
