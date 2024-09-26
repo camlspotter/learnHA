@@ -57,7 +57,6 @@ def select_clustering(
     """
 
     # print("Clustering segmented points ...")
-    maxorder = opts.ode_degree
     num_mode = opts.modes
     ep = opts.segmentation_error_tol
     size_of_input_variables = len(input_variables)
