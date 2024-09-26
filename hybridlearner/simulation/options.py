@@ -26,6 +26,8 @@ class Options:
 
 
 def parse_number_of_cps(s: str) -> dict[str, int]:
+    if s == "":
+        return {}
     def parse_ncps(s: str) -> tuple[str, int]:
         match s.split(":"):
             case (var, n):

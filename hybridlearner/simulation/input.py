@@ -16,6 +16,8 @@ class SignalType(Enum):
 
 
 def parse_signal_types(s: str) -> dict[str, SignalType]:
+    if s == "":
+        return {}
     def parse_vt(s: str) -> tuple[str, SignalType]:
         match s.split(":"):
             case (var, vt):

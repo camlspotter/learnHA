@@ -12,7 +12,7 @@ pipenv run python simulate.py \
        --invariant '0.5 <= x && x <= 1.5 && 0.5 <= y && y <= 1.5' \
        --simulink-model-file vandel/van_del_pol_oscillator.slx \
        -o vandel/simulate.txt \
-       --number-of-cps 'u:4' --signal-types 'u:linear' \
+       --number-of-cps '' --signal-types '' \
        -n 10
 
 pipenv run python inference.py \
