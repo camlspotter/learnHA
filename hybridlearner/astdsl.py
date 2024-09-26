@@ -71,6 +71,16 @@ def expr(e: ast.expr) -> Expr:
         return App(f, args)
     elif isinstance(e, ast.BinOp):
         return BinOp(expr(e.left), binops_name_symbol[type(e.op).__name__], expr(e.right))
+    elif isinstance(e, ast.UnaryOp):
+        match type(e.op).__name__:
+            case "USub":
+                match expr(e.operand):
+                    case Value(v):
+                        return Value(-v)
+                    case e:
+                        assert False, f"Unsupported unary op argument {e}"
+            case n:
+                assert False, f"Unsupported unary op {n}"
     elif isinstance(e, ast.Constant):
         return Value(e.value)
     elif isinstance(e, ast.List):
@@ -91,7 +101,7 @@ def expr(e: ast.expr) -> Expr:
     elif isinstance(e, ast.Name):
         return Variable(e.id)
     else:
-        assert False, f"Unsupported expression: {ast.unparse(e)}"
+        assert False, f"Unsupported expression: {ast.unparse(e)}, {e}"
 
 
 def parse_expr(s: str) -> Expr:
