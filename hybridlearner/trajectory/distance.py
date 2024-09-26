@@ -21,5 +21,5 @@ def trajectory_dtw_distance(
     assert at[1].shape[1] == len(input_variables) + len(output_variables)
     assert bt[1].shape[1] == len(input_variables) + len(output_variables)
     return dtw_distance(
-        at[1][:, len(output_variables)], bt[1][:, len(output_variables)]
+        at[1][:, -len(output_variables) :], bt[1][:, -len(output_variables) :]
     )
