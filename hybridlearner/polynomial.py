@@ -108,10 +108,18 @@ def variable_annotated_to_expr(p: VariableAnnotated) -> Expr:
     return reduce(add, comps[1:], cast(Expr, comps[0]))
 
 
+def va_sub(va: VariableAnnotated) -> VariableAnnotated:
+    return [(k, -f) for (k, f) in va]
+
+
 def expr_to_variable_annotated(e: Expr) -> VariableAnnotated:
     match e:
         case BinOp(e1, '+', e2):
             return expr_to_variable_annotated(e1) + expr_to_variable_annotated(e2)
+        case BinOp(e1, '-', e2):
+            return expr_to_variable_annotated(e1) + va_sub(
+                expr_to_variable_annotated(e2)
+            )
         case _:
             return [expr_to_comp(e)]
 

@@ -26,6 +26,7 @@ class Test(unittest.TestCase):
             ), f"Error: coeffs: {coeffs}  obtained: {coeffs2}.  polynomial: {p.string}"
 
         f(['x', 'y'], 1, [1.0, 2.0, 3.0], "x * 1.0 + y * 2.0 + 3.0")
+        f(['x', 'y'], 1, [1.0, -2.0, 3.0], "x * 1.0 + y * -2.0 + 3.0")
         f(
             ['x', 'y', 'z'],
             2,
