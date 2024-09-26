@@ -11,7 +11,7 @@ class Matlab:
     def engine(self) -> MatlabEngine:
         if self.e is None:
             print("Starting MATLAB engine")
-            self.e = matlab.engine.start_matlab()
+            self.e = matlab.engine.start_matlab('-nodisplay')
             print("Started MATLAB engine")
         if self.e is None:
             assert False
