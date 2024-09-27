@@ -85,8 +85,9 @@ def compile(
     out.write("%% Script file for generating Programmatically Simulink Model!\n")
     printDefinition(out, simulink_model_name, ode_solver_type, ode_solver)
 
+    # Create random Matlab function only when non-deterministic situation arise
+    # XXX never used.
     if len(ha.modes) == 3 and oneVersusOne_oneVersusRest == 2:
-        # Create random Matlab function only when non-deterministic situation arise
         addMatlabFunction(out)
 
     addLocations(out, ha)
@@ -605,10 +606,11 @@ def addLoopTransitions(
 
 
 def inputVariableCreation(out: TextIOWrapper, ha: HA) -> None:
-    out.write("\n%% *** Input Variable Declaration ****\n")
+    out.write("%% *** Input Variable Declaration ****\n\n")
     portNo = 1
     for var in ha.input_variables:
         var_id = f"x{ha.variable_rev_dict[var]}"
+        out.write(f"% Input variable {var}, coded as {var_id}_in\n")
         out.write(f"{var_id}_in  = Stateflow.Data(ch);\n")
         out.write(f"{var_id}_in.Name = '{var_id}';\n")
         out.write(f"{var_id}_in.Scope = 'Input';\n")
@@ -621,11 +623,12 @@ def inputVariableCreation(out: TextIOWrapper, ha: HA) -> None:
 
 
 def outputVariableCreation(out: TextIOWrapper, ha: HA) -> None:
-    out.write("\n%% *** Output Variable Declaration ****\n")
+    out.write("%% *** Output Variable Declaration ****\n\n")
 
     portNo = 1  # Assuming the order is maintained
     for var in ha.output_variables:
         var_id = f"x{ha.variable_rev_dict[var]}"
+        out.write(f"% Output variable {var}, coded as {var_id}_in\n")
         out.write(f"{var_id}_out = Stateflow.Data(ch);\n")
         out.write(f"{var_id}_out.Name = '{var_id}_out';\n")
         out.write(f"{var_id}_out.Scope = 'Output';\n")
@@ -638,10 +641,11 @@ def outputVariableCreation(out: TextIOWrapper, ha: HA) -> None:
 
 
 def localVariableCreation(out: TextIOWrapper, ha: HA) -> None:
-    out.write("\n\n %% *** Local Variable Declaration ****\n")
+    out.write("%% *** Local Variable Declaration ****\n\n")
 
     for var in ha.output_variables:
         var_id = f"x{ha.variable_rev_dict[var]}"
+        out.write(f"% Local variable for output variable {var}, coded as {var_id}_in\n")
         out.write(f"{var_id} = Stateflow.Data(ch);\n")
         out.write(f"{var_id}.Name = '{var_id}';\n")
         out.write(f"{var_id}.Scope = 'Local';\n")
@@ -650,19 +654,19 @@ def localVariableCreation(out: TextIOWrapper, ha: HA) -> None:
 
 
 def parameterVariableCreation(out: TextIOWrapper, ha: HA) -> None:
-    out.write("\n\n%% *** Parameter Variable Declaration ****\n")
+    out.write("%% *** Parameter Variable Declaration ****\n\n")
 
-    for index, var in ha.variable_dict.items():
-        if ha.is_output_variable(
-            var
-        ):  # print only for output variables and not for input variables
-            out.write(f"a{index} = Stateflow.Data(ch);\n")
-            out.write(f"a{index}.Name = 'a{index}';\n")
-            out.write(f"a{index}.Scope = 'Parameter';\n")
-            out.write(f"a{index}.Tunable = true;\n")
-            out.write(f"a{index}.Props.Type.Method = 'Inherited';\n")
-            out.write(f"a{index}.DataType = 'Inherit: Same as Simulink';\n")
-            out.write("\n")
+    # print only for output variables and not for input variables
+    for var in ha.output_variables:
+        index = ha.variable_rev_dict[var]
+        out.write(f"% Parameter for output variable {var}, a{index}\n")
+        out.write(f"a{index} = Stateflow.Data(ch);\n")
+        out.write(f"a{index}.Name = 'a{index}';\n")
+        out.write(f"a{index}.Scope = 'Parameter';\n")
+        out.write(f"a{index}.Tunable = true;\n")
+        out.write(f"a{index}.Props.Type.Method = 'Inherited';\n")
+        out.write(f"a{index}.DataType = 'Inherit: Same as Simulink';\n")
+        out.write("\n")
 
 
 # Printing an identity mapping for reset equations
