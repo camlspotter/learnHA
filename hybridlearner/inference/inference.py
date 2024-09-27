@@ -118,12 +118,12 @@ def infer_model(
         )
         for span in traj_spans
     ]
-    plot_timeseries_multi(
-        os.path.join(opts.output_directory, "preprocess.svg"),
-        "Preprocessed trajectories",
-        tys,
-        1.0,
-    )
+    # plot_timeseries_multi(
+    #     os.path.join(opts.output_directory, "preprocess.svg"),
+    #     "Preprocessed trajectories",
+    #     tys,
+    #     1.0,
+    # )
 
     # Apply Linear Multistep Method
     # compute forward and backward version of BDF
@@ -206,7 +206,7 @@ def infer_model(
     # print("Total dropped points (after fixing) are: ", len(Drop))
     number_of_segment_clusters = len(P_modes)
     print("num of segment clusters", number_of_segment_clusters)
-    print(P_modes)
+    # print(P_modes)
 
     init_location: int
     [init_location] = get_initial_location(P_modes)
