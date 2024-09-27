@@ -233,7 +233,7 @@ for i in range(0, 10):
 
     if len(counter_examples) == 0:
         print("No counter example found")
-        break
+        exit(0)
     else:
         print(f"Counter examples: {len(counter_examples)}")
 
