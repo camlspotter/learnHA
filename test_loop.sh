@@ -6,9 +6,9 @@ pipenv run python loop.py \
      --input-variables 'u' --output-variables 'x,v' \
      \
      --simulink-model-file data/models/ex_sldemo_bounce_Input.slx \
-     --time-horizon 13.0 --sampling-time 0.001 \
+     --time-horizon 13.0 --sampling-time 0.01 \
      --fixed-interval-data False \
-     --invariant '-9.9 <= u && u <= -9.5 && 5 <= x && x <= 10 && 14 <= v && v <= 14' \
+     --invariant '-9.9 <= u && u <= -9.5 && 5 <= x && x <= 10 && 3 <= v && v <= 16' \
      --number-of-cps 'u:4' --signal-types 'u:linear' \
      \
      --output-directory _out \
