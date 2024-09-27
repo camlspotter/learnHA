@@ -174,6 +174,7 @@ trajectories_files = [initial_simulation_file]
 for i in range(0, 10):
     # Inference
 
+    print("Inferring...")
     learned_model_file = os.path.join(opts.output_directory, f"learned_HA{i}.json")
     inference(opts, trajectories_files, learned_model_file)
 
@@ -222,7 +223,6 @@ for i in range(0, 10):
         )
         print(dist)
         if opts.counter_example_threshold < dist:
-            print("Counter example found")
             counter_examples.append(ot)
 
     counter_example_file = os.path.join(
