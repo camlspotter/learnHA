@@ -7,33 +7,50 @@
 - `pipenv --python 3.10`
 - `pipenv install --dev`
 
+Note:
+
+Later versions of MATLAB likely work too by fixing the following fields in `Pipfile`:
+
+- The version constraint of `matlabengine` to the one supported by your MATLAB version.
+  Check https://pypi.org/project/matlabengine/#history
+- `python_version`, to match with one of `matlabengine` supports.
+
 ### Cleaning
+
+To start over the preparation:
 
 - `pipenv --rm`
 
 ## Programs
 
-comple_ha.py
-:  Hybrid Automaton to MATLAB SLX model compiler
+At the toplevel directory, there are several application scripts:
 
-simulate.py
+`comple_ha.py`
+:  Hybrid Automaton in JSON to MATLAB SLX model compiler
+
+`simulate.py`
 :  Simulator of modles in SLX
 
-generate_simulation_script.py
-:  Simulation script generator. Deprecated. Now use `simulate.py`.
+`inference.py` (or `run.py`)
+:  Hybrid Automaton inference
 
-plot_ts.py
+`loop.py`
+:  Inference loop
+
+`plot_ts.py`
 :  Timeseries plotter to SVG
 
-inference.py (or run.py)
-:  Original Hybrid Automaton inference
+`generate_simulation_script.py`
+:  Simulation script generator. Deprecated. Now use `simulate.py`.
 
-loop.py
-:  Inference loop
+`generate_simulation_inputs.py`
+:  Simulation input generator.  Deprecated. Now use `simulate.py`.
 
 ## Workflow example
 
-### Output directory
+### Step by step execution
+
+#### Output directory
 
 Dig a directory for the workflow:
 
@@ -41,10 +58,18 @@ Dig a directory for the workflow:
 $ mkdir _out
 ```
 
-### Run the original SLX model
+#### Run the original SLX model
 
 ```
-$ pipenv run python simulate.py --simulink-model-file data/models/ex_sldemo_bounce_Input.slx --time-horizon 13.0 --sampling-time 0.001 --fixed-interval-data False --input-variables 'u' --output-variables 'x,v' --invariant '-9.9 <= u && u <= -9.5 && 10.2 <= x && x <= 10.5 && 15 <= v && v <= 15' --number-of-cps 'u:4' --signal-types 'u:linear' -o _out/bball.txt -S 0 -n 8
+$ pipenv run python simulate.py \
+    --simulink-model-file data/models/ex_sldemo_bounce_Input.slx \
+    --time-horizon 13.0 --sampling-time 0.001 \
+    --fixed-interval-data False \
+    --input-variables 'u' --output-variables 'x,v' \
+    --invariant '-9.9 <= u && u <= -9.5 && 10.2 <= x && x <= 10.5 && 15 <= v && v <= 15' \
+    --number-of-cps 'u:4' --signal-types 'u:linear' \
+    -o _out/bball.txt \
+    -n 8
 ```
 
 It generates `_out/bball.txt`:
@@ -61,15 +86,25 @@ $ head _out/bball.txt
 0.007	-9.56228713066445	10.4581481412884	14.9330641856348
 0.008	-9.56229511227509	10.4730764243292	14.9235018945133
 0.009	-9.56230309388573	10.4879951450748	14.9139395954103
+...
 ```
 
-### Run inference
+#### Inference
 
 ```
-$ pipenv run python inference.py -i _out/bball.txt --output-directory _out -c dtw -d 1 -m 1 -b 1 --segmentation-error-tol 0.1 --segmentation-fine-error-tol 0.9 --threshold-distance 9.0 --threshold-correlation 0.8 --dbscan-eps-dist 0.01 --dbscan-min-samples 2 --input-variables u --output-variables x,v --lmm-step-size 5 --annotations '{u:continuous,x:constant(0)}' --is-invariant False --filter-last-segment True
+$ pipenv run python inference.py \
+    -i _out/bball.txt \
+    --output-directory _out \
+    -c dtw -d 1 -m 1 -b 1 \
+    --segmentation-error-tol 0.1 --segmentation-fine-error-tol 0.9 \
+    --threshold-distance 9.0 --threshold-correlation 0.8 \
+    --dbscan-eps-dist 0.01 --dbscan-min-samples 2 --lmm-step-size 5 \
+    --input-variables u --output-variables x,v \
+    --annotations '{u:continuous,x:constant(0)}' \
+    --is-invariant False --filter-last-segment True
 ```
 
-It outputs `_out/learned_HA.txt` and `_out/learned_HA.json`:
+It outputs `_out/learned_HA.json` (and `_out/learned_HA.txt` in the old format):
 
 ```
 $ head _out/learned_HA.json 
@@ -83,36 +118,66 @@ $ head _out/learned_HA.json
         "x": {
           "string": "u * 1.0598359126681102e-12 + x * -2.525757381022231e-15 + v * 1.0000000000000033 + 1.0315161919072224e-11"
         },
+...
 ```
 
-### Compile the learned model to SLX
+#### Compile the learned model to SLX
 
 ```
-$ pipenv run python compile_ha.py --ode-solver-type fixed --ode-solver FixedStepAuto --invariant-mode 2 _out/learned_HA.json
+$ pipenv run python compile_ha.py \
+    --ode-solver-type fixed \
+    --ode-solver FixedStepAuto \
+    --invariant-mode 2 \
+    _out/learned_HA.json
 ```
 
 It compiles the model to `_out/learned_HA.slx`.
 
 
-### Run the both original and learned models
+#### Run the both original and learned models
+
+Use the same parameters including the seed:
 
 To run the original model with a fixed seed and save the result to `_out/bball0.txt`:
 ```
-$ pipenv run python simulate.py -S 0 --simulink-model-file data/models/ex_sldemo_bounce_Input.slx --time-horizon 13.0 --sampling-time 0.001 --fixed-interval-data False --input-variables 'u' --output-variables 'x,v' --invariant '-9.9 <= u && u <= -9.5 && 10.2 <= x && x <= 10.5 && 15 <= v && v <= 15' --number-of-cps 'u:4' --signal-types 'u:linear' -o _out/bball0.txt -S 0 -n 64
+$ pipenv run python simulate.py \
+    --simulink-model-file data/models/ex_sldemo_bounce_Input.slx \
+    --time-horizon 13.0 --sampling-time 0.001 \
+    --fixed-interval-data False \
+    --input-variables 'u' --output-variables 'x,v' \
+    --invariant '-9.9 <= u && u <= -9.5 && 10.2 <= x && x <= 10.5 && 15 <= v && v <= 15' \
+    --number-of-cps 'u:4' --signal-types 'u:linear' \
+    -o _out/bball0.txt \
+    -S 0 -n 64
 ```
 
 To run the learned model with the same seed and save the result to `_out/learned0.txt`:
 ```
-$ pipenv run python simulate.py -S 0 --simulink-model-file _out/learned_HA.slx --time-horizon 13.0 --sampling-time 0.001 --fixed-interval-data False --input-variables 'u' --output-variables 'x,v' --invariant '-9.9 <= u && u <= -9.5 && 10.2 <= x && x <= 10.5 && 15 <= v && v <= 15' --number-of-cps 'u:4' --signal-types 'u:linear' -o _out/learned0.txt -S 0 -n 64
+$ pipenv run python simulate.py \
+    --simulink-model-file _out/learned_HA.slx \
+    --time-horizon 13.0 --sampling-time 0.001 \
+    --fixed-interval-data False \
+    --input-variables 'u' --output-variables 'x,v' \
+    --invariant '-9.9 <= u && u <= -9.5 && 10.2 <= x && x <= 10.5 && 15 <= v && v <= 15' \
+    --number-of-cps 'u:4' --signal-types 'u:linear' \
+    -o _out/learned0.txt \
+    -S 0 -n 64
 ```
 
-### Distance
+#### Distance calculation
 
 ```
-$ pipenv run python distance.py --input-variables 'u' --output-variables 'x,v' _out/bball0.txt _out/learned0.txt
+$ pipenv run python distance.py \
+    --input-variables 'u' --output-variables 'x,v' \
+    _out/bball0.txt _out/learned0.txt
 ```
 
-## Inference loop
+To improve the inference, you can restart from the inference by giving counterexample
+trajectories as the input.  It requires manual edition of trajectory files.
+
+### Automatic execution of inference loop
+
+`loop.py` automates the above manual step by step execution:
 
 ```
 $ pipenv run python loop.py \
@@ -138,3 +203,13 @@ $ pipenv run python loop.py \
      -n 10 \
      --counter-example-threshold 1.0
 ```
+
+It iterates the following inference loop:
+
+- Execute the original model to generate the initial trajectories
+- Infer a hybrid automaton from the original model trajectories
+- Compile the automaton to MATLAB slx model
+- Execute the original and compiled models in the same parameters
+- Compare the trajectories and extract counter examples
+- Strengthen the original model trajectories with the counter examples and start over from the inference.
+
