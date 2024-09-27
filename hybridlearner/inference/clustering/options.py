@@ -12,7 +12,10 @@ class Options:
     modes: int  # default=1
 
     segmentation_error_tol: float  # default=0.01
+
+    # exists but not used
     segmentation_fine_error_tol: float  # default=0.01
+
     lmm_step_size: int  # choices=[2, 3, 4, 5, 6], default=5
 
     # DTW options
