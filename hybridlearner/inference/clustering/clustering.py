@@ -9,12 +9,16 @@ Below we have three approaches:
 The learning algorithm is currently designed by focusing on the DTW algorithm.
 """
 
+from enum import Enum
+import argparse
 import numpy as np
 from numpy.typing import NDArray
-from hybridlearner.inference.options import ClusteringMethod, Options
-from hybridlearner.segmentation import Segment
+from pydantic.dataclasses import dataclass
+
+from hybridlearner.segmentation import Segment, ClusteringMethod
 from .cluster_by_dtw import cluster_by_dtw
 from .cluster_by_others import dbscan_cluster, merge_cluster_tol2
+from .options import Options
 
 
 def select_clustering(
@@ -57,15 +61,8 @@ def select_clustering(
     """
 
     # print("Clustering segmented points ...")
-    num_mode = opts.modes
-    ep = opts.segmentation_error_tol
     size_of_input_variables = len(input_variables)
     method = opts.clustering_method
-    maximum_ode_prune_factor = opts.ode_speedup
-    correl_threshold = opts.threshold_correlation
-    distance_threshold = opts.threshold_distance
-    dbscan_eps_dist = opts.dbscan_eps_dist
-    dbscan_min_samples = opts.dbscan_min_samples
 
     P_modes: list[list[Segment]] = []
     G: list[NDArray[np.float64]] = []
@@ -73,15 +70,15 @@ def select_clustering(
     # Choice of Clustering Algorithm
     match method:
         case ClusteringMethod.PIECELINEAR:
-            if len(segmented_traj) > num_mode:
+            if len(segmented_traj) > opts.modes:
                 assert False, "We do not support piecelinear clustering algorithm!!"
-                # P_modes, G = merge_cluster_tol2(res, A, b1, num_mode, ep)  # This is Algo-2:InferByMerge function in Jin et al.
+                # P_modes, G = merge_cluster_tol2(res, A, b1, num_mode, opts.segmentation_error_tol)  # This is Algo-2:InferByMerge function in Jin et al.
                 # Todo: note this approach does not scale well in clustering high number of segments into low modes.
 
         case ClusteringMethod.DBSCAN:
             assert False, "We do not support this clustering algorithm anymore. We have now modifed the number of data structure, it requires some modification to support it again!!"
             # exit(1)
-            # P_modes, G = dbscan_cluster(clfs, segmented_traj, A, b1, num_mode, dbscan_eps_dist, dbscan_min_samples, size_of_input_variables)
+            # P_modes, G = dbscan_cluster(clfs, segmented_traj, A, b1, num_mode, opts.dbscan_eps_dist, opts.dbscan_min_samples, size_of_input_variables)
             # print("Total Clusters after DBSCAN algorithm = ", len(P_modes))
 
         case ClusteringMethod.DTW:
@@ -93,11 +90,11 @@ def select_clustering(
                 Y,
                 t,
                 L_y,
-                correl_threshold,
-                distance_threshold,
+                opts.threshold_correlation,
+                opts.threshold_distance,
                 size_of_input_variables,
                 stepM,
-                maximum_ode_prune_factor,
+                opts.ode_speedup,
             )
             print("Total Clusters after DTW algorithm = ", len(P_modes))
 

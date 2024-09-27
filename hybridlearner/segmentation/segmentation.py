@@ -3,14 +3,23 @@ Contains modules related to the segmentation process
 
 """
 
+from enum import Enum
 import numpy as np
 from numpy.typing import NDArray
 from sklearn import linear_model
 from pydantic.dataclasses import dataclass
 
 from hybridlearner.utils.math import rel_diff, matrowex
-from hybridlearner.inference.options import ClusteringMethod
 from hybridlearner.types import MATRIX, Span
+
+
+# We define ClusteringMethod here, not under inference.clustering
+# since it is used here
+# @dataclass # We cannot use @dataclass with Enum: @dataclass overrides __eq__
+class ClusteringMethod(Enum):
+    DTW = "dtw"
+    DBSCAN = "dbscan"
+    PIECELINEAR = "piecelinear"
 
 
 @dataclass

@@ -13,7 +13,7 @@ from hybridlearner.inference import options as inference_options
 from hybridlearner.inference import infer_model
 from hybridlearner import automaton
 from hybridlearner.obsolete.model_printer.print_HA import print_HA
-from hybridlearner.inference.options import ClusteringMethod
+from hybridlearner.segmentation import ClusteringMethod
 from hybridlearner.trajectory import load_trajectories
 import hybridlearner.utils.io as utils_io
 from hybridlearner.inference.annotation import Continuous, Constant
