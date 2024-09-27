@@ -239,4 +239,4 @@ for i in range(0, 10):
 
     trajectories_files.append(counter_example_file)
 
-print(f"Even after {i} inference iterations, we did not see a fixedpoint")
+print(f"Even after {i+1} inference iterations, we did not see a fixedpoint")
