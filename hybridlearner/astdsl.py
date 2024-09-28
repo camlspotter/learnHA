@@ -152,3 +152,19 @@ def unparse_expr(e: Expr) -> str:
                 assert False, f"Invalid Expr {e}"
 
     return ast.unparse(ast.Expression(unparse(e)))
+
+def get_variable(e : Expr) -> str:
+    match e:
+        case Variable(x):
+            return x
+        case _:
+            assert False, "Variable expected"
+
+def get_int(e : Expr) -> int:
+    match e:
+        case Value(x):
+            if isinstance(x, int):
+                return x
+            assert False, "Integer expected"
+        case _:
+            assert False, "Integer expected"

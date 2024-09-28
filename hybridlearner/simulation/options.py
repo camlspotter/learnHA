@@ -12,7 +12,7 @@ from hybridlearner.simulation.input import (
     parse_signal_types,
 )
 from hybridlearner.parser import parse_invariant
-
+from hybridlearner.astdsl import parse_expr, Dict, Expr, get_variable, get_int
 
 @dataclass
 class Options:
@@ -26,17 +26,11 @@ class Options:
 
 
 def parse_number_of_cps(s: str) -> dict[str, int]:
-    if s == "":
-        return {}
-
-    def parse_ncps(s: str) -> tuple[str, int]:
-        match s.split(":"):
-            case (var, n):
-                return (var, int(n))
-            case _:
-                assert False, "Invalid number of control points spec: " + s
-
-    return dict([parse_ncps(s) for s in s.split(",")])
+    match parse_expr("{" + s + "}"):
+        case Dict(kv):
+            return { get_variable(k) : get_int(v) for (k,v) in kv }
+        case _:
+            assert False, "Invalid number of control points spec: " + s
 
 
 def add_argument_group(parser: argparse.ArgumentParser) -> None:

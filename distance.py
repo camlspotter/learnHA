@@ -10,7 +10,6 @@ from typeguard import typechecked
 from pydantic.dataclasses import dataclass
 from hybridlearner.trajectory.distance import trajectory_dtw_distance
 from hybridlearner.trajectory import load_trajectories
-import hybridlearner.parser
 import hybridlearner.utils.io as utils_io
 from hybridlearner.common import options as common_options
 

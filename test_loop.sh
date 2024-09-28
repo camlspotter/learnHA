@@ -14,7 +14,7 @@ pipenv run python loop.py \
      --output-directory _out \
      -c dtw -d 1 -m 1 -b 1 \
      --segmentation-error-tol 0.1 \
-     --threshold-distance 18.0 --threshold-correlation 0.7 \
+     --threshold-distance 1000.0 --threshold-correlation 0.8 \
      --lmm-step-size 5 --is-invariant False --filter-last-segment True \
      --annotations '{u:continuous,x:constant(0)}' \
      \
