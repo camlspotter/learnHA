@@ -1,4 +1,19 @@
-"""Simple DSL using Python AST"""
+"""
+Simple DSL using Python AST
+
+Very small subset of Python expressions is supported.
+Equivalent type definition in OCaml:
+
+type expr = 
+  | App of string * expr list (* f(e1, e2, ..) *)
+  | BinOp of expr * string * expr (* e1 op e2 *)
+  | Value of value (* int or float *)
+  | List of expr list (* [e1, e2, .. ] *)
+  | Tuple of expr list (* (e1, e2, .. ) *)
+  | Dict of (expr * expr) list (* { k1: v1, k2: v2, .. } *)
+  | Set of expr list (* { e1, e2, .. } *)
+  | Variable of string (* x, y, etc *)
+"""
 
 import ast
 from typing import Union, cast
