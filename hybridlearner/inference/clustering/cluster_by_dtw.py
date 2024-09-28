@@ -203,11 +203,12 @@ def cluster_by_dtw(
             if correlValue >= correl_threshold and distance_threshold == 0:
                 # print("******************************************** Found *******************************")
                 # print("i=", i, " and j=", j, " : Ignored distance = ", distance, "   and   correlation = ", correlValue)
+                print("mode append: correlValue", correlValue, "distance", distance)
                 mode.append(res1[j])
                 delete_position.append(j)
 
             # distance is also compared. distance_threshold is threshold value to be supplied wisely
-            if (
+            elif (
                 correlValue >= correl_threshold
                 and distance_threshold > 0
                 and distance < distance_threshold
@@ -216,7 +217,6 @@ def cluster_by_dtw(
                 #       "   and   correlation = ", correlValue)
                 # print("******************************************** Found *******************************")
                 # print("i=", i, " and j=", j, " :  Distance = ", distance, "   and   correlation = ", correlValue)
-
                 mode.append(res1[j])
                 delete_position.append(j)
 
