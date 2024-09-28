@@ -67,7 +67,7 @@ $ pipenv run python simulate.py \
     --time-horizon 13.0 --sampling-time 0.001 \
     --fixed-interval-data False \
     --input-variables 'u' --output-variables 'x,v' \
-    --invariant '-9.9 <= u && u <= -9.5 && 10.2 <= x && x <= 10.5 && 15 <= v && v <= 15' \
+    --invariant 'u:(-9.9, -9.5), x:(10.2, 10.5), v:(15,15)' \
     --number-of-cps 'u:4' --signal-types 'u:linear' \
     -o _out/bball.txt \
     -n 8
@@ -101,7 +101,7 @@ $ pipenv run python inference.py \
     --threshold-distance 9.0 --threshold-correlation 0.8 \
     --dbscan-eps-dist 0.01 --dbscan-min-samples 2 --lmm-step-size 5 \
     --input-variables u --output-variables x,v \
-    --annotations '{u:continuous,x:constant(0)}' \
+    --annotations 'u:continuous, x:constant(0)' \
     --is-invariant False --filter-last-segment True
 ```
 
@@ -146,7 +146,7 @@ $ pipenv run python simulate.py \
     --time-horizon 13.0 --sampling-time 0.001 \
     --fixed-interval-data False \
     --input-variables 'u' --output-variables 'x,v' \
-    --invariant '-9.9 <= u && u <= -9.5 && 10.2 <= x && x <= 10.5 && 15 <= v && v <= 15' \
+    --invariant 'u:(-9.9, -9.5), x:(10.2, 10.5), v:(15, 15)' \
     --number-of-cps 'u:4' --signal-types 'u:linear' \
     -o _out/bball0.txt \
     -S 0 -n 64
@@ -159,7 +159,7 @@ $ pipenv run python simulate.py \
     --time-horizon 13.0 --sampling-time 0.001 \
     --fixed-interval-data False \
     --input-variables 'u' --output-variables 'x,v' \
-    --invariant '-9.9 <= u && u <= -9.5 && 10.2 <= x && x <= 10.5 && 15 <= v && v <= 15' \
+    --invariant 'u:(-9.9, -9.5), x:(10.2, 10.5), v:(15, 15)' \
     --number-of-cps 'u:4' --signal-types 'u:linear' \
     -o _out/learned0.txt \
     -S 0 -n 64
@@ -188,7 +188,7 @@ $ pipenv run python loop.py \
      --simulink-model-file data/models/ex_sldemo_bounce_Input.slx \
      --time-horizon 13.0 --sampling-time 0.001 \
      --fixed-interval-data False \
-     --invariant '-9.9 <= u && u <= -9.5 && 5 <= x && x <= 10 && 14 <= v && v <= 14' \
+     --invariant 'u:(-9.9, -9.5), x:(10.2, 10.5), v:(15, 15)' \
      --number-of-cps 'u:4' --signal-types 'u:linear' \
      \
      --output-directory _out \
@@ -197,7 +197,7 @@ $ pipenv run python loop.py \
      --threshold-distance 9.0 --threshold-correlation 0.8 \
      --dbscan-eps-dist 0.01 --dbscan-min-samples 2 \
      --lmm-step-size 5 --is-invariant False --filter-last-segment True \
-     --annotations '{u:continuous,x:constant(0)}' \
+     --annotations 'u:continuous, x:constant(0)' \
      \
      --ode-solver-type fixed --ode-solver FixedStepAuto --invariant-mode 2 \
      \
