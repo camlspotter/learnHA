@@ -7,9 +7,7 @@ from typing import Any
 from scipy.spatial.distance import euclidean
 from fastdtw import fastdtw  # https://pypi.org/project/fastdtw/
 from sklearn import linear_model
-import numpy as np
 from hybridlearner.utils.math import matrowex
-from numpy.typing import NDArray
 from hybridlearner.segmentation import Segment
 from hybridlearner.types import MATRIX, Span
 from .utils import (

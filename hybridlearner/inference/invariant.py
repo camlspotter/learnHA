@@ -5,8 +5,6 @@ We use a straightforward approach to compute each variable's bound values (Min, 
 A more complex approach can be implemented and tested in this module.
 """
 
-import numpy as np
-from numpy.typing import NDArray
 from operator import itemgetter
 
 from hybridlearner.segmentation import Segment

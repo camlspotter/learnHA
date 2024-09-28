@@ -1,9 +1,7 @@
-import os
 import csv
 import matplotlib.pyplot as plt
 
 from operator import itemgetter
-import itertools
 
 from hybridlearner.inference.clustering.utils import (
     create_simple_per_segmented_positions_exact,

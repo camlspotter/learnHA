@@ -7,18 +7,13 @@ import random
 import argparse
 from typeguard import typechecked
 from pydantic.dataclasses import dataclass
-from typing import Optional
 
 from hybridlearner.simulation import simulate_list
 from hybridlearner.simulation.input import (
     generate_simulation_input,
-    parse_signal_types,
-    SignalType,
 )
 from hybridlearner.simulation.script import generate_simulation_script
-from hybridlearner.utils.argparse_bool import argparse_bool
 import hybridlearner.utils.io as utils_io
-from hybridlearner.types import Invariant
 from hybridlearner.common import options as common_options
 from hybridlearner.simulation import options as simulation_options
 

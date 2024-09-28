@@ -6,7 +6,7 @@ import argparse
 from dataclasses import dataclass
 from typeguard import typechecked
 import hybridlearner.utils.io as utils_io
-from hybridlearner.slx_compiler import OdeSolverType, InvariantMode, compile
+from hybridlearner.slx_compiler import compile
 from hybridlearner.slx_compiler import options as compiler_options
 from hybridlearner.automaton import HybridAutomaton
 from hybridlearner import matlab

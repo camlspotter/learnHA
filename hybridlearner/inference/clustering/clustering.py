@@ -9,15 +9,11 @@ Below we have three approaches:
 The learning algorithm is currently designed by focusing on the DTW algorithm.
 """
 
-from enum import Enum
-import argparse
 import numpy as np
 from numpy.typing import NDArray
-from pydantic.dataclasses import dataclass
 
 from hybridlearner.segmentation import Segment, ClusteringMethod
 from .cluster_by_dtw import cluster_by_dtw
-from .cluster_by_others import dbscan_cluster, merge_cluster_tol2
 from .options import Options
 
 

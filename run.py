@@ -10,7 +10,6 @@ from hybridlearner.common import options as common_options
 from hybridlearner.inference import options as inference_options
 from hybridlearner.trajectory import load_trajectories_files
 import hybridlearner.utils.io as utils_io
-from hybridlearner.slx_compiler import compile, OdeSolverType, InvariantMode
 
 from pydantic.dataclasses import dataclass
 from typeguard import typechecked
@@ -47,7 +46,7 @@ def get_options() -> Options:
         args['input_filenames'] = [args['input_filename']]
         del args['input_filename']
 
-    if not 'input_filenames' in args:
+    if 'input_filenames' not in args:
         assert False, "At least one input filename must be given"
 
     return Options(**args)

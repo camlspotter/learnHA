@@ -157,7 +157,7 @@ def generate_simulation_script(
 
     out.write(
         textwrap.dedent(
-            f"""\
+            """\
     % result_filename = 'output_file'; Now given by setvar
     writematrix(result_matrix, result_filename, 'Delimiter', 'tab');
     """

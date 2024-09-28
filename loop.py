@@ -3,7 +3,6 @@ import random
 import argparse
 from typeguard import typechecked
 from pydantic.dataclasses import dataclass
-from typing import Optional
 
 import hybridlearner.utils.io as utils_io
 # from hybridlearner.types import Invariant
@@ -212,7 +211,7 @@ for i in range(0, 10):
     for ot, lt in zip(
         original_trajectories.trajectories, learned_trajectories.trajectories
     ):
-        assert len(ot[0]) == len(lt[0]), f"Non equal number of samples for a trajectory"
+        assert len(ot[0]) == len(lt[0]), "Non equal number of samples for a trajectory"
         ot_ovs = ot[1][:, -len(opts.output_variables) :]
         lt_ovs = lt[1][:, -len(opts.output_variables) :]
         print("Comparing")

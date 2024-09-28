@@ -1,8 +1,6 @@
 import os
 import argparse
-from typing import Optional, Any
 from pydantic.dataclasses import dataclass
-from typeguard import typechecked
 from hybridlearner.utils.argparse_bool import argparse_bool
 from hybridlearner.inference.annotation import AnnotationDict, parse_annotation_dict
 from hybridlearner.inference.clustering import options as clustering_options

@@ -1,5 +1,4 @@
 import argparse
-from typeguard import typechecked
 from pydantic.dataclasses import dataclass
 from hybridlearner.astdsl import parse_expr
 from hybridlearner.astdsl.parser import *

@@ -5,7 +5,6 @@ This is the main module for inferring an HA model.
 import sys  # This is used for command line arguments
 from typeguard import typechecked
 import numpy as np
-import os
 from pydantic.dataclasses import dataclass
 from pydantic import ConfigDict
 
@@ -18,16 +17,13 @@ from hybridlearner.inference.clustering import select_clustering
 from hybridlearner.inference.invariant import compute_invariant
 from hybridlearner.inference.annotation import (
     convert_annotation_dict,
-    AnnotationDict,
     AnnotationTbl,
 )
 from hybridlearner.segmentation.derivatives import diff_method_backandfor
 from hybridlearner.inference.transition import Transition, compute_transitions
-from hybridlearner.trajectory import Trajectory, Trajectories, preprocess_trajectories
+from hybridlearner.trajectory import Trajectories, preprocess_trajectories
 from hybridlearner.inference.options import Options
 from hybridlearner.types import MATRIX, Span
-from hybridlearner.inference.transition.assignment import Assignment
-from hybridlearner.plot import plot_timeseries_multi
 
 sys.setrecursionlimit(1000000)  # this is the limit
 

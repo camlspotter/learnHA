@@ -2,9 +2,7 @@
 This module computes the derivatives
 """
 
-from typing import cast
 import numpy as np
-from numpy.typing import NDArray
 from hybridlearner.utils import generator as generate  # generate_complete_polynomial
 from hybridlearner.types import MATRIX
 

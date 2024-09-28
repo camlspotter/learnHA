@@ -1,8 +1,5 @@
-from typing import Optional, Union, cast
-import ast
-from numbers import Number
+from typing import Union
 from pydantic.dataclasses import dataclass
-from typeguard import typechecked
 from hybridlearner.astdsl import parse_expr, unparse_expr, Expr
 from hybridlearner.astdsl.parser import *
 

@@ -2,7 +2,6 @@ from io import TextIOWrapper
 import csv
 import numpy as np
 from numpy.typing import NDArray
-from typing import Optional, TypeVar, Callable, Iterator
 from pydantic.dataclasses import dataclass
 from pydantic import ConfigDict
 

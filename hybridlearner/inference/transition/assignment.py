@@ -1,5 +1,4 @@
 from sklearn import linear_model
-import numpy as np
 from hybridlearner.types import MATRIX
 from .connection import ConnectionPoint
 

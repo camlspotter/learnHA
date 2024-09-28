@@ -2,7 +2,6 @@ from typeguard import typechecked
 
 # pydantic.dataclasses is required for JSON conversions of nested dataclasses
 from pydantic.dataclasses import dataclass
-from pydantic import ConfigDict
 import numpy as np
 from hybridlearner.types import Invariant, Range
 from hybridlearner.inference.transition import Transition as RawTransition

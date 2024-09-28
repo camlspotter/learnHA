@@ -1,10 +1,8 @@
-import numpy as np
 
 from hybridlearner.inference.annotation import (
     Continuous,
     Pool,
     Constant,
-    Annotation,
     AnnotationTbl,
 )
 from hybridlearner.types import MATRIX

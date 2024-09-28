@@ -11,8 +11,6 @@ from libsvm.svmutil import (
     svm_problem,
     svm_parameter,
     svm_train,
-    svm_parameter,
-    svm_train,
 )
 
 

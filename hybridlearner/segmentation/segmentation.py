@@ -4,8 +4,6 @@ Contains modules related to the segmentation process
 """
 
 from enum import Enum
-import numpy as np
-from numpy.typing import NDArray
 from sklearn import linear_model
 from pydantic.dataclasses import dataclass
 

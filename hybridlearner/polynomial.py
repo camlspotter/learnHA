@@ -1,6 +1,6 @@
 from pydantic.dataclasses import dataclass
 from functools import reduce
-from typing import cast, Optional
+from typing import cast
 from frozenlist import FrozenList
 
 from hybridlearner.utils.generator import generate_complete_polynomial

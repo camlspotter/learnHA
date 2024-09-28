@@ -3,14 +3,11 @@
 # ex.
 # pipenv run python distance.py --output-variables 'x,y' _out/bball0.txt _out/learned0.txt
 
-import numpy as np
 import argparse
-from typing import Optional, cast
 from typeguard import typechecked
 from pydantic.dataclasses import dataclass
 from hybridlearner.trajectory.distance import trajectory_dtw_distance
 from hybridlearner.trajectory import load_trajectories
-import hybridlearner.utils.io as utils_io
 from hybridlearner.common import options as common_options
 
 
@@ -44,7 +41,7 @@ b_nvars = b.trajectories[0][1].shape[1]
 assert a_nvars == b_nvars, f"Non equal number of variables: {a_nvars}, {b_nvars}"
 
 for at, bt in zip(a.trajectories, b.trajectories):
-    assert len(at[0]) == len(bt[0]), f"Non equal number of samples for a trajectory"
+    assert len(at[0]) == len(bt[0]), "Non equal number of samples for a trajectory"
     aovs = at[1][:, -len(opts.output_variables) :]
     bovs = bt[1][:, -len(opts.output_variables) :]
     print("Comparing")

@@ -1,7 +1,5 @@
 import unittest
 
-from dataclasses import asdict
-import json
 
 from .annotation import *
 from hybridlearner.astdsl import parse_expr

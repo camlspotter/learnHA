@@ -1,4 +1,3 @@
-from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.svm import SVC
 from sklearn.model_selection import GridSearchCV
 from hybridlearner.types import MATRIX
