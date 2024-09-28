@@ -4,7 +4,7 @@ Simple DSL using Python AST
 Very small subset of Python expressions is supported.
 Equivalent type definition in OCaml:
 
-type expr = 
+type expr =
   | App of string * expr list (* f(e1, e2, ..) *)
   | BinOp of expr * string * expr (* e1 op e2 *)
   | Value of value (* int or float *)
@@ -153,14 +153,16 @@ def unparse_expr(e: Expr) -> str:
 
     return ast.unparse(ast.Expression(unparse(e)))
 
-def get_variable(e : Expr) -> str:
+
+def get_variable(e: Expr) -> str:
     match e:
         case Variable(x):
             return x
         case _:
             assert False, "Variable expected"
 
-def get_int(e : Expr) -> int:
+
+def get_int(e: Expr) -> int:
     match e:
         case Value(x):
             if isinstance(x, int):

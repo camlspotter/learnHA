@@ -14,7 +14,7 @@ pipenv run python loop.py \
      --simulink-model-file vandel/_out/van_del_pol_oscillator.slx \
      --time-horizon 10.0 --sampling-time 0.001 \
      --fixed-interval-data False \
-     --invariant '-5 <= x && x <= 5 && -5 <= y && y <= 5' \
+     --invariant 'x:(-5,5), y:(-5,5)' \
      --number-of-cps '' --signal-types '' \
      \
      --output-directory vandel/_out \

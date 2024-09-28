@@ -5,14 +5,15 @@ from pydantic.dataclasses import dataclass
 from typing import Optional
 
 from hybridlearner.utils.argparse_bool import argparse_bool
-from hybridlearner.types import Invariant
+from hybridlearner.types import Invariant, Range
 from hybridlearner.simulation.input import (
     generate_simulation_input,
     SignalType,
     parse_signal_types,
 )
-from hybridlearner.parser import parse_invariant
 from hybridlearner.astdsl import parse_expr, Dict, Expr, get_variable, get_int
+from hybridlearner.astdsl.parser import *
+
 
 @dataclass
 class Options:
@@ -26,11 +27,16 @@ class Options:
 
 
 def parse_number_of_cps(s: str) -> dict[str, int]:
-    match parse_expr("{" + s + "}"):
-        case Dict(kv):
-            return { get_variable(k) : get_int(v) for (k,v) in kv }
-        case _:
-            assert False, "Invalid number of control points spec: " + s
+    return parse_dict(parse_variable, parse_int)(parse_expr("{" + s + "}"))
+
+
+parse_range: Parser[Range] = map_parser(
+    lambda x: Range(min=x[0], max=x[1]), parse_tuple2(parse_float, parse_float)
+)
+
+
+def parse_invariant(s: str) -> Invariant:
+    return parse_dict(parse_variable, parse_range)(parse_expr("{" + s + "}"))
 
 
 def add_argument_group(parser: argparse.ArgumentParser) -> None:

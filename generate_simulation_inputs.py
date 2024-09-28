@@ -18,7 +18,6 @@ from hybridlearner.simulation.input import (
 )
 import hybridlearner.utils.io as utils_io
 from hybridlearner.types import Invariant
-from hybridlearner.parser import parse_invariant
 from hybridlearner.common import options as common_options
 from hybridlearner.simulation import options as simulation_options
 
@@ -56,7 +55,10 @@ def get_options() -> Options:
         required=True,
     )
     parser.add_argument(
-        '--invariant', help='Invariant', type=parse_invariant, required=True
+        '--invariant',
+        help='Invariant',
+        type=simulation_options.parse_invariant,
+        required=True,
     )
     parser.add_argument(
         '--number-of-cps',

@@ -1,7 +1,9 @@
 import argparse
 from typeguard import typechecked
 from pydantic.dataclasses import dataclass
-from hybridlearner.astdsl import parse_expr, Variable, Tuple, Expr
+from hybridlearner.astdsl import parse_expr
+from hybridlearner.astdsl.parser import *
+
 
 @dataclass
 class Options:
@@ -10,22 +12,7 @@ class Options:
 
 
 def parse_variables(s: str) -> list[str]:
-    if s == "":
-        return []
-    match parse_expr(s):
-        case Variable(x):
-            return [x]
-        case Tuple(es):
-            def f(e : Expr) -> str:
-                match e:
-                    case Variable(x):
-                        return x
-                    case _:
-                        assert False, "Invalid expression for variable list"
-            return [f(e) for e in es]
-        case _:
-            assert False, "Invalid expression for variable list"
-        
+    return parse_list(parse_variable)(parse_expr("[" + s + "]"))
 
 
 def add_argument_group(parser: argparse.ArgumentParser) -> None:
