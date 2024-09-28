@@ -98,10 +98,12 @@ def compute_transitions(
         srcData = [link.src_end - 1 for link in links]
         destData = [link.src_end for link in links]
 
-        # C++ code assumes the first element of guard_coeff is either 0, 1 or -1
-        guard = normalize_guard(
-            getGuard_inequality(output_dir, srcData, destData, L_y, boundary_order, Y)
+        guard = getGuard_inequality(
+            output_dir, srcData, destData, L_y, boundary_order, Y
         )
+
+        # C++ code assumes the first element of guard_coeff is either 0, 1 or -1
+        # guard = normalize_guard(guard)
 
         '''
         We will not check any complex condition. We simply apply linear regression to first learn the assignments.
