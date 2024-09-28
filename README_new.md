@@ -6,6 +6,7 @@
 - Install pipenv
 - `pipenv --python 3.10`
 - `pipenv install --dev`
+- `export LANG=C` for correct printing of MATLAB warning and error messages
 
 Note:
 
