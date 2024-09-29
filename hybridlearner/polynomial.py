@@ -7,11 +7,15 @@ from hybridlearner.utils.generator import generate_complete_polynomial
 from hybridlearner.utils.math import factorial
 from hybridlearner.astdsl import Expr, BinOp, Variable, Value, unparse_expr, parse_expr
 
+# Coefficients annotated with variables and powers
+# [ ({ 'x' : 2 }, 1.2), ({ 'x' : 1, 'y' : 1 }, 3.4), ({}, 5.6) ]
+# is for polynomial 1.2 x^2 + 3.4 x y + 5.6
 VariableAnnotated = list[tuple[dict[str, int], float]]
 
 
 @dataclass
 class Polynomial:
+    # String representation of polynomial, valid for Python and MATLAB.
     string: str
 
 
@@ -19,6 +23,9 @@ class Polynomial:
 class Raw:
     variables: list[str]
     degree: int
+
+    # Coefficients. The ordering is given by:
+    # generate_complete_polynomial(len(variables), degree)
     coeffs: list[float]
 
 
