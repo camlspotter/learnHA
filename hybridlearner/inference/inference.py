@@ -32,7 +32,7 @@ sys.setrecursionlimit(1000000)  # this is the limit
 @dataclass(config=ConfigDict(arbitrary_types_allowed=True))
 class Raw:
     num_mode: int  # num_mode
-    # ODE coeffs and intercepts, called Flow in the paper.  The array size is (#v + 1) * #o
+    # ODE coeffs and intercepts, called Flow in the paper.  The array size is (#vars + 1) * #ovars
     G: list[np.ndarray]
     mode_inv: list[list[tuple[float, float]]]  # Variable invariants per mode
     transitions: list[Transition]
