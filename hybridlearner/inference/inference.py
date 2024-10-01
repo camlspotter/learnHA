@@ -15,10 +15,7 @@ from hybridlearner.segmentation import (
 )
 from hybridlearner.inference.clustering import select_clustering
 from hybridlearner.inference.invariant import compute_invariant
-from hybridlearner.inference.annotation import (
-    convert_annotation_dict,
-    AnnotationTbl,
-)
+from hybridlearner.inference.annotation import convert_annotation_dict, AnnotationTbl
 from hybridlearner.segmentation.derivatives import diff_method_backandfor
 from hybridlearner.inference.transition import Transition, compute_transitions
 from hybridlearner.trajectory import Trajectories, preprocess_trajectories

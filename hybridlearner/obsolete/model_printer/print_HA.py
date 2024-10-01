@@ -2,7 +2,6 @@
 This module prints an HA model into a plain .txt file
 '''
 
-
 from io import TextIOWrapper
 from hybridlearner.utils import generator as generate
 from hybridlearner.obsolete.model_printer.print_header import *

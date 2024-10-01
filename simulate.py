@@ -9,9 +9,7 @@ from typeguard import typechecked
 from pydantic.dataclasses import dataclass
 
 from hybridlearner.simulation import simulate_list
-from hybridlearner.simulation.input import (
-    generate_simulation_input,
-)
+from hybridlearner.simulation.input import generate_simulation_input
 from hybridlearner.simulation.script import generate_simulation_script
 import hybridlearner.utils.io as utils_io
 from hybridlearner.common import options as common_options

@@ -1,10 +1,4 @@
-
-from hybridlearner.inference.annotation import (
-    Continuous,
-    Pool,
-    Constant,
-    AnnotationTbl,
-)
+from hybridlearner.inference.annotation import Continuous, Pool, Constant, AnnotationTbl
 from hybridlearner.types import MATRIX
 from .assignment import Assignment
 from .connection import ConnectionPoint

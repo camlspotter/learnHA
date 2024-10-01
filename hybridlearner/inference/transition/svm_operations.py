@@ -7,11 +7,7 @@ This module performs operations related to SVM and HA's guard creation.
 # from libsvm.svmutil import svm_train
 import numpy as np
 from numpy.typing import NDArray
-from libsvm.svmutil import (
-    svm_problem,
-    svm_parameter,
-    svm_train,
-)
+from libsvm.svmutil import svm_problem, svm_parameter, svm_train
 
 
 def svm_model_training(
