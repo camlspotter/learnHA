@@ -22,26 +22,44 @@ def generate_simulation_script(
         + simulink_model_file
     )
 
+    var_id_tbl = {v: i for (i, v) in enumerate(output_variables + input_variables)}
+
     out.write(
         textwrap.dedent(
             f"""\
     %% ******** Simulate User Supplied Model ********
     %% ******** by generate_simulation_script ********
     % Run the simulation and generate a txt file containing a result of the simulation.
-    % run this file with the following variables in the workspace
-    %  - timeFinal:  is the simulation Stop time or the simulation Time-Horizon. Note, .slx must have it set in the Model Settings->Solver menu.
-    %  - timeStepMax: is the Maximum simulation time-step or 'Max step size'. Note, .slx must set it in the Model Settings->Solver menu.
-    %  - a0, a1, and so on...: the initial values for state/output variables should also be loaded in the workspace.
-    %    x0_input:       control point for the first input variable
-    %    x0_time:        time series for the first input variable
-    %    x1_input:       control point for the second input variable
-    %    x1_time:        time series for the second input variable ..... and so on.
+    %
+    % Variable indices:
+    %   The variable index of a variable is the position of the variable in the list of:
+    %     input_varialbes + output_variables
+    %
+    %   For example, when the input variables are x, y, z,
+    %   and the output variables are u, w, then,
+    %
+    %   - The variable index of y is 1
+    %   - The variable index of w is 4.
+    %
+    % The host program must set the following parameters to execute this script:
+    %   
+    %  - ai ...: The initial values for output variables. i is the output variable's vairable index.
+    %
+    %  - x_input, x_time :   timeseries of the input variable x
+    %  - y_input, y_time :   timeseries of the input variable y
+    %  - ...                 Here, you must use the original names of the input variables.
+    % 
+    %  - result_filename :   The path of the output filename
+    %
+    % The target SLX model must have the following parameters:
+    %
+    %  - ai ...: The initial values for output variables. i is the output variable's vairable index.
     %
     % Note: If the .slx model has input variable, then the inport must be labelled as
     %   x0In for the first input variable, x1In for the second input variable ..... and so on.
 
-    timeFinal = {time_horizon}; %Simulation Stop time or the simulation Time-Horizon
-    timeStepMax = {sampling_time}; %Maximum simulation time-step
+    timeFinal = {time_horizon}; % Simulation Stop time or the simulation Time-Horizon
+    timeStepMax = {sampling_time}; % Maximum simulation time-step
 
     % initial values for Simulation
 
@@ -53,9 +71,8 @@ def generate_simulation_script(
         textwrap.dedent(
             f"""\
     %% Load the model
-    mdl ='{path.splitext(path.basename(simulink_model_file))[0]}';
-    load_system('{simulink_model_file}');
-    format shortG;
+    mdl = load_system('{simulink_model_file}');
+
     """
         )
     )
@@ -67,11 +84,9 @@ def generate_simulation_script(
         out.write(
             textwrap.dedent(
                 """\
-        %%%%% Non-deterministic inputs %%%%%%% These values are obtained from
-        %%%%% our Tool using random bounded by initial input values or from CE
         % Make SimulationData.Dataset to feed to the Simulink model
         ds = Simulink.SimulationData.Dataset;
-        %%
+
         """
             )
         )
@@ -80,20 +95,25 @@ def generate_simulation_script(
         # cout <<"Check-out size of time-signal per-simulation =" << init_point.size()<< endl;
 
         for varName in input_variables:
-            # Eg., timeseriese_varName_input = timeseries(u_input, u_time); \n"
+            # Eg., timeseriese_u_input = timeseries(u_input, u_time); \n"
             input_data_varName = f"{varName}_input"
             input_time_varName = f"{varName}_time"
             timeseries_varName = f"timeseries_{input_data_varName}"
-            timeseries_input_value = f"{timeseries_varName} = timeseries({input_data_varName}, {input_time_varName}); \n"
-            out.write(timeseries_input_value)
+            out.write(
+                f"{timeseries_varName} = timeseries({input_data_varName}, {input_time_varName});\n"
+            )
 
             # Todo:
-            # We have to assume here the input-port name would be "varName" followed by "In". Eg.,  "x0In" or "x1In"
-            # This is the naming convention applied in the "txt2slx" process/engine. In general, when no name is assigned in the simulink model it is "In1" "In2" by default
-
+            # We have to assume here the input-port name would be "varName" followed by "In".
+            # Eg.,  "x0In" or "x1In".
+            # This is the naming convention applied in the "txt2slx" process/engine.
+            # In general, when no name is assigned in the simulink model it is "In1" "In2" by default
+            # Jun: the next comment sounds contradicting with the above comment.
+            # Note: the variable 'u' should be created as input_port in the simulink model
+            # Jun: The simulink model uses port names such as 'x0In', 'x1In'.  Here, however, the script
+            #      uses name 'uIn'.
             input_port_Name = f"{varName}In"
 
-            # Note: the variable 'u' should be created as input_port in the simulink model
             out.write(
                 f"ds = ds.addElement({timeseries_varName}, '{input_port_Name}');\n%%\n"
             )
@@ -106,10 +126,19 @@ def generate_simulation_script(
     out.write(
         textwrap.dedent(
             f"""\
-    simOut = sim(mdl, 'SaveOutput', 'on', 'OutputSaveName', 'yOut', 'SaveTime', 'on','TimeSaveName','tOut', 'LimitDataPoints', 'off', 'SaveFormat', 'Array');
-    %% Plot the result
+
+    simOut = sim(get_param(mdl, 'Name'), ...
+                 'SaveOutput', 'on', ...
+                 'OutputSaveName', 'yOut', ...
+                 'SaveTime', 'on', ...
+                 'TimeSaveName', 'tOut', ...
+                 'LimitDataPoints', 'off', ...
+                 'SaveFormat', 'Array');
+
     y = simOut.get('yOut');
     t = simOut.get('tOut');
+
+    %% Plot the result
     % comment out this shows a plot
     % [rsize, csize] = size(y);
     % % *********** Plotting the original output from the Simulink model *****************
@@ -121,6 +150,7 @@ def generate_simulation_script(
     %     grid on;
     %     grid minor;
     % end
+
     """
         )
     )
@@ -136,29 +166,22 @@ def generate_simulation_script(
 
     # *********** Data Filtering done ***********
 
-    out.write("% Write the simulation result to the txt file\n")
+    out.write("% Final result matrix\n")
 
-    output_str = "result_matrix = [t, "
-
-    output_str += ", ".join(  # Writing first the input variables, which is all followed by the output ports
-        [
-            f"y( : , {i+1})"
-            for i in range(
-                len(output_variables), len(input_variables) + len(output_variables)
-            )
-        ]
-        +
-        # Writing then the output variables, which are the starting output ports
-        [f"y( : , {i+1})" for i in range(0, len(output_variables))]
+    # Writing first the input variables, which is all followed by the output ports
+    # Writing then the output variables, which are the starting output ports
+    fields = (
+        ["t"]
+        + [f"y( : , {var_id_tbl[v]+1})" for v in input_variables]
+        + [f"y( : , {var_id_tbl[v]+1})" for v in output_variables]
     )
 
-    output_str += "];\n"
-    out.write(output_str)
+    out.write(f"result_matrix = [ {', '.join(fields)} ];\n\n")
 
     out.write(
         textwrap.dedent(
             """\
-    % result_filename = 'output_file'; Now given by setvar
+    % `result_filename` is given by setvar
     writematrix(result_matrix, result_filename, 'Delimiter', 'tab');
     """
         )
