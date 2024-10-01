@@ -98,14 +98,13 @@ def compile(
     # Output ports from the Chart to be connected using lines to the outputComponents
     out.write("\n\n")
     out.write(
-        f"chartOutSignal = get_param('{simulink_model_name}/Chart', 'PortHandles'); \n\n"
+        f"chartOutSignal = get_param('{simulink_model_name}/Chart', 'PortHandles'); \n"
     )
 
-    addInputComponents(out, ha, simulink_model_name)  # when model has input variables
+    addInputComponents(out, ha, simulink_model_name)
     addOutputComponents(out, ha, simulink_model_name)
     # addConnectionPointLines(out)
 
-    out.write("\n\n")
     out.write(f"Simulink.BlockDiagram.arrangeSystem('{simulink_model_name}');\n")
     out.write(
         f"Simulink.BlockDiagram.arrangeSystem('{simulink_model_name}/Chart');\n\n"
@@ -113,6 +112,7 @@ def compile(
     out.write(
         textwrap.dedent(
             """
+        % Rearrange objects
         sfsave;
         sfclose;
         close_system;
@@ -135,18 +135,29 @@ def printDefinition(
     # outfile << "set_param(bdroot, 'StopTime', 'timeFinal', 'MaxStep', 'timeStepMax'); \n";  //This is for variable-step with MaxStep as timeStepMax
     # Working with Fixed-step   outfile << "set_param(bdroot, 'SolverType','Fixed-step', 'StopTime', 'timeFinal', 'FixedStep', 'timeStepMax'); \n";  //This is for Fixed-step size
 
+    solver_type: str
+    step_parameter_key: str
     match ode_solver_type:
         case OdeSolverType.VARIABLE:
-            # std::cout <<"ODE Solver Type: Variable-step" << std::endl;
-            # This makes the model Variable-step
-            out.write(
-                f"set_param(bdroot, 'SolverType', 'Variable-step', 'StopTime', 'timeFinal', 'SolverName', '{ode_solver}', 'MaxStep', 'timeStepMax');\n"
-            )
-
+            solver_type = 'Variable-step'
+            step_parameter_key = 'MaxStep'
         case OdeSolverType.FIXED:
-            out.write(
-                f"set_param(bdroot, 'SolverType', 'Fixed-step', 'StopTime', 'timeFinal', 'SolverName', '{ode_solver}', 'FixedStep', 'timeStepMax');\n"
-            )
+            solver_type = 'Fixed-step'
+            step_parameter_key = 'FixedStep'
+        case _:
+            assert False
+    out.write(
+        textwrap.dedent(
+            f"""
+            %% Uses ... for multiline code
+            set_param(bdroot, ...
+            'SolverType', '{solver_type}', ...
+            'StopTime', 'timeFinal', ...
+            'SolverName', '{ode_solver}', ...
+            '{step_parameter_key}', 'timeStepMax');
+            """
+        )[1:]
+    )
 
     out.write(
         textwrap.dedent(
@@ -186,10 +197,11 @@ def addMatlabFunction(out: TextIOWrapper) -> None:
         """
         )[1:-1]
     )
+    out.write("\n\n")
 
 
 def addLocations(out: TextIOWrapper, ha: HA) -> None:
-    out.write("\n\n%% Adding Locations or States with ODE\n")
+    out.write("%% Adding Locations or States with ODE\n")
 
     pos_x: int = 30
     pos_y: int = 30
@@ -199,36 +211,25 @@ def addLocations(out: TextIOWrapper, ha: HA) -> None:
 
     for loc in ha.modes:
         loc_id = loc.id + 1
+        out.write(f"%% Loc {loc_id}\n")
         out.write(f"loc{loc_id} = Stateflow.State(ch);\n")
-        # Calculate the position properly later (dynamicall)
-        # out << "loc" << loc->getLocId() << ".Position = [30 30 90 60];";
         out.write(f"loc{loc_id}.Position = [{pos_x} {pos_y} {width} {height}];\n")
 
-        out.write(
-            f"str = ['loc{loc_id}', 10, ...\n"
-        )  # 10 here is ASCII char indicate newline char
-        out.write(" 'du: ', 10, ...\n")
-        # Now get the ODE for each variable_dot
-        # derivatives = loc.flow # list<flow_equation>
-        # int var_index=0; // fixing this hard-coded indexing approach
-        # string variableName="", prime_variableName;
-        # size_t pos;
+        # 10 here is ASCII char indicate newline char
+        out.write(f"str = ['loc{loc_id}', 10, ...\n")
 
-        # Loop for during block
+        # du: during action block
+        out.write(" 'du: ', 10, ...\n")
         for var, ode in loc.flow.items():
             var_id = f"x{ha.variable_rev_dict[var]}"
-            # XXX Filtering must be done outside of this printer
-            assert ha.is_output_variable(var), "flow contains input variable's ODE"
             out.write(
                 f" '    {var_id}_dot = {ha.string_of_polynomial(ode)};', 10, ...\n"
             )
 
+        # exit action block
         out.write("'exit: ', 10, ...\n")
-
-        # XXX dupe
         for var, _ode in loc.flow.items():
             var_id = f"x{ha.variable_rev_dict[var]}"
-            assert ha.is_output_variable(var), "flow contains input variable's ODE"
             out.write(f" '    {var_id}_out = {var_id};', 10, ...\n")
 
         out.write(" ];\n")
@@ -240,7 +241,7 @@ def addLocations(out: TextIOWrapper, ha: HA) -> None:
 
 
 def addTransitions(out: TextIOWrapper, ha: HA, invariant_mode: InvariantMode) -> None:
-    out.write("\n\n%% Adding Transition for each Locations or States\n")
+    out.write("%% Adding Transition for each Locations or States\n")
 
     pos_x = 30
     width = 90
@@ -256,7 +257,7 @@ def addTransitions(out: TextIOWrapper, ha: HA, invariant_mode: InvariantMode) ->
 
         loc_id = loc.id + 1
         trans = ha.outgoing_transitions(loc.id)
-        out.write(f"\n%%Transitions for Location loc{loc_id}\n")
+        out.write(f"%% Transitions for Location loc{loc_id}\n")
         exec_order: int = 1
         # start value Todo: proper calculation needed
         sourceOClock = 3.1 + different_position
@@ -314,22 +315,24 @@ def addTransitions(out: TextIOWrapper, ha: HA, invariant_mode: InvariantMode) ->
 
         # ****** addLoopTransitions(out); #This is the Invariant Loop ******
         # Adding blank lines before Invariants handling (using Connectives-Self Loops)
-        out.write("\n\n")
-        out.write("%% Adding Loop Transition to represent Invariant Condition\n")
+        out.write("\n")
+        out.write(
+            "%% Loop Transition for loc {loc_id} to represent Invariant Condition\n"
+        )
         out.write(f"c{loc_id}_{number_of_loop_trans} = Stateflow.Junction(ch);\n")
         out.write(
             f"c{loc_id}_{number_of_loop_trans}.Position.Center = [{pos_x - 20} 0];\n"
         )
         out.write(f"c{loc_id}_{number_of_loop_trans}.Position.Radius = 10;\n")
 
-        out.write("\n")  # Adding blank lines
+        out.write("\n")
         out.write(f"ca{loc_id}_{number_of_loop_trans} = Stateflow.Transition(ch);\n")
         out.write(f"ca{loc_id}_{number_of_loop_trans}.Source = loc{loc_id};\n")
         out.write(
             f"ca{loc_id}_{number_of_loop_trans}.Destination = c{loc_id}_{number_of_loop_trans};\n"
         )
 
-        out.write("\n")  # Adding blank lines
+        out.write("\n")
         out.write(f"cb{loc_id}_{number_of_loop_trans} = Stateflow.Transition(ch);\n")
         out.write(
             f"cb{loc_id}_{number_of_loop_trans}.Source = c{loc_id}_{number_of_loop_trans};\n"
@@ -450,7 +453,7 @@ def variableCreation(out: TextIOWrapper, ha: HA) -> None:
 
 
 def addInputComponents(out: TextIOWrapper, ha: HA, simulink_model_name: str) -> None:
-    out.write("\n%% *** Adding Input  components ****\n")
+    out.write("%% *** Adding Input  components ****\n")
 
     y_pos = 18
     height = 33
@@ -487,7 +490,7 @@ def addInputComponents(out: TextIOWrapper, ha: HA, simulink_model_name: str) -> 
 
 def addOutputComponents(out: TextIOWrapper, ha: HA, simulink_model_name: str) -> None:
     # The number of output components is equal to the number of variables. Not anymore now they are separate.
-    out.write("\n\n%% *** Adding Output components ****\n")
+    out.write("%% *** Adding Output components ****\n")
 
     portNo = 1  # Assuming the order is maintained
     y_pos = 18
@@ -568,10 +571,6 @@ def addLoopTransitions(
     condition_str: str,
     reset_str: str,
 ) -> None:
-    out.write(
-        "%% Transition to represent Invariants: Current fix is using Junction ConnectionPoint to avoid inner Transitions\n"
-    )
-
     pos_x += 10
     next_height += 10
 
@@ -581,8 +580,9 @@ def addLoopTransitions(
 
     # exec_order this will be for loop-transtions now
     # Adding blank lines before Invariants handling (using Connectives-Self Loops)
-    out.write("\n\n")
-    out.write("%% Adding Loop Transition to represent Invariant Condition\n")
+    out.write(
+        f"%% Loop Transition for Loc {sourceLoc+1} to represent Invariant Condition\n"
+    )
     out.write(f"{junction_object_name} = Stateflow.Junction(ch);\n")
     out.write(f"{junction_object_name}.Position.Center = [{pos_x - 20} 0];\n")
     out.write(f"{junction_object_name}.Position.Radius = 10;\n")
