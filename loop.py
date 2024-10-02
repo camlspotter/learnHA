@@ -39,6 +39,7 @@ class Options(
     simulink_model_file: str
     counter_example_threshold: float
     nsimulations: int
+    max_nloops : int
 
 
 @typechecked
@@ -62,6 +63,13 @@ def get_options() -> Options:
         help='Number of simulations per inference iteration',
         type=int,
         default=1,
+        required=False,
+    )
+    parser.add_argument(
+        '--max-nloops',
+        help='Max number of inference loops',
+        type=int,
+        default=10,
         required=False,
     )
     common_options.add_argument_group(parser)
@@ -170,7 +178,7 @@ simulate(rng, opts, opts.simulink_model_file, initial_simulation_file, 1)  # sta
 
 trajectories_files = [initial_simulation_file]
 
-for i in range(0, 10):
+for i in range(0, opts.max_nloops):
     # Inference
 
     print("Inferring...")
