@@ -39,7 +39,7 @@ class Options(
     simulink_model_file: str
     counter_example_threshold: float
     nsimulations: int
-    max_nloops : int
+    max_nloops: int
 
 
 @typechecked
