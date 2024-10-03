@@ -1,6 +1,7 @@
 import numpy as np
 from numpy.typing import NDArray
 import math
+import sys
 
 
 def permut(n: int, k: int) -> list[list[int]]:
@@ -101,6 +102,9 @@ def matrowex(matr: NDArray[np.float64], l: list[int]) -> NDArray[np.float64]:
     """Pick some rows of a matrix to form a new matrix."""
     rows = [matr[l[i]] for i in range(0, len(l))]
     return np.array(rows)
+
+
+epsilon = sys.float_info.min
 
 
 if __name__ == "__main__":

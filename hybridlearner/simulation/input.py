@@ -2,6 +2,7 @@ from enum import Enum
 from pydantic.dataclasses import dataclass
 from dataclasses import asdict
 import random
+from hybridlearner.utils.math import epsilon
 from hybridlearner.types import Range
 from hybridlearner.types import Invariant
 import json
@@ -60,13 +61,13 @@ def fixed_step_signal(time_horizon: float, cps: list[float]) -> Signal:
      fixed_step_signal(timeHorizon, control_points, time_vector, data_vector)
         [ (t_i, p_i), (t_{i+1} - epsilon, p_i) ]_{i in [0..n-1]}
     where
-       t_i = timeHorizon * i / n   (not / (n+1) somehow)
+       t_i = timeHorizon * i / n
     """
 
     time_step = time_horizon / len(cps)
 
     time_vectors: list[list[float]] = [
-        [i * time_step, i * (time_step + 1)] for i in range(0, len(cps))
+        [i * time_step, (i + 1) * time_step - epsilon] for i in range(0, len(cps))
     ]
 
     time_vector: list[float] = [t for tt in time_vectors for t in tt]
