@@ -1,0 +1,25 @@
+{
+  "init_mode": 0,
+  "modes": [
+    {
+      "id": 0,
+      "invariant": {},
+      "flow": {
+        "h": {
+          "string": "y - x"
+        },
+        "g": {
+          "string": "x - y"
+        }
+      }
+    }
+  ],
+  "transitions": [
+  ],
+  "input_variables": [
+    "y", "x"
+  ],
+  "output_variables": [
+    "h", "g"
+  ]
+}
