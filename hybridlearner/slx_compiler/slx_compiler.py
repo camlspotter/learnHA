@@ -100,6 +100,8 @@ def compile(
     out.write(
         textwrap.dedent(
             f"""\
+            %%% IO components %%%
+
             % chart ports are accessible via chartOutSignal.{{In,Out}}port(portId)
             chartOutSignal = get_param('{simulink_model_name}/Chart', 'PortHandles');
 
@@ -113,7 +115,7 @@ def compile(
 
     out.write(
         textwrap.dedent(
-            f"""
+            f"""\
             %%% Rearrange object positions automatically %%%
 
             Simulink.BlockDiagram.arrangeSystem('{simulink_model_name}');
@@ -126,7 +128,7 @@ def compile(
             close_system;
             bdclose all;
             """
-        )[1:-1]
+        )
     )
 
 
@@ -192,7 +194,7 @@ def printDefinition(
 def addMatlabFunction(out: TextIOWrapper) -> None:
     out.write(
         textwrap.dedent(
-            """
+            """\
             %% Adding a Matlab Function that generates random number in the range -2 to +2
         
             function1 = Stateflow.EMFunction(ch);
@@ -213,9 +215,8 @@ def addMatlabFunction(out: TextIOWrapper) -> None:
                    'end'];
             function1.Script=str;
 
-
             """
-        )[1:-1]
+        )
     )
 
 
@@ -266,7 +267,7 @@ def addLocations(out: TextIOWrapper, ha: HA) -> None:
 
 
 def addTransitions(out: TextIOWrapper, ha: HA, invariant_mode: InvariantMode) -> None:
-    out.write("%%% Adding Transitions %%%\n\n")
+    out.write("%%% Transitions %%%\n\n")
 
     pos_x = 30
     width = 90
@@ -282,7 +283,7 @@ def addTransitions(out: TextIOWrapper, ha: HA, invariant_mode: InvariantMode) ->
 
         loc_id = loc.id + 1
         trans = ha.outgoing_transitions(loc.id)
-        out.write(f"% Transitions for Location loc{loc_id}\n\n")
+        out.write(f"% Transitions for Location loc{loc_id}\n")
         exec_order: int = 1
         # start value Todo: proper calculation needed
         sourceOClock = 3.1 + different_position
@@ -327,7 +328,7 @@ def addTransitions(out: TextIOWrapper, ha: HA, invariant_mode: InvariantMode) ->
                 )
 
                 out.write(
-                    f"    t{tr.id}.LabelString = '[ {inequality_guard} ]{reset_statement_for_tr}';"
+                    f"    t{tr.id}.LabelString = '[ {inequality_guard} ]{reset_statement_for_tr}';\n"
                 )
 
                 # ************* Using the Modified Guard which replace Equality guard into inequality guard for fixing MATLAB's issue *********
@@ -398,7 +399,7 @@ def addTransitions(out: TextIOWrapper, ha: HA, invariant_mode: InvariantMode) ->
                     assert False, "invalid invariant_mode"
 
         out.write(
-            f"cb{loc_id}_{number_of_loop_trans}.LabelString = '{condition_str}{reset_statement_identity}';\n"
+            f"cb{loc_id}_{number_of_loop_trans}.LabelString = '{condition_str}{reset_statement_identity}';\n\n"
         )
 
         number_of_loop_trans += 1  # every location has a loop-transition that represents an invariant #XXX WHOT!?
@@ -457,7 +458,7 @@ def generateInitialValues(ha: HA) -> str:
 
 
 def variableCreation(out: TextIOWrapper, ha: HA) -> None:
-    out.write("\n\n%% *** Variable Declaration Block ****\n")
+    out.write("%%% Variable Declarations %%%\n\n")
     inputVariableCreation(out, ha)
     outputVariableCreation(out, ha)
     localVariableCreation(out, ha)
@@ -484,7 +485,7 @@ def addInputComponents(out: TextIOWrapper, ha: HA, simulink_model_name: str) -> 
                 set_param('{simulink_model_name}/{var_id}In', 'Port', '{portNo}');
                 set_param('{simulink_model_name}/{var_id}In', 'SignalType', 'auto');
                 set_param('{simulink_model_name}/{var_id}In', 'position', [-40, {y_pos}, 0, {height}]);
-                % {var_id}Input ---> Chart's Input {portNo}
+                % {var_id}Input ---> Input {portNo} of Chart
                 add_line('{simulink_model_name}', {var_id}Input.Outport(1), chartOutSignal.Inport({portNo}));
 
             """
@@ -521,7 +522,7 @@ def addOutputComponents(out: TextIOWrapper, ha: HA, simulink_model_name: str) ->
                 set_param('{simulink_model_name}/{var_id}Out', 'Port', '{portNo}');
                 set_param('{simulink_model_name}/{var_id}Out', 'SignalType', 'auto');
                 set_param('{simulink_model_name}/{var_id}Out', 'position', [140, {y_pos}, 180, {height}]);
-                % Chart's Outport {portNo} ---> {var_id}Output
+                % Outport {portNo} of Chart ---> {var_id}Output
                 add_line('{simulink_model_name}', chartOutSignal.Outport({portNo}), {var_id}Output.Inport(1));
 
                 """
@@ -657,7 +658,7 @@ def outputVariableCreation(out: TextIOWrapper, ha: HA) -> None:
 
 
 def localVariableCreation(out: TextIOWrapper, ha: HA) -> None:
-    out.write("%%% Local Variable Declaration %%\n\n")
+    out.write("%%% Local Variable Declaration %%%\n\n")
 
     for var in ha.output_variables:
         var_id = f"x{ha.variable_rev_dict[var]}"
