@@ -14,7 +14,7 @@ pipenv run python loop.py \
      --simulink-model-file $OUTDIR/test.slx \
      --time-horizon 10.0 --sampling-time 0.1 \
      --fixed-interval-data False \
-     --invariant 'y:(-10, 10), x:(-10, 10), h:(-10, 10), g:(-10,10)' \
+     --invariant 'y:(0, 10), x:(-10, 0), h:(-10, 10), g:(-10,10)' \
      --number-of-cps 'y:5,x:5' --signal-types 'y:linear,x:linear' \
      \
      --output-directory $OUTDIR \
