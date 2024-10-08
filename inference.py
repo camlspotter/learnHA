@@ -1,3 +1,5 @@
+#!/usr/bin/env pipenv-shebang
+
 import os
 import json
 from dataclasses import asdict

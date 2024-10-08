@@ -1,3 +1,5 @@
+#!/usr/bin/env pipenv-shebang
+
 import csv
 import argparse
 import os

@@ -3,7 +3,8 @@
 ## Preparation
 
 - Install MATLAB R2022b at /usr/local/MATLAB/R2022b
-- Install pipenv
+- Install pipenv: `pip install pipenv`
+- Install pipenv-shebang: `pip install pipenv-shebang`
 - `pipenv --python 3.10`
 - `pipenv install --dev`
 - `export LANG=C` for correct printing of MATLAB warning and error messages

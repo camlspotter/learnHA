@@ -1,3 +1,5 @@
+#!/usr/bin/env pipenv-shebang
+
 # ex.
 #
 # pipenv run python simulate.py --simulink-model-file data/models/ex_sldemo_bounce_Input.slx --time-horizon 13.0 --sampling-time 0.001 --fixed-interval-data False --input-variables 'u' --output-variables 'x,v' --invariant '-9.9 <= u && u <= -9.5 && 10.2 <= x && x <= 10.5 && 15 <= v && v <= 15' --number-of-cps 'u:4' --signal-types 'u:linear' -o _out/model_simulation.txt -S 0 -n 64
