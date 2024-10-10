@@ -32,7 +32,7 @@ class Matlab:
     def getvar(self, var: str) -> Any:
         _eng = self.engine()
         print(f"Get MATLAB variable {var}")
-        return _eng.eval(var, nargout=1)
+        return _eng.workspace[var]
 
 
 engine = Matlab()
