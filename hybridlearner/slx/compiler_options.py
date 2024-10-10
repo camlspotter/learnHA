@@ -1,7 +1,7 @@
 # pipenv run python compile_ha.py --ode-solver-type fixed --ode-solver FixedStepAuto --invariant-mode 2 _out/learned_HA.json
 import argparse
 from dataclasses import dataclass
-from hybridlearner.slx_compiler import OdeSolverType, InvariantMode
+from hybridlearner.slx.compiler import OdeSolverType, InvariantMode
 
 
 @dataclass

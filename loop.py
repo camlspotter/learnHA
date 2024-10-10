@@ -12,7 +12,7 @@ import hybridlearner.utils.io as utils_io
 from hybridlearner.common import options as common_options
 from hybridlearner.simulation import options as simulation_options
 from hybridlearner.inference import options as inference_options
-from hybridlearner.slx_compiler import options as compiler_options
+from hybridlearner.slx import compiler_options
 
 from hybridlearner.simulation import simulate_list
 from hybridlearner.simulation.input import generate_simulation_input
@@ -25,7 +25,7 @@ from hybridlearner.automaton import HybridAutomaton
 import json
 from dataclasses import asdict
 
-from hybridlearner import slx_compiler
+from hybridlearner.slx import compiler
 from hybridlearner import matlab
 
 from hybridlearner.trajectory.distance import trajectory_dtw_distance
@@ -154,7 +154,7 @@ def compile(opts: Options, learned_model_file: str) -> str:
         ha = HybridAutomaton(**json.load(file))
 
     with utils_io.open_for_write(output_matlab_script) as out:
-        slx_compiler.compile(
+        compiler.compile(
             out,
             ha,
             opts.ode_solver_type,

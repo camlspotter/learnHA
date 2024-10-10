@@ -37,9 +37,9 @@ Conversion from `inference.Raw` (old type) to `HybridAutomaton`.
 
 Printer of old type of hybrid automaton `inference.Raw`.
 
-## `slx_compiler`
+## `slx`
 
-Compiler of hybrid automaton to MATLAB SLX model
+- `compiler`: compiler of hybrid automaton to MATLAB SLX model
 
 ## Other modules
 
