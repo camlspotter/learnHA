@@ -11,8 +11,8 @@ from hybridlearner.astdsl.parser import *
 
 @dataclass
 class Options:
-    time_horizon: float
-    sampling_time: float
+    time_horizon: float  # total time of simulation
+    sampling_time: float  # simulation frame time
     fixed_interval_data: bool
     invariant: Invariant
     number_of_cps: dict[str, int]

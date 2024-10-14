@@ -18,7 +18,7 @@ from hybridlearner.simulation import simulate_list
 from hybridlearner.simulation.input import generate_simulation_input
 from hybridlearner.simulation.script import generate_simulation_script
 
-from hybridlearner.trajectory import load_trajectories_files, Trajectories
+from hybridlearner.trajectory import load_trajectories_files, Trajectories, Trajectory
 from hybridlearner.inference import infer_model
 from hybridlearner import automaton
 from hybridlearner.automaton import HybridAutomaton
@@ -168,39 +168,17 @@ def compile(opts: Options, learned_model_file: str) -> str:
     return output_slx_file
 
 
-# Random seed
+def find_counter_examples(
+    rng: random.Random, opts: Options, i: int
+) -> list[Trajectory]:
+    # Simulation of the original model
 
-print("Random seed", opts.seed)
-rng = random.Random() if opts.seed is None else random.Random(opts.seed)
-
-# Initial simulation set
-
-initial_simulation_file = os.path.join(opts.output_directory, "original_simulation.txt")
-simulate(rng, opts, opts.simulink_model_file, initial_simulation_file, 1)  # start small
-
-trajectories_files = [initial_simulation_file]
-
-for i in range(0, opts.max_nloops):
-    # Inference
-
-    print("Inferring...")
-    learned_model_file = os.path.join(opts.output_directory, f"learned_HA{i}.json")
-    inference(opts, trajectories_files, learned_model_file)
-
-    # Compile
-
-    output_slx_file = compile(opts, learned_model_file)
-
-    # Simulation
+    rng_state = rng.getstate()
 
     original_trajectories_file = os.path.join(
         opts.output_directory, f"original_simulation{i}.txt"
     )
-    learned_trajectories_file = os.path.join(
-        opts.output_directory, f"learned_simulation{i}.txt"
-    )
 
-    rng_state = rng.getstate()
     simulate(
         rng,
         opts,
@@ -209,7 +187,14 @@ for i in range(0, opts.max_nloops):
         opts.nsimulations,
     )
 
+    # Simulation of the learned model with the same RNG seed
+
     rng.setstate(rng_state)
+
+    learned_trajectories_file = os.path.join(
+        opts.output_directory, f"learned_simulation{i}.txt"
+    )
+
     simulate(rng, opts, output_slx_file, learned_trajectories_file, opts.nsimulations)
 
     # Find counter examples
@@ -234,11 +219,41 @@ for i in range(0, opts.max_nloops):
         if opts.counter_example_threshold < dist:
             counter_examples.append(ot)
 
+    return counter_examples
+
+
+# Random seed
+
+print("Random seed", opts.seed)
+rng = random.Random() if opts.seed is None else random.Random(opts.seed)
+
+# Initial simulation set
+
+initial_simulation_file = os.path.join(opts.output_directory, "original_simulation.txt")
+simulate(rng, opts, opts.simulink_model_file, initial_simulation_file, 1)  # start small
+
+trajectories_files = [initial_simulation_file]
+
+for i in range(0, opts.max_nloops):
+    # Inference
+
+    print("Inferring...")
+    learned_model_file = os.path.join(opts.output_directory, f"learned_HA{i}.json")
+    inference(opts, trajectories_files, learned_model_file)
+
+    # Compile
+
+    output_slx_file = compile(opts, learned_model_file)
+
+    # Find counter examples
+
+    counter_examples = find_counter_examples(rng, opts, i)
+
     counter_example_file = os.path.join(
         opts.output_directory, f"counter_example{i}.txt"
     )
     with utils_io.open_for_write(counter_example_file) as oc:
-        Trajectories(counter_examples, original_trajectories.stepsize).output(oc)
+        Trajectories(counter_examples, opts.sampling_time).output(oc)
 
     if len(counter_examples) == 0:
         print("No counter example found")
