@@ -34,7 +34,7 @@ class Range:
         return rng.uniform(self.min, self.max)
 
 
-Invariant = dict[str, Range]  # ∧a_i <= x_i <= b_i
+Invariant = dict[str, Range]  # a_i <= x_i <= b_i
 
 
 def string_of_invariant(inv: Invariant) -> str:
