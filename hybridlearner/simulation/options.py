@@ -1,6 +1,6 @@
 import argparse
 from pydantic.dataclasses import dataclass
-from typing import Optional, Protocol
+from typing import Optional
 
 from hybridlearner.utils.argparse_bool import argparse_bool
 from hybridlearner.types import Invariant, Range

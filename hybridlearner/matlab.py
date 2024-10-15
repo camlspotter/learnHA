@@ -1,6 +1,5 @@
 from typing import Optional, Any
 import matlab.engine
-from matlab import double
 
 MatlabEngine = Any
 

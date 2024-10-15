@@ -5,7 +5,6 @@ from typing import Protocol
 from hybridlearner import matlab
 from hybridlearner.simulation.input import Simulation_input, generate_simulation_input
 from hybridlearner.simulation.script import generate_simulation_script
-from hybridlearner.simulation.options import Options as simulation_options
 import hybridlearner.utils.io as utils_io
 
 from typing import Optional

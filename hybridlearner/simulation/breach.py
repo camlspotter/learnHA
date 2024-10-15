@@ -1,15 +1,12 @@
 # Simluation by Breach
 import numpy as np
 import textwrap
-from .options import Options
 from .input import SignalType
 from hybridlearner.utils import io as utils_io
 from hybridlearner.matlab import engine
 from hybridlearner.trajectory import Trajectories
 from hybridlearner.types import Range
 from hybridlearner.simulation import simulate_options
-
-import matplotlib.pyplot as plt
 
 
 def simulate(
