@@ -14,9 +14,7 @@ from hybridlearner.simulation import options as simulation_options
 from hybridlearner.inference import options as inference_options
 from hybridlearner.slx import compiler_options
 
-from hybridlearner.simulation import simulate_list
-from hybridlearner.simulation.input import generate_simulation_input
-from hybridlearner.simulation.script import generate_simulation_script
+from hybridlearner.simulation import simulate
 
 from hybridlearner.trajectory import load_trajectories_files, Trajectories, Trajectory
 from hybridlearner.inference import infer_model
@@ -83,49 +81,6 @@ def get_options() -> Options:
 
 
 opts = get_options()
-
-
-def simulate(
-    rng: random.Random,
-    opts: Options,
-    simulink_model_file: str,
-    output_file: str,
-    nsimulations: int,
-) -> None:
-    inputs = [
-        generate_simulation_input(
-            rng,
-            time_horizon=opts.time_horizon,
-            invariant=opts.invariant,
-            number_of_cps=opts.number_of_cps,
-            signal_types=opts.signal_types,
-            input_variables=opts.input_variables,
-            output_variables=opts.output_variables,
-        )
-        for _ in range(nsimulations)
-    ]
-
-    script_file = os.path.join(opts.output_directory, "simulate_model.m")
-
-    with utils_io.open_for_write(script_file) as out:
-        generate_simulation_script(
-            out=out,
-            title='Title',
-            simulink_model_file=simulink_model_file,
-            time_horizon=opts.time_horizon,
-            sampling_time=opts.sampling_time,
-            fixed_interval_data=opts.fixed_interval_data,
-            input_variables=opts.input_variables,
-            output_variables=opts.output_variables,
-        )
-
-    simulate_list(
-        script_file=script_file,
-        output_file=output_file,
-        input_variables=opts.input_variables,
-        output_variables=opts.output_variables,
-        inputs=inputs,
-    )
 
 
 def inference(

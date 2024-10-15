@@ -8,7 +8,9 @@ import os
 import random
 import argparse
 from typeguard import typechecked
-from pydantic.dataclasses import dataclass
+
+# from pydantic.dataclasses import dataclass
+from dataclasses import dataclass
 
 from hybridlearner.simulation import simulate_list
 from hybridlearner.simulation.input import generate_simulation_input

@@ -5,23 +5,17 @@ from .options import Options
 from .input import SignalType
 from hybridlearner.utils import io as utils_io
 from hybridlearner.matlab import engine
-from hybridlearner.trajectory import Trajectory
+from hybridlearner.trajectory import Trajectories
 from hybridlearner.types import Range
+from hybridlearner.simulation import simulate_options
 
 import matplotlib.pyplot as plt
 
 
 def simulate(
-    opts: Options,
-    script_fn: str,
-    model_fn: str,
-    input_variables: list[str],
-    output_variables: list[str],
-    nsimulations: int,
-) -> list[Trajectory]:
-    build_script(
-        opts, script_fn, model_fn, input_variables, output_variables, nsimulations
-    )
+    opts: simulate_options, script_fn: str, model_fn: str, nsimulations: int
+) -> Trajectories:
+    build_script(opts, script_fn, model_fn, nsimulations)
 
     engine.run(script_fn)
     time = np.array(engine.getvar('time'))[0]
@@ -29,26 +23,21 @@ def simulate(
     signals = engine.getvar('signals')
     trajectories = list(map(lambda sig: (time, np.transpose(np.array(sig))), signals))
 
-    return trajectories
+    return Trajectories(trajectories=trajectories, stepsize=opts.sampling_time)
 
 
 def build_script(
-    opts: Options,
-    script_fn: str,
-    model_fn: str,
-    input_variables: list[str],
-    output_variables: list[str],
-    nsimulations: int,
+    opts: simulate_options, script_fn: str, model_fn: str, nsimulations: int
 ) -> None:
     variable_index: dict[str, int] = {
-        v: i for (i, v) in enumerate(input_variables + output_variables)
+        v: i for (i, v) in enumerate(opts.input_variables + opts.output_variables)
     }
 
     with utils_io.open_for_write(script_fn) as out:
         out.write("InitBreach;\n")
 
         # Fill variables to load the model
-        for ov in output_variables:
+        for ov in opts.output_variables:
             idx = variable_index[ov]
             out.write(f"a{idx} = 42; % dummy\n")
 
@@ -65,13 +54,13 @@ def build_script(
         )
 
         # Range of the initial output variables
-        for ov in output_variables:
+        for ov in opts.output_variables:
             idx = variable_index[ov]
             r: Range = opts.invariant[ov]
             out.write(f"Bsim.SetParamRanges({{'a{idx}'}}, [{r.min} {r.max}]);\n")
 
         # Generators of the input variables
-        for iv in input_variables:
+        for iv in opts.input_variables:
             ncps = opts.number_of_cps[iv]
             signal_type = opts.signal_types[iv]
             r = opts.invariant[iv]
@@ -96,7 +85,7 @@ def build_script(
                 % Bsim.PlotSignals();
 
                 signals = Bsim.GetSignalList();
-                output_signals = signals(1:{len(input_variables + output_variables)});
+                output_signals = signals(1:{len(opts.input_variables + opts.output_variables)});
                 traces = Bsim.GetTraces();
                 
                 % GetTime() seems broken.
