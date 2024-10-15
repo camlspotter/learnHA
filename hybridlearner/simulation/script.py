@@ -179,8 +179,12 @@ def generate_simulation_script(
 
     # ******* If Data Filtering required by the user ***********
 
-    # XXX enum or bool
-    # 0: variable outputs obtained from the model-solver. 1: get fixed timestep outputs.
+    # Jun: Some simulations return timeseries with non unique timesteps.
+    #      I GUESS if `fixed_interval_data`, the code obtains fixed timestep
+    #      timeseries from the original variable-timestep timeseris using
+    #      linear-interporation.
+    # False: variable outputs obtained from the model-solver.
+    # True: get fixed timestep outputs.
     if fixed_interval_data:
         addFilteringCode(out)
 
