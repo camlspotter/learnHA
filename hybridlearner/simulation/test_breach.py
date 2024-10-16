@@ -1,9 +1,11 @@
+from pydantic.dataclasses import dataclass
+
 from .breach import *
-from .options import Options
 from .input import SignalType
 from hybridlearner.types import Range
+from .simulation import simulate_options
 
-opts = Options(
+opts = simulate_options(
     time_horizon=20,
     sampling_time=0.01,
     fixed_interval_data=False,
@@ -14,14 +16,15 @@ opts = Options(
     },
     number_of_cps={'u': 3},
     signal_types={'u': SignalType.FIXED_STEP},
-    seed=3,
+    input_variables=['u'],
+    output_variables=['x', 'v'],
+    output_directory="_out",
 )
 
 simulate(
     opts,
     '_out/breach_simulate.m',
     '../data/models/ex_sldemo_bounce_Input.slx',  # from _out/ directory
-    ['u'],
-    ['x', 'v'],
+    '_out/breach_simulation.txt',
     10,
 )

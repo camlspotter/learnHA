@@ -6,25 +6,36 @@ from hybridlearner.utils import io as utils_io
 from hybridlearner.matlab import engine
 from hybridlearner.trajectory import Trajectories
 from hybridlearner.types import Range
-from hybridlearner.simulation import simulate_options
+from hybridlearner.simulation import simulate_protocol
 
 
 def simulate(
-    opts: simulate_options, script_fn: str, model_fn: str, nsimulations: int
+    opts: simulate_protocol,
+    script_fn: str,
+    simulink_model_file: str,
+    output_file: str,
+    nsimulations: int,
 ) -> Trajectories:
-    build_script(opts, script_fn, model_fn, nsimulations)
+    build_script(opts, script_fn, simulink_model_file, nsimulations)
 
     engine.run(script_fn)
     time = np.array(engine.getvar('time'))[0]
 
     signals = engine.getvar('signals')
-    trajectories = list(map(lambda sig: (time, np.transpose(np.array(sig))), signals))
+    trajectory_list = list(
+        map(lambda sig: (time, np.transpose(np.array(sig))), signals)
+    )
 
-    return Trajectories(trajectories=trajectories, stepsize=opts.sampling_time)
+    trs = Trajectories(trajectories=trajectory_list, stepsize=opts.sampling_time)
+
+    with utils_io.open_for_write(output_file) as out:
+        trs.output(out)
+
+    return trs
 
 
 def build_script(
-    opts: simulate_options, script_fn: str, model_fn: str, nsimulations: int
+    opts: simulate_protocol, script_fn: str, simulink_model_file: str, nsimulations: int
 ) -> None:
     variable_index: dict[str, int] = {
         v: i for (i, v) in enumerate(opts.input_variables + opts.output_variables)
@@ -44,7 +55,7 @@ def build_script(
                 timeStepMax = 42; %dummy
                 timeFinal = 42; %dummy
 
-                mdl = load_system('{model_fn}');
+                mdl = load_system('{simulink_model_file}');
                 Bsim = BreachSimulinkSystem(get_param(mdl, 'Name'));
                 """
             )

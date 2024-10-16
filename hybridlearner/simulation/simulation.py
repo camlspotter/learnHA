@@ -2,12 +2,11 @@ import os
 import random
 import matlab
 from typing import Protocol
+from pydantic.dataclasses import dataclass
 from hybridlearner import matlab
 from hybridlearner.simulation.input import Simulation_input, generate_simulation_input
 from hybridlearner.simulation.script import generate_simulation_script
 import hybridlearner.utils.io as utils_io
-
-from typing import Optional
 from hybridlearner.types import Invariant
 from hybridlearner.simulation.input import SignalType
 
@@ -88,16 +87,28 @@ def simulate_list(
                     oc.write(line)
 
 
-# Protocol for subtyping!
-# Unfortunately I cannot inherit dataclasses and have to list all the fields here.
-class simulate_options(Protocol):
-    time_horizon: float  # total time of simulation
-    sampling_time: float  # simulation frame time
+@dataclass
+class simulate_options:
+    time_horizon: float
+    sampling_time: float
     fixed_interval_data: bool
     invariant: Invariant
     number_of_cps: dict[str, int]
     signal_types: dict[str, SignalType]
-    seed: Optional[int]
+    input_variables: list[str]
+    output_variables: list[str]
+    output_directory: str
+
+
+# Protocol for subtyping!
+# Unfortunately I cannot inherit dataclasses and have to list all the fields here.
+class simulate_protocol(Protocol):
+    time_horizon: float
+    sampling_time: float
+    fixed_interval_data: bool
+    invariant: Invariant
+    number_of_cps: dict[str, int]
+    signal_types: dict[str, SignalType]
     input_variables: list[str]
     output_variables: list[str]
     output_directory: str
@@ -105,7 +116,7 @@ class simulate_options(Protocol):
 
 def simulate(
     rng: random.Random,
-    opts: simulate_options,
+    opts: simulate_protocol,
     simulink_model_file: str,
     output_file: str,
     nsimulations: int,
