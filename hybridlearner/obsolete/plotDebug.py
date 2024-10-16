@@ -3,9 +3,6 @@ import matplotlib.pyplot as plt
 
 from operator import itemgetter
 
-from hybridlearner.inference.clustering.utils import (
-    create_simple_per_segmented_positions_exact,
-)
 from hybridlearner.utils.math import rel_diff
 from hybridlearner.utils import io
 from hybridlearner.types import Span
@@ -222,103 +219,103 @@ def plot_segmentation(res, L_y, t_list, Y, stepM):
     #     break
 
 
-def plot_segmentation_new(segmented_traj, L_y, t_list, Y, stepM):
-    """
-
-    @param segmented_traj: is a list of a custom data structure consisting of segmented trajectories (positions). Each item
-        of the list contains tuple of the form ([start_ode, end_ode], [start_exact, end_exact], [p_1, ... , p_n]).
-        The Tuple has three items:
-            (1) first, a list of two values for recording start and end points for learning ODE
-            (2) second, a list of two values for recording start and end points for learning guard and assignment using
-            the exact point of a jump
-            (3) third, a list of values representing the position of points of the trajectories.
-    @param L_y: is the dimension of the system
-    @param t_list: is the list of time step values for each Y values
-    @param Y: is the list of values of the system. Y can be n-dimensional
-    @return:
-    """
-
-    fig, axs = plt.subplots(L_y, figsize=(10, 20))
-
-    fig.suptitle('Segmentation', fontsize=16)
-    res: list[Span] = create_simple_per_segmented_positions_exact(segmented_traj)
-    print("L_y=", L_y)
-    for imode in range(0, len(res)):
-        x_pts = []
-        # x_p1 = []
-        # x_p2 = []
-        # x_p3 = []
-        # x_p4 = []
-        # x_p5 = []
-        time_pt = []
-        for id0 in res[
-            imode
-        ].range():  # Note: P contains list of clustered segments each segments contains the positions
-            x_pts.append({dim + 1: Y[id0, dim] for dim in range(L_y)})
-            time_pt.append(
-                t_list[0][id0 + stepM]
-            )  # since Y values are after leaving 5 point from start and -5 at the end
-
-        # x_p1 = list(map(itemgetter(1), x_pts))
-        # x_p2 = list(map(itemgetter(2), x_pts))
-        # x_p3 = list(map(itemgetter(3), x_pts))
-        # x_p4 = list(map(itemgetter(4), x_pts))
-        # x_p5 = list(map(itemgetter(5), x_pts))
-
-        x_p = [list(map(itemgetter(i), x_pts)) for i in range(1, (L_y + 1))]
-
-        for i, ax in enumerate(axs):
-            ax.scatter(time_pt, x_p[i])
-
-        # plt.figure(2)
-        # plt.title('Segmentation')
-        # # plt.scatter(time_pt, x_p1)  # padel_angle    refrigeration-cycle
-        # # plt.scatter(time_pt, x_p2) # engine-speed
-        # # plt.scatter(time_pt, x_p3) #engine-speed
-        # # plt.scatter(time_pt, x_p4) # AF the value of our interest
-        # plt.scatter(time_pt, x_p5) # for AT vehicle_speed
-        #
-        # # plt.xlim([0, 3])    #Navigation
-        # # plt.ylim([0, 3])   #Navigation
-        # # plt.xlim([0, 10])  # chasing cars      plt.scatter(x_p1)
-        # # plt.ylim([0, 2500])  # chasing cars
-        #
-        # # plt.xlim([0, 50])   #AFC
-        # # plt.ylim([14.5, 15.5])   #AFC for x_p4 the AF variable
-        #
-        # # plt.xlim([0, 10])  # Two Tanks      plt.scatter(x_p3)
-        # # plt.ylim([-1, 2])  # Two Tanks
-        #
-        # # plt.xlim([0, 3000])  # refrigeration cycle
-        # # plt.ylim([274, 280])  # refrigeration cycle
-        #
-        # #
-        # # plt.xlim([0, 10])  # Engine Timing System      plt.scatter(x_p3)
-        # # plt.ylim([1900, 3100])  # Engine Timing System
-        # #
-        # # plt.xlim([0, 10])  # Engine Timing System
-        # # plt.ylim([10, 100])  # Engine Timing System    plt.scatter(x_p2)
-        #
-        #
-        # # plt.xlim([-1, 500])  # Excitable Cell Model      plt.scatter(x_p1)
-        # # plt.ylim([-80, 60])  # Excitable Cell Model
-        # # plt.xlim([0, 15])   #BBall
-        # # plt.ylim([0, 25])   #BBall
-        # # plt.xlim([0, 20])  # Oscillator
-        # # plt.ylim([-1, 1])  # Oscillator
-        # # plt.ylim([-1.5, 1.5])
-        #
-        # plt.xlim([0, 35])  # AT
-        # plt.ylim([0, 125])  # AT
-        #
-        # # plt.xlim([0, 5])  # time-horizon for Lorenz Attractor
-        # # plt.ylim([-30, 50])  # height for Lorenz Attractor
-        #
-        # # plt.xlim([-3, 3])  # time-horizon for Ven Der Pol Oscillator
-        # # plt.ylim([-3, 3])  # height for Ven Der Pol Oscillator
-    plt.show()
-    # if imode == 10:
-    #     break
+# def plot_segmentation_new(segmented_traj, L_y, t_list, Y, stepM):
+#     """
+#
+#     @param segmented_traj: is a list of a custom data structure consisting of segmented trajectories (positions). Each item
+#         of the list contains tuple of the form ([start_ode, end_ode], [start_exact, end_exact], [p_1, ... , p_n]).
+#         The Tuple has three items:
+#             (1) first, a list of two values for recording start and end points for learning ODE
+#             (2) second, a list of two values for recording start and end points for learning guard and assignment using
+#             the exact point of a jump
+#             (3) third, a list of values representing the position of points of the trajectories.
+#     @param L_y: is the dimension of the system
+#     @param t_list: is the list of time step values for each Y values
+#     @param Y: is the list of values of the system. Y can be n-dimensional
+#     @return:
+#     """
+#
+#     fig, axs = plt.subplots(L_y, figsize=(10, 20))
+#
+#     fig.suptitle('Segmentation', fontsize=16)
+#     res: list[Span] = create_simple_per_segmented_positions_exact(segmented_traj)
+#     print("L_y=", L_y)
+#     for imode in range(0, len(res)):
+#         x_pts = []
+#         # x_p1 = []
+#         # x_p2 = []
+#         # x_p3 = []
+#         # x_p4 = []
+#         # x_p5 = []
+#         time_pt = []
+#         for id0 in res[
+#             imode
+#         ].range():  # Note: P contains list of clustered segments each segments contains the positions
+#             x_pts.append({dim + 1: Y[id0, dim] for dim in range(L_y)})
+#             time_pt.append(
+#                 t_list[0][id0 + stepM]
+#             )  # since Y values are after leaving 5 point from start and -5 at the end
+#
+#         # x_p1 = list(map(itemgetter(1), x_pts))
+#         # x_p2 = list(map(itemgetter(2), x_pts))
+#         # x_p3 = list(map(itemgetter(3), x_pts))
+#         # x_p4 = list(map(itemgetter(4), x_pts))
+#         # x_p5 = list(map(itemgetter(5), x_pts))
+#
+#         x_p = [list(map(itemgetter(i), x_pts)) for i in range(1, (L_y + 1))]
+#
+#         for i, ax in enumerate(axs):
+#             ax.scatter(time_pt, x_p[i])
+#
+#         # plt.figure(2)
+#         # plt.title('Segmentation')
+#         # # plt.scatter(time_pt, x_p1)  # padel_angle    refrigeration-cycle
+#         # # plt.scatter(time_pt, x_p2) # engine-speed
+#         # # plt.scatter(time_pt, x_p3) #engine-speed
+#         # # plt.scatter(time_pt, x_p4) # AF the value of our interest
+#         # plt.scatter(time_pt, x_p5) # for AT vehicle_speed
+#         #
+#         # # plt.xlim([0, 3])    #Navigation
+#         # # plt.ylim([0, 3])   #Navigation
+#         # # plt.xlim([0, 10])  # chasing cars      plt.scatter(x_p1)
+#         # # plt.ylim([0, 2500])  # chasing cars
+#         #
+#         # # plt.xlim([0, 50])   #AFC
+#         # # plt.ylim([14.5, 15.5])   #AFC for x_p4 the AF variable
+#         #
+#         # # plt.xlim([0, 10])  # Two Tanks      plt.scatter(x_p3)
+#         # # plt.ylim([-1, 2])  # Two Tanks
+#         #
+#         # # plt.xlim([0, 3000])  # refrigeration cycle
+#         # # plt.ylim([274, 280])  # refrigeration cycle
+#         #
+#         # #
+#         # # plt.xlim([0, 10])  # Engine Timing System      plt.scatter(x_p3)
+#         # # plt.ylim([1900, 3100])  # Engine Timing System
+#         # #
+#         # # plt.xlim([0, 10])  # Engine Timing System
+#         # # plt.ylim([10, 100])  # Engine Timing System    plt.scatter(x_p2)
+#         #
+#         #
+#         # # plt.xlim([-1, 500])  # Excitable Cell Model      plt.scatter(x_p1)
+#         # # plt.ylim([-80, 60])  # Excitable Cell Model
+#         # # plt.xlim([0, 15])   #BBall
+#         # # plt.ylim([0, 25])   #BBall
+#         # # plt.xlim([0, 20])  # Oscillator
+#         # # plt.ylim([-1, 1])  # Oscillator
+#         # # plt.ylim([-1.5, 1.5])
+#         #
+#         # plt.xlim([0, 35])  # AT
+#         # plt.ylim([0, 125])  # AT
+#         #
+#         # # plt.xlim([0, 5])  # time-horizon for Lorenz Attractor
+#         # # plt.ylim([-30, 50])  # height for Lorenz Attractor
+#         #
+#         # # plt.xlim([-3, 3])  # time-horizon for Ven Der Pol Oscillator
+#         # # plt.ylim([-3, 3])  # height for Ven Der Pol Oscillator
+#     plt.show()
+#     # if imode == 10:
+#     #     break
 
 
 def print_segmented_trajectories(segmented_traj):
