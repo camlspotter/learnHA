@@ -23,7 +23,6 @@ opts = simulate_options(
 
 simulate(
     opts,
-    '_out/breach_simulate.m',
     '../data/models/ex_sldemo_bounce_Input.slx',  # from _out/ directory
     '_out/breach_simulation.txt',
     10,

@@ -6,7 +6,7 @@ from io import TextIOWrapper
 import textwrap
 
 
-def merge(out: TextIOWrapper, fn_a: str, fn_b: str, fn_merged: str) -> None:
+def merge_without_save(out: TextIOWrapper, fn_a: str, fn_b: str, fn_merged: str) -> str:
     a = os.path.splitext(os.path.basename(fn_a))[0]
     b = os.path.splitext(os.path.basename(fn_b))[0]
     merged = os.path.splitext(fn_merged)[0]
@@ -16,6 +16,11 @@ def merge(out: TextIOWrapper, fn_a: str, fn_b: str, fn_merged: str) -> None:
 
     merge_system(out, fn_a, fn_b, fn_merged, a, b, merged)
     connect_ports(out, fn_a, fn_b, fn_merged, a, b, merged)
+    return merged
+
+
+def merge(out: TextIOWrapper, fn_a: str, fn_b: str, fn_merged: str) -> None:
+    merged = merge_without_save(out, fn_a, fn_b, fn_merged)
     save_system(out, fn_merged, merged)
 
 
@@ -31,6 +36,9 @@ def merge_system(
     out.write(
         textwrap.dedent(
             f"""\
+        bdclose all;
+        clear;
+
         % Load the original model
         load_system('{fn_a}');
         load_system('{fn_b}');
