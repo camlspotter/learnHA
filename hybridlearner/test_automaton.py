@@ -3,7 +3,7 @@ from hybridlearner.automaton import *
 
 
 class Test(unittest.TestCase):
-    def test_build_assignments(self):
+    def test_build_assignments(self) -> None:
         a = build_assignments(
             ["a", "b", "c"],
             ["a", "b", "c"],

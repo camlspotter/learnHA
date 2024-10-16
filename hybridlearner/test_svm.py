@@ -46,8 +46,13 @@ class Test(unittest.TestCase):
         for color, i in zip(colors, [0, 1, 2]):
             idx = np.where(y == i)
             plt.scatter(
-                X[idx, 0], X[idx, 1], c=color, cmap=plt.cm.coolwarm, edgecolor='k', s=20
-            )  # type: ignore
+                X[idx, 0],
+                X[idx, 1],
+                c=color,
+                cmap=plt.cm.coolwarm,  # type: ignore
+                edgecolor='k',
+                s=20,
+            )
         plt.xlabel('Feature 1')
         plt.ylabel('Feature 2')
         plt.title('SVM Decision Boundary')
