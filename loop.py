@@ -5,9 +5,10 @@ import random
 import argparse
 from typeguard import typechecked
 from pydantic.dataclasses import dataclass
+import json
+from dataclasses import asdict
 
 import hybridlearner.utils.io as utils_io
-# from hybridlearner.types import Invariant
 
 from hybridlearner.common import options as common_options
 from hybridlearner.simulation import options as simulation_options
@@ -15,18 +16,13 @@ from hybridlearner.inference import options as inference_options
 from hybridlearner.slx import compiler_options
 
 from hybridlearner.simulation import simulate
-
-from hybridlearner.trajectory import load_trajectories_files, Trajectories, Trajectory
+from hybridlearner.trajectory import load_trajectories_files, Trajectories
 from hybridlearner.inference import infer_model
 from hybridlearner import automaton
 from hybridlearner.automaton import HybridAutomaton
-import json
-from dataclasses import asdict
-
 from hybridlearner.slx import compiler
 from hybridlearner import matlab
-
-from hybridlearner.trajectory.distance import trajectory_dtw_distance
+from hybridlearner.falsify import find_counter_examples
 
 
 @dataclass
@@ -123,60 +119,6 @@ def compile(opts: Options, learned_model_file: str) -> str:
     return output_slx_file
 
 
-def find_counter_examples(
-    rng: random.Random, opts: Options, i: int
-) -> list[Trajectory]:
-    # Simulation of the original model
-
-    rng_state = rng.getstate()
-
-    original_trajectories_file = os.path.join(
-        opts.output_directory, f"original_simulation{i}.txt"
-    )
-
-    simulate(
-        rng,
-        opts,
-        opts.simulink_model_file,
-        original_trajectories_file,
-        opts.nsimulations,
-    )
-
-    # Simulation of the learned model with the same RNG seed
-
-    rng.setstate(rng_state)
-
-    learned_trajectories_file = os.path.join(
-        opts.output_directory, f"learned_simulation{i}.txt"
-    )
-
-    simulate(rng, opts, output_slx_file, learned_trajectories_file, opts.nsimulations)
-
-    # Find counter examples
-
-    original_trajectories = load_trajectories_files([original_trajectories_file])
-    learned_trajectories = load_trajectories_files([learned_trajectories_file])
-
-    counter_examples = []
-    for ot, lt in zip(
-        original_trajectories.trajectories, learned_trajectories.trajectories
-    ):
-        assert len(ot[0]) == len(lt[0]), "Non equal number of samples for a trajectory"
-        ot_ovs = ot[1][:, -len(opts.output_variables) :]
-        lt_ovs = lt[1][:, -len(opts.output_variables) :]
-        print("Comparing")
-        print(ot_ovs)
-        print(lt_ovs)
-        dist = trajectory_dtw_distance(
-            ot, lt, opts.input_variables, opts.output_variables
-        )
-        print(dist)
-        if opts.counter_example_threshold < dist:
-            counter_examples.append(ot)
-
-    return counter_examples
-
-
 # Random seed
 
 print("Random seed", opts.seed)
@@ -202,7 +144,7 @@ for i in range(0, opts.max_nloops):
 
     # Find counter examples
 
-    counter_examples = find_counter_examples(rng, opts, i)
+    counter_examples = find_counter_examples(rng, opts, output_slx_file, i)
 
     counter_example_file = os.path.join(
         opts.output_directory, f"counter_example{i}.txt"
