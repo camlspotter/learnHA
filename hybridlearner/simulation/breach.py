@@ -44,21 +44,26 @@ def build_script(
     }
 
     with utils_io.open_for_write(script_fn) as out:
-        out.write("InitBreach;\n")
+        out.write("% MATLABPATH must contain Breach\n")
+        out.write("InitBreach;\n\n")
 
         # Fill variables to load the model
+        out.write(
+            "% Free variables must be assigned with dummy values for BreachSimulinkSystem\n"
+        )
         for ov in opts.output_variables:
             idx = variable_index[ov]
-            out.write(f"a{idx} = 42; % dummy\n")
+            out.write(f"a{idx} = 42; % for output variable {ov}\n")
 
         out.write(
             textwrap.dedent(
                 f"""\
-                timeStepMax = 42; %dummy
-                timeFinal = 42; %dummy
+                timeStepMax = 42; % time horizon
+                timeFinal = 42; % samplinig time
 
                 mdl = load_system('{simulink_model_file}');
                 Bsim = BreachSimulinkSystem(get_param(mdl, 'Name'));
+
                 """
             )
         )
@@ -67,13 +72,15 @@ def build_script(
         for ov in opts.output_variables:
             idx = variable_index[ov]
             r: Range = opts.invariant[ov]
-            out.write(f"Bsim.SetParamRanges({{'a{idx}'}}, [{r.min} {r.max}]);\n")
+            out.write(f"% Range of the initial value of output variable {ov}\n")
+            out.write(f"Bsim.SetParamRanges({{'a{idx}'}}, [{r.min} {r.max}]);\n\n")
 
         # Generators of the input variables
         for iv in opts.input_variables:
             ncps = opts.number_of_cps[iv]
             signal_type = opts.signal_types[iv]
             r = opts.invariant[iv]
+            out.write(f"% Input signal {iv}In for input variable {iv}\n")
             match signal_type:
                 case SignalType.FIXED_STEP:
                     out.write(f"Bsim.SetInputGen('UniStep{ncps}');\n")
@@ -99,24 +106,46 @@ def build_script(
             )
             + "}"
         )
+        signal_comments = "\n".join(
+            [
+                f'% Input variable {v} at signal #{signal_positions[v]+1}'
+                for v in opts.input_variables
+            ]
+            + [
+                f'% Output variable {v} at signal #{signal_positions[v]+1}'
+                for v in opts.output_variables
+            ]
+        )
 
         out.write(
             textwrap.dedent(
                 f"""\
-                Bsim.SetParam('timeStepMax', {opts.sampling_time});
 
-                Bsim.QuasiRandomSample({nsimulations});
-                Bsim.Sim({opts.time_horizon}); % time up to {opts.time_horizon}
-                % Bsim.PlotSignals();
-
-                % GetTime() seems broken.
-                % time = Bsim.GetTime()
-                time = Bsim.P.traj{{1}}.time
-
+                Bsim.SetParam('timeStepMax', {opts.sampling_time}); % sampling time
+                Bsim.QuasiRandomSample({nsimulations}); % number of simulations
+                    
+                % Simulation!
+                Bsim.Sim({opts.time_horizon}); % time horizon
+                    
+                % Bsim.PlotSignals(); % visualization
+                    
+                % Timestamps
+                % time = Bsim.GetTime()  % GetTime() seems broken
+                time = Bsim.P.traj{{1}}.time;
+                    
+                % Bulid signals for Trajectories:
                 all_signal_names = Bsim.GetSignalList();
-                % Input variables must come first in Trajectories
+                """
+            )
+        )
+        out.write(f"{signal_comments}\n")
+        out.write(
+            textwrap.dedent(
+                f"""\
                 signal_names = {signal_names};
                 signals = Bsim.GetSignalValues(signal_names);
+
+                % Get values of time and signals from Python!
                 """
             )
         )
