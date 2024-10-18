@@ -4,24 +4,22 @@ import csv
 import argparse
 import os
 import numpy as np
-import matplotlib.pyplot as plt
+from hybridlearner.plot import plot_timeseries_multi
+from hybridlearner.trajectory import load_trajectories
 
 parser = argparse.ArgumentParser(description="TSV timeseries plotter to SVG")
 parser.add_argument('tsv', metavar='tsv', type=str, help='Timeseries TSV file')
 parser.add_argument(
-    '--output-svg', '-o', help='SVG output', type=str, default=None, required=False
+    '--output', '-o', help='Output file', type=str, default=None, required=False
 )
 args = vars(parser.parse_args())
 
-if args['output_svg'] is None:
+if args['output'] is None:
     fn = os.path.splitext(args['tsv'])
-    args['output_svg'] = fn[0] + ".svg"
+    output = fn[0] + ".svg"
+else:
+    output = args['output']
 
-with open(args['tsv'], 'r') as ic:
-    reader = list(csv.reader(ic, delimiter='\t'))
-    ts = [float(row[0]) for row in reader]
-    vs = np.array([list(map(float, row[1:])) for row in reader])
-    plt.plot(ts, vs)
+trajectories = load_trajectories(args['tsv'])
 
-plt.grid()
-plt.savefig(args['output_svg'])
+plot_timeseries_multi(output, output, trajectories.trajectories, 1.0)
