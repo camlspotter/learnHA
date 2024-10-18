@@ -31,13 +31,14 @@ def plot_timeseries_multi(
     offset = 0.0
 
     plt.clf()
-    plt.title(title)
+
+    fig, subs = plt.subplots(len(tv_list), 1, figsize=(6, 3 * len(tv_list)))
+    fig.tight_layout(rect=[0, 0, 1, 0.96], pad=2)  # type: ignore
+    fig.suptitle(title)
+
     for i, (ts, vs) in enumerate(tv_list):
-        # map is not accepted by matplotlib
-        ts_shifted = np.array(list(map(lambda t: t + offset, ts)))
-        # print(list(ts_shifted), list(vs))
-        plt.plot(ts_shifted, vs)
-        offset += ts[-1] - ts[0] + space
+        subs[i].set_title(f'Trajectory {i+1}')
+        subs[i].plot(ts, vs)
 
     # plt.grid()
     plt.savefig(fn)
