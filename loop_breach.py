@@ -154,6 +154,12 @@ for i in range(0, opts.max_nloops):
     with utils_io.open_for_write(counter_example_file) as oc:
         original_trajectories.output(oc)
 
+    learned_trajectories_file = os.path.join(
+        opts.output_directory, f"learned_trajectories{i}.txt"
+    )
+    with utils_io.open_for_write(learned_trajectories_file) as oc:
+        learned_trajectories.output(oc)
+
     if len(original_trajectories.trajectories) == 0:
         print("No counter example found")
         exit(0)

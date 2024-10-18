@@ -120,7 +120,7 @@ def build_script(
             ]
         )
 
-        shift = len(opts.input_variables) * 2 + len(opts.output_variables)
+        shift = len(opts.input_variables) + len(opts.output_variables)
         learned_signal_names = (
             "{"
             + ",".join(
