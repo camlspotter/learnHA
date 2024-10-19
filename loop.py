@@ -19,7 +19,7 @@ from hybridlearner.simulation import simulate
 from hybridlearner.trajectory import (
     load_trajectories_files,
     Trajectories,
-    write_trajectories,
+    save_trajectories,
 )
 from hybridlearner.inference import infer_model
 from hybridlearner import automaton
@@ -86,7 +86,7 @@ opts = get_options()
 def inference(
     opts: Options, trajectories_files: list[str], outputfilename: str
 ) -> None:
-    list_of_trajectories = load_trajectories_files(trajectories_files)
+    _header, list_of_trajectories = load_trajectories_files(trajectories_files)
 
     print(f"Loaded {len(list_of_trajectories)} trajectories")
 
@@ -153,8 +153,8 @@ for i in range(0, opts.max_nloops):
     counter_example_file = os.path.join(
         opts.output_directory, f"counter_example{i}.txt"
     )
-    with utils_io.open_for_write(counter_example_file) as oc:
-        write_trajectories(oc, counter_examples)
+    header = ['time'] + opts.input_variables + opts.output_variables
+    save_trajectories(counter_example_file, header, counter_examples)
 
     if len(counter_examples) == 0:
         print("No counter example found")

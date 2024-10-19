@@ -1,3 +1,4 @@
+from typing import Optional
 import numpy as np
 import matplotlib.pyplot as plt
 from hybridlearner.types import MATRIX
@@ -16,13 +17,13 @@ def plot_timeseries(
 def plot_timeseries_multi(
     fn: str,
     title: str,
+    header: Optional[list[str]],
     tv_list: list[
         tuple[
             MATRIX,  # 1D times
             MATRIX,  # 2D values
         ]
     ],
-    space: float,
 ) -> None:
     """
     Plot multiple timeseries side by side, by shifting them horizontally

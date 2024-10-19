@@ -1,3 +1,4 @@
+from typing import Optional
 from io import TextIOWrapper
 import csv
 import numpy as np
@@ -6,6 +7,7 @@ from pydantic.dataclasses import dataclass
 from pydantic import ConfigDict
 
 from hybridlearner.types import Span
+from hybridlearner.utils import io as utils_io
 
 # Timeseries.
 #
@@ -44,7 +46,16 @@ def write_trajectories(oc: TextIOWrapper, trajs: Trajectories) -> None:
         write_trajectory(oc, traj)
 
 
-def load_trajectories(path: str) -> Trajectories:
+def save_trajectories(
+    fn: str, header: Optional[list[str]], trajs: Trajectories
+) -> None:
+    with utils_io.open_for_write(fn) as oc:
+        if not header is None:
+            oc.write('\t'.join(header) + '\n')
+        write_trajectories(oc, trajs)
+
+
+def load_trajectories(path: str) -> tuple[Optional[list[str]], Trajectories]:
     """
     Load trajectories from a tsv file.
 
@@ -53,9 +64,18 @@ def load_trajectories(path: str) -> Trajectories:
     with open(path, 'r') as ic:
         reader = csv.reader(ic, delimiter='\t')
 
-        tvs_list: list[tuple[float, list[float]]] = list(
-            map(lambda ss: (float(ss[0]), [float(s) for s in ss[1:]]), reader)
-        )
+        header: Optional[list[str]] = None
+
+        tvs_list: list[tuple[float, list[float]]] = []
+
+        for i, tokens in enumerate(reader):
+            if i == 0:
+                try:
+                    float(tokens[0])
+                except ValueError:
+                    header = tokens
+                    continue
+            tvs_list.append((float(tokens[0]), [float(tkn) for tkn in tokens[1:]]))
 
         zero_poses: list[int] = [i for (i, (t, _vs)) in enumerate(tvs_list) if t == 0.0]
         ranges: list[tuple[int, int]] = [
@@ -75,16 +95,28 @@ def load_trajectories(path: str) -> Trajectories:
             for tvs in tvs_group
         ]
 
-        return trajectories
+        return header, trajectories
 
 
-def load_trajectories_files(paths: list[str]) -> Trajectories:
+def load_trajectories_files(
+    paths: list[str],
+) -> tuple[Optional[list[str]], Trajectories]:
     """
     Load trajectories from tsv files.
 
     - No check of stepsize uniqueness
     """
-    trs_list = [load_trajectories(path) for path in paths]
+    header_trs_list = [load_trajectories(path) for path in paths]
+
+    header: Optional[list[str]] = None
+    for h, _ in header_trs_list:
+        if h is None:
+            pass
+        else:
+            header = h
+            break
+
+    trs_list = [trs for (_, trs) in header_trs_list]
 
     stepsize = trajectory_stepsize(trs_list[0][0])
     nvars = trs_list[0][0][1].shape[1]  # 0th trajectory, 0th sample, value
@@ -95,7 +127,7 @@ def load_trajectories_files(paths: list[str]) -> Trajectories:
     if not all(lambda trs: trs[0][1].shape[1] == nvars for trs in trs_list):
         assert False, "Trajectories files must have the same number of variables"
 
-    return [tr for trs in trs_list for tr in trs]
+    return header, [tr for trs in trs_list for tr in trs]
 
 
 def preprocess_trajectories(

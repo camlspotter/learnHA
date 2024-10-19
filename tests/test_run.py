@@ -47,7 +47,7 @@ class TestLearnHA(unittest.TestCase):
     def doit(self, ps, golden_dir):
         opts = get_options(ps)
 
-        list_of_trajectories = load_trajectories(opts.input_filename)
+        _header, list_of_trajectories = load_trajectories(opts.input_filename)
 
         raw = infer_model(
             list_of_trajectories, opts.input_variables, opts.output_variables, opts

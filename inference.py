@@ -63,7 +63,7 @@ def runLearnHA() -> None:  # Calling the implementation from project BBC4CPS
     '''
     opts = get_options()
 
-    list_of_trajectories = load_trajectories_files(opts.input_filenames)
+    _header, list_of_trajectories = load_trajectories_files(opts.input_filenames)
 
     raw = infer_model(
         list_of_trajectories, opts.input_variables, opts.output_variables, opts

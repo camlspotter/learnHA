@@ -5,7 +5,7 @@ import textwrap
 from .input import SignalType
 from hybridlearner.utils import io as utils_io
 from hybridlearner.matlab import engine
-from hybridlearner.trajectory import Trajectories, write_trajectories
+from hybridlearner.trajectory import Trajectories, save_trajectories
 from hybridlearner.types import Range
 from hybridlearner.simulation import simulate_protocol
 
@@ -28,8 +28,8 @@ def simulate(
         map(lambda sig: (time, np.transpose(np.array(sig))), signals)
     )
 
-    with utils_io.open_for_write(output_file) as out:
-        write_trajectories(out, trajectory_list)
+    header = ['time'] + opts.input_variables + opts.output_variables
+    save_trajectories(output_file, header, trajectory_list)
 
     return trajectory_list
 

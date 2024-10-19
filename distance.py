@@ -30,8 +30,8 @@ def get_options() -> Options:
 
 opts = get_options()
 
-a = load_trajectories(opts.file_a)
-b = load_trajectories(opts.file_b)
+_header_a, a = load_trajectories(opts.file_a)
+_header_b, b = load_trajectories(opts.file_b)
 
 assert trajectory_stepsize(a[0]) == trajectory_stepsize(
     b[0]

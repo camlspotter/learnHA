@@ -76,8 +76,12 @@ def find_counter_examples(
 
     # Find counter examples
 
-    original_trajectories = load_trajectories_files([original_trajectories_file])
-    learned_trajectories = load_trajectories_files([learned_trajectories_file])
+    _original_header, original_trajectories = load_trajectories_files(
+        [original_trajectories_file]
+    )
+    _learned_header, learned_trajectories = load_trajectories_files(
+        [learned_trajectories_file]
+    )
 
     counter_examples = []
     for ot, lt in zip(original_trajectories, learned_trajectories):
