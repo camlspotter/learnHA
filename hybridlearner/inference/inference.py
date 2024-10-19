@@ -18,7 +18,11 @@ from hybridlearner.inference.invariant import compute_invariant
 from hybridlearner.inference.annotation import convert_annotation_dict, AnnotationTbl
 from hybridlearner.segmentation.derivatives import diff_method_backandfor
 from hybridlearner.inference.transition import Transition, compute_transitions
-from hybridlearner.trajectory import Trajectories, preprocess_trajectories
+from hybridlearner.trajectory import (
+    Trajectories,
+    preprocess_trajectories,
+    trajectory_stepsize,
+)
 from hybridlearner.inference.options import Options
 from hybridlearner.types import MATRIX, Span
 
@@ -101,7 +105,7 @@ def infer_model(
     y: MATRIX  # values, 2D
     # The positions of the original trajectories in the concatenated one
     traj_spans: list[Span]
-    t, y, traj_spans = preprocess_trajectories(list_of_trajectories.trajectories)
+    t, y, traj_spans = preprocess_trajectories(list_of_trajectories)
 
     # plot of preprocessed trajectories
     tys = [
@@ -126,7 +130,7 @@ def infer_model(
     Y: MATRIX  # slice of y, dropping the first and last stepM samples
     npoints: int
     A, b1, b2, Y, npoints = diff_method_backandfor(
-        y, maxorder, list_of_trajectories.stepsize, stepM
+        y, maxorder, trajectory_stepsize(list_of_trajectories[0]), stepM
     )
     # L_y: length (nrows) of y
     L_y = len(input_variables) + len(output_variables)

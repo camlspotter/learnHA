@@ -9,7 +9,7 @@ import argparse
 from typeguard import typechecked
 from pydantic.dataclasses import dataclass
 from hybridlearner.trajectory.distance import trajectory_dtw_distance
-from hybridlearner.trajectory import load_trajectories
+from hybridlearner.trajectory import load_trajectories, trajectory_stepsize
 from hybridlearner.common import options as common_options
 
 
@@ -33,16 +33,16 @@ opts = get_options()
 a = load_trajectories(opts.file_a)
 b = load_trajectories(opts.file_b)
 
-assert a.stepsize == b.stepsize, f"Non equal stepsizes: {a.stepsize}, {b.stepsize}"
-assert len(a.trajectories) == len(
-    b.trajectories
-), f"Non equal number of trajectories: {len(a.trajectories)} {len(b.trajectories)}"
+assert trajectory_stepsize(a[0]) == trajectory_stepsize(
+    b[0]
+), f"Non equal stepsizes: {trajectory_stepsize(a[0]), trajectory_stepsize(b[0])}"
+assert len(a) == len(b), f"Non equal number of trajectories: {len(a)} {len(b)}"
 
-a_nvars = a.trajectories[0][1].shape[1]
-b_nvars = b.trajectories[0][1].shape[1]
+a_nvars = a[0][1].shape[1]
+b_nvars = b[0][1].shape[1]
 assert a_nvars == b_nvars, f"Non equal number of variables: {a_nvars}, {b_nvars}"
 
-for at, bt in zip(a.trajectories, b.trajectories):
+for at, bt in zip(a, b):
     assert len(at[0]) == len(bt[0]), "Non equal number of samples for a trajectory"
     aovs = at[1][:, -len(opts.output_variables) :]
     bovs = bt[1][:, -len(opts.output_variables) :]

@@ -24,19 +24,13 @@ def find_counter_examples(
     time = np.array(engine.getvar('time'))[0]
 
     original_signals = engine.getvar('original_signals')
-    original_trajectory_list = list(
+    original_trs = list(
         map(lambda sig: (time, np.transpose(np.array(sig))), original_signals)
-    )
-    original_trs = Trajectories(
-        trajectories=original_trajectory_list, stepsize=opts.sampling_time
     )
 
     learned_signals = engine.getvar('learned_signals')
-    learned_trajectory_list = list(
+    learned_trs = list(
         map(lambda sig: (time, np.transpose(np.array(sig))), learned_signals)
-    )
-    learned_trs = Trajectories(
-        trajectories=learned_trajectory_list, stepsize=opts.sampling_time
     )
 
     return original_trs, learned_trs

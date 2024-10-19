@@ -26,15 +26,22 @@ Trajectory = tuple[
 # the same timestamp gap, here called stepsize.
 
 
-# config is required to carry np.ndarray in pydantic's dataclass
-@dataclass(config=ConfigDict(arbitrary_types_allowed=True))
-class Trajectories:
-    trajectories: list[Trajectory]
-    stepsize: float
+def trajectory_stepsize(tr: Trajectory) -> float:
+    # diff of the first 2 times in the first tvs
+    times = tr[0]
+    return times[1] - times[0]
 
-    def output(self, oc: TextIOWrapper) -> None:
-        for traj in self.trajectories:
-            np.savetxt(oc, np.column_stack(traj), delimiter='\t', fmt='%.16g')
+
+def write_trajectory(oc: TextIOWrapper, traj: Trajectory) -> None:
+    np.savetxt(oc, np.column_stack(traj), delimiter='\t', fmt='%.16g')
+
+
+Trajectories = list[Trajectory]
+
+
+def write_trajectories(oc: TextIOWrapper, trajs: Trajectories) -> None:
+    for traj in trajs:
+        write_trajectory(oc, traj)
 
 
 def load_trajectories(path: str) -> Trajectories:
@@ -68,10 +75,7 @@ def load_trajectories(path: str) -> Trajectories:
             for tvs in tvs_group
         ]
 
-        # diff of the first 2 times in the first tvs
-        stepsize = tvs_group[0][1][0] - tvs_group[0][0][0]
-
-        return Trajectories(trajectories, stepsize)
+        return trajectories
 
 
 def load_trajectories_files(paths: list[str]) -> Trajectories:
@@ -82,23 +86,20 @@ def load_trajectories_files(paths: list[str]) -> Trajectories:
     """
     trs_list = [load_trajectories(path) for path in paths]
 
-    stepsize = trs_list[0].stepsize
-    nvars = trs_list[0].trajectories[0][1].shape[1]
+    stepsize = trajectory_stepsize(trs_list[0][0])
+    nvars = trs_list[0][0][1].shape[1]  # 0th trajectory, 0th sample, value
 
-    if not all(lambda trs: trs.stepsize == stepsize for trs in trs_list):
+    if not all(lambda trs: trajectory_stepsize(trs) == stepsize for trs in trs_list):
         assert False, "Trajectories files must have a unique stepsize"
 
-    if not all(
-        lambda trs: trs.trajectories[0][1].shape[1] == nvars for trs in trs_list
-    ):
+    if not all(lambda trs: trs[0][1].shape[1] == nvars for trs in trs_list):
         assert False, "Trajectories files must have the same number of variables"
 
-    trajectories = [tr for trs in trs_list for tr in trs.trajectories]
-    return Trajectories(trajectories, stepsize)
+    return [tr for trs in trs_list for tr in trs]
 
 
 def preprocess_trajectories(
-    list_of_trajectories: list[Trajectory],
+    list_of_trajectories: Trajectories,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64], list[Span]]:
     '''
     Concatenate the trajectories.

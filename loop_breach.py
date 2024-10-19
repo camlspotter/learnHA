@@ -15,7 +15,11 @@ from hybridlearner.simulation import options as simulation_options
 from hybridlearner.inference import options as inference_options
 from hybridlearner.slx import compiler_options
 
-from hybridlearner.trajectory import load_trajectories_files, Trajectories
+from hybridlearner.trajectory import (
+    load_trajectories_files,
+    Trajectories,
+    write_trajectories,
+)
 from hybridlearner.inference import infer_model
 from hybridlearner import automaton
 from hybridlearner.automaton import HybridAutomaton
@@ -84,7 +88,7 @@ def inference(
 ) -> None:
     list_of_trajectories = load_trajectories_files(trajectories_files)
 
-    print(f"Loaded {len(list_of_trajectories.trajectories)} trajectories")
+    print(f"Loaded {len(list_of_trajectories)} trajectories")
 
     raw = infer_model(
         list_of_trajectories, opts.input_variables, opts.output_variables, opts
@@ -152,19 +156,19 @@ for i in range(0, opts.max_nloops):
         opts.output_directory, f"counter_example{i}.txt"
     )
     with utils_io.open_for_write(counter_example_file) as oc:
-        original_trajectories.output(oc)
+        write_trajectories(oc, original_trajectories)
 
     learned_trajectories_file = os.path.join(
         opts.output_directory, f"learned_trajectories{i}.txt"
     )
     with utils_io.open_for_write(learned_trajectories_file) as oc:
-        learned_trajectories.output(oc)
+        write_trajectories(oc, learned_trajectories)
 
-    if len(original_trajectories.trajectories) == 0:
+    if len(original_trajectories) == 0:
         print("No counter example found")
         exit(0)
     else:
-        print(f"Counter examples: {len(original_trajectories.trajectories)}")
+        print(f"Counter examples: {len(original_trajectories)}")
 
     trajectories_files.append(counter_example_file)
 

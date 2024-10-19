@@ -80,9 +80,7 @@ def find_counter_examples(
     learned_trajectories = load_trajectories_files([learned_trajectories_file])
 
     counter_examples = []
-    for ot, lt in zip(
-        original_trajectories.trajectories, learned_trajectories.trajectories
-    ):
+    for ot, lt in zip(original_trajectories, learned_trajectories):
         assert len(ot[0]) == len(lt[0]), "Non equal number of samples for a trajectory"
         ot_ovs = ot[1][:, -len(opts.output_variables) :]
         lt_ovs = lt[1][:, -len(opts.output_variables) :]

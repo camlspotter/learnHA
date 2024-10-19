@@ -22,4 +22,4 @@ else:
 
 trajectories = load_trajectories(args['tsv'])
 
-plot_timeseries_multi(output, output, trajectories.trajectories, 1.0)
+plot_timeseries_multi(output, output, trajectories, 1.0)
