@@ -200,14 +200,11 @@ def generate_simulation_script(
         + [f"y( : , {var_id_tbl[v]+1})" for v in output_variables]
     )
 
-    out.write(f"result_matrix = [ {', '.join(fields)} ];\n\n")
-
     out.write(
         textwrap.dedent(
-            """\
-            %%% Saving. `result_filename` is given by setvar %%%
-
-            writematrix(result_matrix, result_filename, 'Delimiter', 'tab');
+            f"""\
+            % Get result_matrix from Python!
+            result_matrix = [ {', '.join(fields)} ];
             """
         )
     )
