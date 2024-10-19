@@ -90,7 +90,20 @@ def build_script(
                         )
 
                 case SignalType.LINEAR:
-                    assert False, "LINEAR is not supported yet"
+                    out.write(
+                        textwrap.dedent(
+                            f"""\
+                            input_gen.type = 'UniStep';
+                            input_gen.cp = {ncps};
+                            input_gen.method = {{'linear'}};
+                            Bsim.SetInputGen(input_gen);
+                            """
+                        )
+                    )
+                    for i in range(0, ncps):
+                        out.write(
+                            f"Bsim.SetParamRanges({{'{iv}In_u{i}'}}, [{r.min} {r.max}]);\n"
+                        )
 
         # The output var signals are followed by the input var signals
         signal_positions = {

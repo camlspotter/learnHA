@@ -15,7 +15,7 @@ opts = simulate_options(
         'v': Range(min=5, max=15),
     },
     number_of_cps={'u': 3},
-    signal_types={'u': SignalType.FIXED_STEP},
+    signal_types={'u': SignalType.LINEAR},
     input_variables=['u'],
     output_variables=['x', 'v'],
     output_directory="_out",

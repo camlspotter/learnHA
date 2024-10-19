@@ -9,7 +9,7 @@ pipenv run python loop_breach.py \
      --time-horizon 13.0 --sampling-time 0.01 \
      --fixed-interval-data False \
      --invariant 'u:(-15.0, -5.0), x:(5, 10), v:(3, 16)' \
-     --number-of-cps 'u:4' --signal-types 'u:fixed-step' \
+     --number-of-cps 'u:4' --signal-types 'u:linear' \
      \
      --output-directory _out \
      -c dtw -d 1 -m 1 -b 1 \
