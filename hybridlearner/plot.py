@@ -17,7 +17,7 @@ def plot_timeseries(
 def plot_timeseries_multi(
     fn: str,
     title: str,
-    header: Optional[list[str]],
+    header: list[str],
     tv_list: list[
         tuple[
             MATRIX,  # 1D times
@@ -39,7 +39,8 @@ def plot_timeseries_multi(
 
     for i, (ts, vs) in enumerate(tv_list):
         subs[i].set_title(f'Trajectory {i+1}')
-        subs[i].plot(ts, vs)
+        for j in range(0, vs.shape[1]):
+            subs[i].plot(ts, vs[:, j], label=header[j])
+        subs[i].legend()
 
-    # plt.grid()
     plt.savefig(fn)
