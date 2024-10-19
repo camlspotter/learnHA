@@ -55,7 +55,7 @@ def save_trajectories(
         write_trajectories(oc, trajs)
 
 
-def load_trajectories(path: str) -> tuple[Optional[list[str]], Trajectories]:
+def load_trajectories(path: str) -> tuple[list[str], Trajectories]:
     """
     Load trajectories from a tsv file.
 
@@ -64,14 +64,15 @@ def load_trajectories(path: str) -> tuple[Optional[list[str]], Trajectories]:
     with open(path, 'r') as ic:
         reader = csv.reader(ic, delimiter='\t')
 
-        header: Optional[list[str]] = None
+        header: list[str] = []
 
         tvs_list: list[tuple[float, list[float]]] = []
 
         for i, tokens in enumerate(reader):
             if i == 0:
                 try:
-                    float(tokens[0])
+                    [float(t) for t in tokens]
+                    header = [f"unknown{i}" for (i, _) in enumerate(tokens)]
                 except ValueError:
                     header = tokens
                     continue
