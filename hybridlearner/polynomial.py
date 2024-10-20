@@ -153,3 +153,18 @@ def expr_to_comp(e: Expr) -> tuple[dict[str, int], float]:
             return (d, f)
         case _:
             assert False, f"Invalid polynomial: {unparse_expr(e)}"
+
+
+def hum_str_polynomial(p: Polynomial) -> str:
+    """
+    Inaccurate but human friendly printer
+    """
+    va = polynomial_to_variable_annotated(p)
+    return " + ".join(
+        [
+            f"{coeff:.2f}"
+            if key == {}
+            else unparse_expr(key_to_expr(key)) + f" * {coeff:.2f}"
+            for (key, coeff) in va
+        ]
+    )

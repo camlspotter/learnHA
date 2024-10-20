@@ -3,6 +3,8 @@
 import os
 import random
 import argparse
+import textwrap
+import numpy as np
 from typeguard import typechecked
 from pydantic.dataclasses import dataclass
 import json
@@ -19,6 +21,7 @@ from hybridlearner.simulation import simulate
 from hybridlearner.trajectory import (
     load_trajectories_files,
     Trajectories,
+    Trajectory,
     save_trajectories,
 )
 from hybridlearner.inference import infer_model
@@ -27,6 +30,7 @@ from hybridlearner.automaton import HybridAutomaton
 from hybridlearner.slx import compiler
 from hybridlearner import matlab
 from hybridlearner.falsify import find_counter_examples
+from hybridlearner.plot import plot_timeseries_multi
 
 
 @dataclass
@@ -83,9 +87,7 @@ def get_options() -> Options:
 opts = get_options()
 
 
-def inference(
-    opts: Options, trajectories_files: list[str], outputfilename: str
-) -> None:
+def inference(opts: Options, trajectories_files: list[str]) -> HybridAutomaton:
     _header, list_of_trajectories = load_trajectories_files(trajectories_files)
 
     print(f"Loaded {len(list_of_trajectories)} trajectories")
@@ -93,10 +95,7 @@ def inference(
     raw = infer_model(
         list_of_trajectories, opts.input_variables, opts.output_variables, opts
     )
-    ha = automaton.build(raw)
-    # outputfilename = os.path.join(opts.output_directory, "learned_HA.json")
-    with utils_io.open_for_write(outputfilename) as f_out:
-        f_out.write(json.dumps(asdict(ha), indent=2))
+    return automaton.build(raw)
 
 
 def compile(opts: Options, learned_model_file: str) -> str:
@@ -130,38 +129,81 @@ rng = random.Random() if opts.seed is None else random.Random(opts.seed)
 
 # Initial simulation set
 
-initial_simulation_file = os.path.join(opts.output_directory, "original_simulation.txt")
+initial_simulation_file = os.path.join(opts.output_directory, "learning00.txt")
 simulate(rng, opts, opts.simulink_model_file, initial_simulation_file, 1)  # start small
 
 trajectories_files = [initial_simulation_file]
 
-for i in range(0, opts.max_nloops):
+for i in range(1, opts.max_nloops + 1):
     # Inference
 
-    print("Inferring...")
-    learned_model_file = os.path.join(opts.output_directory, f"learned_HA{i}.json")
-    inference(opts, trajectories_files, learned_model_file)
+    logfile = os.path.join(opts.output_directory, f"report{i:02d}.md")
+    with utils_io.open_for_write(logfile) as log:
+        print("Inferring...")
+        ha = inference(opts, trajectories_files)
 
-    # Compile
+        learned_model_file = os.path.join(
+            opts.output_directory, f"learned_HA{i:02d}.json"
+        )
+        ha.save(learned_model_file)
 
-    output_slx_file = compile(opts, learned_model_file)
+        log.write(f"# {os.path.basename(opts.simulink_model_file)} inference {i}\n\n")
+        log.write(f"## Automaton\n\n")
+        log.write("```\n")
+        ha.hum_print(log)
+        log.write("```\n")
+        log.write("\n")
 
-    # Find counter examples
+        # Compile
 
-    counter_examples = find_counter_examples(rng, opts, output_slx_file, i)
+        output_slx_file = compile(opts, learned_model_file)
 
-    counter_example_file = os.path.join(
-        opts.output_directory, f"counter_example{i}.txt"
-    )
-    header = ['time'] + opts.input_variables + opts.output_variables
-    save_trajectories(counter_example_file, header, counter_examples)
+        # Find counter examples
 
-    if len(counter_examples) == 0:
-        print("No counter example found")
-        exit(0)
-    else:
-        print(f"Counter examples: {len(counter_examples)}")
+        original, learned = find_counter_examples(rng, opts, output_slx_file, i)
 
-    trajectories_files.append(counter_example_file)
+        header = ['time'] + opts.input_variables + opts.output_variables
 
-print(f"Even after {i+1} inference iterations, we did not see a fixedpoint")
+        learning_file = os.path.join(opts.output_directory, f"learning{i:02d}.txt")
+        # Add the original trajectories which could not be reproduced well
+        # by the learned model.
+        save_trajectories(learning_file, header, original)
+
+        # Counter example plot. Show both the original and learned for visual comparison
+
+        header = (
+            ['time']
+            + opts.input_variables
+            + [f"original:{k}" for k in opts.output_variables]
+            + [f"learned:{k}" for k in opts.output_variables]
+        )
+
+        counter_examples = [
+            (ot[0], np.hstack((ot[1], lt[1][:, -len(opts.output_variables) :])))
+            for (ot, lt) in zip(original, learned)
+        ]
+
+        base = f"counter_examples{i:02d}.svg"
+        counter_example_file = os.path.join(opts.output_directory, base)
+
+        plot_timeseries_multi(
+            counter_example_file,
+            'Counter examples found',
+            header[1:],  # drop 'time'
+            counter_examples,
+        )
+
+        log.write(f"## Counter examples\n\n")
+        log.write(f"![]({base})\n\n")
+
+        # Loop or not
+
+        if len(original) == 0:
+            print("No counter example found")
+            exit(0)
+        else:
+            print(f"Counter examples: {len(original)}")
+
+        trajectories_files.append(learning_file)
+
+print(f"Even after {i} inference iterations, we did not see a fixedpoint")

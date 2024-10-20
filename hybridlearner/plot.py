@@ -1,3 +1,4 @@
+import re
 from typing import Optional
 import numpy as np
 import matplotlib.pyplot as plt
@@ -40,7 +41,8 @@ def plot_timeseries_multi(
     for i, (ts, vs) in enumerate(tv_list):
         subs[i].set_title(f'Trajectory {i+1}')
         for j in range(0, vs.shape[1]):
-            subs[i].plot(ts, vs[:, j], label=header[j])
+            style = 'dotted' if re.match('original:', header[j]) else 'solid'
+            subs[i].plot(ts, vs[:, j], label=header[j], linewidth=1, linestyle=style)
         subs[i].legend()
 
     plt.savefig(fn)

@@ -1,13 +1,18 @@
+from io import TextIOWrapper
+import textwrap
 from typeguard import typechecked
+import json
+from dataclasses import asdict
 
 # pydantic.dataclasses is required for JSON conversions of nested dataclasses
 from pydantic.dataclasses import dataclass
 import numpy as np
-from hybridlearner.types import Invariant, Range
+from hybridlearner.types import Invariant, Range, hum_string_of_invariant
 from hybridlearner.inference.transition import Transition as RawTransition
 from hybridlearner.inference.transition.assignment import Assignment
 from hybridlearner.inference import Raw
-from hybridlearner.polynomial import Polynomial, build_polynomial
+from hybridlearner.polynomial import Polynomial, build_polynomial, hum_str_polynomial
+import hybridlearner.utils.io as utils_io
 
 
 @dataclass
@@ -87,6 +92,22 @@ class HybridAutomaton:
     def outgoing_transitions(self, mode_id: int) -> list[Transition]:
         return [tr for tr in self.transitions if tr.src == mode_id]
 
+    def hum_print(self, oc: TextIOWrapper) -> None:
+        oc.write(f"init_mode: {self.init_mode}\n")
+        oc.write(f"input_variables: {', '.join(self.input_variables)}\n")
+        oc.write(f"output_variables: {', '.join(self.output_variables)}\n")
+        for m in self.modes:
+            hum_print_Mode(oc, m)
+        for t in self.transitions:
+            hum_print_Transition(oc, t)
+
+    def write(self, oc: TextIOWrapper) -> None:
+        oc.write(json.dumps(asdict(self), indent=2))
+
+    def save(self, fn: str) -> None:
+        with utils_io.open_for_write(fn) as f_out:
+            self.write(f_out)
+
 
 @typechecked
 def build(raw: Raw) -> HybridAutomaton:
@@ -115,3 +136,34 @@ def build(raw: Raw) -> HybridAutomaton:
         input_variables=raw.input_variables,
         output_variables=raw.output_variables,
     )
+
+
+def hum_print_Mode(oc: TextIOWrapper, m: Mode) -> None:
+    oc.write(
+        textwrap.dedent(
+            f"""\
+            mode: {m.id}
+              invariant: {hum_string_of_invariant(m.invariant)}
+              flow:
+            """
+        )
+    )
+    for v, p in m.flow.items():
+        oc.write(f"    {v}' = {hum_str_polynomial(p)}\n")
+
+
+def hum_print_Transition(oc: TextIOWrapper, tr: Transition) -> None:
+    oc.write(
+        textwrap.indent(
+            textwrap.dedent(
+                f"""\
+                transition: {tr.src} -> {tr.dst}
+                  guard: {hum_str_polynomial(tr.guard)}
+                  assignments:
+                """
+            ),
+            "  ",
+        )
+    )
+    for v, p in tr.assignments.items():
+        oc.write(f"      {v} = {hum_str_polynomial(p)}\n")

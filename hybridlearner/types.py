@@ -41,5 +41,11 @@ def string_of_invariant(inv: Invariant) -> str:
     return " && ".join([f"{r.min} <= {v} && {v} <= {r.max}" for (v, r) in inv.items()])
 
 
+def hum_string_of_invariant(inv: Invariant) -> str:
+    return " && ".join(
+        [f"{r.min:.2f} <= {v} && {v} <= {r.max:.2f}" for (v, r) in inv.items()]
+    )
+
+
 def instance_of_invariant(rng: random.Random, inv: Invariant) -> dict[str, float]:
     return {k: range.pick_random_point(rng) for (k, range) in inv.items()}
