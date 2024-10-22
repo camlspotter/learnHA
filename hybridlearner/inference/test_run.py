@@ -9,8 +9,7 @@ from pydantic.dataclasses import dataclass
 
 from hybridlearner.common import options as common_options
 from hybridlearner.inference import options as inference_options
-
-from hybridlearner.inference import infer_model
+from hybridlearner.inference import infer_model, Raw
 from hybridlearner import automaton
 from hybridlearner.obsolete.model_printer.print_HA import print_HA
 from hybridlearner.segmentation import ClusteringMethod
@@ -32,7 +31,7 @@ def get_options(ps: dict[str, Any]) -> Options:
     return Options(**ps)
 
 
-def write_HA(opts, raw):
+def write_HA(opts: Options, raw: Raw) -> None:
     outputfilename = os.path.join(opts.output_directory, "learned_HA.txt")
     with utils_io.open_for_write(outputfilename) as f_out:
         print_HA(f_out, raw)
@@ -44,7 +43,7 @@ def write_HA(opts, raw):
 
 
 class TestLearnHA(unittest.TestCase):
-    def doit(self, ps, golden_dir):
+    def doit(self, ps: dict[str, Any], golden_dir: str) -> None:
         opts = get_options(ps)
 
         _header, list_of_trajectories = load_trajectories(opts.input_filename)
@@ -64,9 +63,9 @@ class TestLearnHA(unittest.TestCase):
             backup_file, test_generated_file, shallow=False
         ), f"Golden test fails: golden: {backup_file} generated: {test_generated_file}"
 
-    def test_runLearnHA_osci_withoutAnnotate(self):
+    def test_runLearnHA_osci_withoutAnnotate(self) -> None:
         print("Running test runLearnHA module")
-        ps = {}
+        ps: dict[str, Any] = {}
         ps['input_filename'] = "data/test_data/simu_oscillator_2.txt"
         ps['output_directory'] = "_test/oscillator_2_withoutAnnotate"
         ps['clustering_method'] = ClusteringMethod.DTW
@@ -91,11 +90,11 @@ class TestLearnHA(unittest.TestCase):
 
         self.doit(ps, "data/test_output/oscillator_2_withoutAnnotate")
 
-    def test_runLearnHA_osci_withAnnotate(self):
+    def test_runLearnHA_osci_withAnnotate(self) -> None:
         print(
             "Running test runLearnHA module with Oscillator model with type annotation"
         )
-        ps = {}
+        ps: dict[str, Any] = {}
         ps['input_filename'] = "data/test_data/simu_oscillator_2.txt"
         ps['output_directory'] = "_test/oscillator_2_withAnnotate"
         ps['clustering_method'] = ClusteringMethod.DTW
@@ -120,11 +119,11 @@ class TestLearnHA(unittest.TestCase):
 
         self.doit(ps, "data/test_output/oscillator_2_withAnnotate")
 
-    def test_runLearnHA_bball_withAnnotate(self):
+    def test_runLearnHA_bball_withAnnotate(self) -> None:
         print(
             "Running test runLearnHA module with Bouncing Ball model with type annotation"
         )
-        ps = {}
+        ps: dict[str, Any] = {}
         ps['input_filename'] = "data/test_data/simu_bball_4.txt"
         ps['output_directory'] = "_test/bball_4"
         ps['clustering_method'] = ClusteringMethod.DTW
