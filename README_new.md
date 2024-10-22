@@ -8,6 +8,7 @@
 - `pipenv --python 3.10`
 - `pipenv install --dev`
 - `export LANG=C` for correct printing of MATLAB warning and error messages
+- [Breach](https://github.com/decyphir/breach) must be in MATLABPATH
 
 Note:
 
