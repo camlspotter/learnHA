@@ -30,6 +30,9 @@ def plot_timeseries_multi(
     Plot multiple timeseries side by side, by shifting them horizontally
     to avoid overwraps.
     """
+
+    assert len(tv_list) > 0
+
     offset = 0.0
 
     plt.clf()
@@ -37,6 +40,9 @@ def plot_timeseries_multi(
     fig, subs = plt.subplots(len(tv_list), 1, figsize=(6, 3 * len(tv_list)))
     fig.tight_layout(rect=[0, 0, 1, 0.96], pad=2)  # type: ignore
     fig.suptitle(title)
+
+    # subplots is NOT well typed ...
+    subs = subs if isinstance(subs, np.ndarray) else np.array([subs])
 
     for i, (ts, vs) in enumerate(tv_list):
         subs[i].set_title(f'Trajectory {i+1}')

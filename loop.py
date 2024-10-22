@@ -30,7 +30,7 @@ from hybridlearner.automaton import HybridAutomaton
 from hybridlearner.slx import compiler
 from hybridlearner import matlab
 from hybridlearner.falsify import find_counter_examples
-from hybridlearner.plot import plot_timeseries_multi
+from hybridlearner.report import report
 
 
 @dataclass
@@ -137,81 +137,66 @@ trajectories_files = [initial_simulation_file]
 for i in range(1, opts.max_nloops + 1):
     # Inference
 
-    logfile = os.path.join(opts.output_directory, f"report{i:02d}.md")
-    with utils_io.open_for_write(logfile) as log:
-        print("Inferring...")
-        ha = inference(opts, trajectories_files)
+    print("Inferring...")
+    ha = inference(opts, trajectories_files)
 
-        learned_model_file = os.path.join(
-            opts.output_directory, f"learned_HA{i:02d}.json"
-        )
-        ha.save(learned_model_file)
+    learned_model_file = os.path.join(opts.output_directory, f"learned_HA{i:02d}.json")
+    ha.save(learned_model_file)
 
-        log.write(f"# {os.path.basename(opts.simulink_model_file)} inference {i}\n\n")
-        log.write(f"## Automaton\n\n")
-        log.write("```\n")
-        ha.hum_print(log)
-        log.write("```\n")
-        log.write("\n")
+    # Compile
 
-        # Compile
+    output_slx_file = compile(opts, learned_model_file)
 
-        output_slx_file = compile(opts, learned_model_file)
+    # Find counter examples
 
-        # Find counter examples
+    result = find_counter_examples(rng, opts, output_slx_file, i)
 
-        result = find_counter_examples(rng, opts, output_slx_file, i)
+    # counter_examples = counter_examples.sort(key=lambda (_,_,dist): dist)
 
-        # counter_examples = counter_examples.sort(key=lambda (_,_,dist): dist)
+    header = ['time'] + opts.input_variables + opts.output_variables
 
-        header = ['time'] + opts.input_variables + opts.output_variables
+    learning_file = os.path.join(opts.output_directory, f"learning{i:02d}.txt")
+    # Add the original trajectories which could not be reproduced well
+    # by the learned model.
+    save_trajectories(learning_file, header, [ot for (ot, _, _) in result])
 
-        learning_file = os.path.join(opts.output_directory, f"learning{i:02d}.txt")
-        # Add the original trajectories which could not be reproduced well
-        # by the learned model.
-        save_trajectories(learning_file, header, [ot for (ot, _, _) in result])
+    # Counter example plot. Show both the original and learned for visual comparison
 
-        # Counter example plot. Show both the original and learned for visual comparison
+    header = (
+        ['time']
+        + opts.input_variables
+        + [f"original:{k}" for k in opts.output_variables]
+        + [f"learned:{k}" for k in opts.output_variables]
+    )
 
-        header = (
-            ['time']
-            + opts.input_variables
-            + [f"original:{k}" for k in opts.output_variables]
-            + [f"learned:{k}" for k in opts.output_variables]
-        )
+    counter_examples = [
+        (ot[0], np.hstack((ot[1], lt[1][:, -len(opts.output_variables) :])))
+        for (ot, lt, dist) in result
+    ]
 
-        counter_examples = [
-            (ot[0], np.hstack((ot[1], lt[1][:, -len(opts.output_variables) :])))
-            for (ot, lt, dist) in result
-        ]
+    base = f"counter_examples{i:02d}.svg"
+    counter_example_file = os.path.join(opts.output_directory, base)
 
-        base = f"counter_examples{i:02d}.svg"
-        counter_example_file = os.path.join(opts.output_directory, base)
+    # report
 
-        print("counter examples", counter_examples)
+    report(
+        opts.output_directory,
+        os.path.basename(opts.simulink_model_file),
+        i,  # iteration
+        ha,
+        result,
+        opts.input_variables,
+        opts.output_variables,
+    )
 
-        if len(result) > 0:
-            plot_timeseries_multi(
-                counter_example_file,
-                'Counter examples found',
-                header[1:],  # drop 'time'
-                counter_examples,
-            )
+    # Loop or not
 
-            log.write(f"## Counter examples\n\n")
-            log.write(f"![]({base})\n\n")
-        else:
-            log.write(f"## Counter examples\n\n")
-            log.write(f"None!!!\n\n")
+    if len(result) == 0:
+        print("No counter example found")
+        exit(0)
+    else:
+        print(f"Counter examples: {len(result)}")
 
-        # Loop or not
-
-        if len(result) == 0:
-            print("No counter example found")
-            exit(0)
-        else:
-            print(f"Counter examples: {len(result)}")
-
-        trajectories_files.append(learning_file)
+    trajectories_files.append(learning_file)
 
 print(f"Even after {i} inference iterations, we did not see a fixedpoint")

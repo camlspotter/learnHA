@@ -115,12 +115,6 @@ def infer_model(
         )
         for span in traj_spans
     ]
-    # plot_timeseries_multi(
-    #     os.path.join(opts.output_directory, "preprocess.svg"),
-    #     "Preprocessed trajectories",
-    #     tys,
-    #     1.0,
-    # )
 
     # Apply Linear Multistep Method
     # compute forward and backward version of BDF
