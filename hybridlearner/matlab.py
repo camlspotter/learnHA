@@ -26,12 +26,12 @@ class Matlab:
 
     def setvar(self, var: str, val: Any) -> None:
         _eng = self.engine()
-        print(f"Set MATLAB variable {var}")
+        # print(f"Set MATLAB variable {var}")
         _eng.workspace[var] = val
 
     def getvar(self, var: str) -> Any:
         _eng = self.engine()
-        print(f"Get MATLAB variable {var}")
+        # print(f"Get MATLAB variable {var}")
         return _eng.workspace[var]
 
 
