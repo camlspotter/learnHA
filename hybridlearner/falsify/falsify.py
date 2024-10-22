@@ -47,7 +47,7 @@ def find_counter_examples(
     opts: find_counter_examples_protocol,
     output_slx_file: str,
     i: int,
-) -> tuple[list[Trajectory], list[Trajectory]]:
+) -> list[tuple[Trajectory, Trajectory, float]]:
     # Simulation of the original model
 
     rng_state = rng.getstate()
@@ -83,8 +83,7 @@ def find_counter_examples(
         [learned_trajectories_file]
     )
 
-    counter_examples_original = []
-    counter_examples_learned = []
+    result = []
 
     for ot, lt in zip(original_trajectories, learned_trajectories):
         assert len(ot[0]) == len(lt[0]), "Non equal number of samples for a trajectory"
@@ -97,8 +96,7 @@ def find_counter_examples(
             ot, lt, opts.input_variables, opts.output_variables
         )
         print(dist)
-        if opts.counter_example_threshold < dist:
-            counter_examples_original.append(ot)
-            counter_examples_learned.append(lt)
+        if dist > opts.counter_example_threshold:
+            result.append((ot, lt, dist))
 
-    return counter_examples_original, counter_examples_learned
+    return result
