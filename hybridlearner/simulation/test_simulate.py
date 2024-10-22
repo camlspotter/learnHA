@@ -11,7 +11,7 @@ from hybridlearner.simulation import simulate_list
 
 
 class Test(unittest.TestCase):
-    def test_simulate(self):
+    def test_simulate(self) -> None:
         # pipenv run python simulate.py --simulink-model-file  --time-horizon 13.0 --sampling-time 0.001 --fixed-interval-data False --input-variables 'u' --output-variables 'x,v' --invariant '-9.9 <= u && u <= -9.5 && 10.2 <= x && x <= 10.5 && 15 <= v && v <= 15' --number-of-cps 'u:4' --signal-types 'u:linear' -o model_simulation.txt -S 0 -n 64
 
         script_file = "_test/simulate_model.m"
@@ -62,4 +62,6 @@ class Test(unittest.TestCase):
             inputs=inputs,
         )
 
-        assert filecmp.cmp("data/test_simulate.txt", output_file, shallow=False)
+        assert filecmp.cmp(
+            "data/test_simulate.txt", output_file, shallow=False
+        ), f"data/test_simulate.txt and {output_file} differ!"
