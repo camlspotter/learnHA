@@ -1,5 +1,5 @@
 set -e
-rm -rf _out
+rm -rf _out/bball_breach
 
 pipenv run python loop_breach.py \
      \
@@ -11,7 +11,7 @@ pipenv run python loop_breach.py \
      --invariant 'u:(-15.0, -5.0), x:(5, 10), v:(3, 16)' \
      --number-of-cps 'u:4' --signal-types 'u:linear' \
      \
-     --output-directory _out \
+     --output-directory _out/bball_breach \
      -c dtw -d 1 -m 1 -b 1 \
      --segmentation-error-tol 0.01 \
      --threshold-distance 100.0 --threshold-correlation 0.01 \
@@ -21,7 +21,5 @@ pipenv run python loop_breach.py \
      --ode-solver-type fixed --ode-solver FixedStepAuto --invariant-mode 2 \
      \
      -n 10 \
-     --counter-example-threshold 1.0
-
-# original
-# --threshold-distance 9.0 --threshold-correlation 0.8
+     --counter-example-threshold 1.0 \
+     --max-nloops 3

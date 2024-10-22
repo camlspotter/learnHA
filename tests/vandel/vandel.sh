@@ -2,7 +2,7 @@
 
 set -e
 
-OUTDIR=tests/vandel/_out
+OUTDIR=_out/vandel
 
 rm -rf $OUTDIR
 mkdir $OUTDIR
@@ -30,4 +30,5 @@ pipenv run python loop.py \
      --ode-solver-type fixed --ode-solver FixedStepAuto --invariant-mode 2 \
      \
      -n 10 \
+     -max-nloops 3 \
      --counter-example-threshold 1.0

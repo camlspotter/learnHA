@@ -1,6 +1,6 @@
 SIMULATION_OPTS=""
 
-rm -rf _out
+rm -rf _out/vandel_loop
 
 pipenv run python compile_ha.py --ode-solver-type fixed --ode-solver FixedStepAuto --invariant-mode 2 vandel/van_del_pol_oscillator.json --output-file vandel/_out/van_del_pol_oscillator.slx
 

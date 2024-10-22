@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-OUTDIR=tests/2inputs/_out
+OUTDIR=_out/2inputs
 
 rm -rf $OUTDIR
 
