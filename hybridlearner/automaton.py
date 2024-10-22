@@ -154,15 +154,12 @@ def hum_print_Mode(oc: TextIOWrapper, m: Mode) -> None:
 
 def hum_print_Transition(oc: TextIOWrapper, tr: Transition) -> None:
     oc.write(
-        textwrap.indent(
-            textwrap.dedent(
-                f"""\
-                transition: {tr.src} -> {tr.dst}
-                  guard: {hum_str_polynomial(tr.guard)}
-                  assignments:
-                """
-            ),
-            "  ",
+        textwrap.dedent(
+            f"""\
+            transition: {tr.src} -> {tr.dst}
+              guard: {hum_str_polynomial(tr.guard)}
+              assignments:
+            """
         )
     )
     for v, p in tr.assignments.items():
