@@ -151,31 +151,12 @@ for i in range(1, opts.max_nloops + 1):
 
     result = find_counter_examples(rng, opts, output_slx_file, i)
 
-    # counter_examples = counter_examples.sort(key=lambda (_,_,dist): dist)
-
     header = ['time'] + opts.input_variables + opts.output_variables
 
     learning_file = os.path.join(opts.output_directory, f"learning{i:02d}.txt")
     # Add the original trajectories which could not be reproduced well
     # by the learned model.
     save_trajectories(learning_file, header, [ot for (ot, _, _) in result])
-
-    # Counter example plot. Show both the original and learned for visual comparison
-
-    header = (
-        ['time']
-        + opts.input_variables
-        + [f"original:{k}" for k in opts.output_variables]
-        + [f"learned:{k}" for k in opts.output_variables]
-    )
-
-    counter_examples = [
-        (ot[0], np.hstack((ot[1], lt[1][:, -len(opts.output_variables) :])))
-        for (ot, lt, dist) in result
-    ]
-
-    base = f"counter_examples{i:02d}.svg"
-    counter_example_file = os.path.join(opts.output_directory, base)
 
     # report
 
