@@ -42,6 +42,15 @@ def report(
     input_variables: list[str],
     output_variables: list[str],
 ) -> None:
+    """
+    - output_directory: where to produce the report and images
+    - model_name: used in the title
+    - iteration: used in the title
+    - ha : hybrid automaton
+    - counter_examples: counter examples found for ha
+    - input_variables: the names of the input variables
+    - output_variables: the names of the output variables
+    """
     log_filename = os.path.join(output_directory, f'report{iteration:02d}.md')
     with utils_io.open_for_write(log_filename) as log:
         log.write(f"# {model_name} inference {iteration}\n\n")
