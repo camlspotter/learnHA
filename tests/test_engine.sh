@@ -34,5 +34,5 @@ pipenv run python loop.py \
      \
      -n 5 \
      --counter-example-threshold 10.0 \
-     --max-nloops 3 \
+     --max-nloops 5 \
      --annotations 'engineSpeed:continuous'

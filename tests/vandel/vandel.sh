@@ -30,5 +30,5 @@ pipenv run python loop.py \
      --ode-solver-type fixed --ode-solver FixedStepAuto --invariant-mode 2 \
      \
      -n 10 \
-     -max-nloops 3 \
+     --max-nloops 5 \
      --counter-example-threshold 1.0

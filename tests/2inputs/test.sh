@@ -27,7 +27,4 @@ pipenv run python loop.py \
      \
      -n 10 \
      --counter-example-threshold 1.0 \
-     --max-nloops 2
-
-# original
-# --threshold-distance 9.0 --threshold-correlation 0.8
+     --max-nloops 5

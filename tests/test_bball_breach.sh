@@ -22,4 +22,4 @@ pipenv run python loop_breach.py \
      \
      -n 10 \
      --counter-example-threshold 1.0 \
-     --max-nloops 3
+     --max-nloops 5
