@@ -4,7 +4,7 @@ import numpy as np
 import textwrap
 from hybridlearner.utils import io as utils_io
 from hybridlearner.matlab import engine
-from hybridlearner.trajectory import Trajectories
+from hybridlearner.trajectory import Trajectories, Trajectory
 from hybridlearner.types import Range
 from hybridlearner.simulation import simulate_protocol
 from hybridlearner.falsify import find_counter_examples_protocol
@@ -14,7 +14,7 @@ from hybridlearner.slx.merger import merge_without_save
 
 def find_counter_examples(
     opts: find_counter_examples_protocol, learned_model_file: str
-) -> tuple[Trajectories, Trajectories]:
+) -> list[tuple[Trajectory, Trajectory, float]]:
     script_fn = os.path.join(opts.output_directory, 'falsify_learned_model.m')
 
     build_script(opts, script_fn, learned_model_file)
@@ -33,7 +33,8 @@ def find_counter_examples(
         map(lambda sig: (time, np.transpose(np.array(sig))), learned_signals)
     )
 
-    return original_trs, learned_trs
+    # XXX No distance for now
+    return [(ot, lt, 0.0) for (ot, lt) in zip(original_trs, learned_trs)]
 
 
 def build_script(
