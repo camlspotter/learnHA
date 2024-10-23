@@ -8,7 +8,11 @@
 - `pipenv --python 3.10`
 - `pipenv install --dev`
 - `export LANG=C` for correct printing of MATLAB warning and error messages
-- [Breach](https://github.com/decyphir/breach) must be in MATLABPATH
+- [Breach](https://github.com/decyphir/breach) must be in MATLABPATH, i.e., `export MATLABPATH=:breach_directory`
+
+Optionally:
+
+- [pandoc](https://pandoc.org/) in the PATH for HTML reports.
 
 Note:
 
@@ -23,6 +27,14 @@ Later versions of MATLAB likely work too by fixing the following fields in `Pipf
 To start over the preparation:
 
 - `pipenv --rm`
+
+## Testing
+
+`./run_test`
+: Basic unit tests
+
+`tests/*.sh` and `tests/*/*.sh`
+: Longer tests
 
 ## Programs
 
