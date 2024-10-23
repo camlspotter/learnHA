@@ -27,6 +27,7 @@ from hybridlearner.slx import compiler
 from hybridlearner import matlab
 from hybridlearner.simulation.breach import simulate
 from hybridlearner.falsify.breach import find_counter_examples
+from hybridlearner.report import report
 
 
 @dataclass
@@ -83,9 +84,7 @@ def get_options() -> Options:
 opts = get_options()
 
 
-def inference(
-    opts: Options, trajectories_files: list[str], outputfilename: str
-) -> None:
+def inference(opts: Options, trajectories_files: list[str]) -> HybridAutomaton:
     _header, list_of_trajectories = load_trajectories_files(trajectories_files)
 
     print(f"Loaded {len(list_of_trajectories)} trajectories")
@@ -93,10 +92,7 @@ def inference(
     raw = infer_model(
         list_of_trajectories, opts.input_variables, opts.output_variables, opts
     )
-    ha = automaton.build(raw)
-    # outputfilename = os.path.join(opts.output_directory, "learned_HA.json")
-    with utils_io.open_for_write(outputfilename) as f_out:
-        f_out.write(json.dumps(asdict(ha), indent=2))
+    return automaton.build(raw)
 
 
 def compile(opts: Options, learned_model_file: str) -> str:
@@ -130,17 +126,19 @@ rng = random.Random() if opts.seed is None else random.Random(opts.seed)
 
 # Initial simulation set
 
-initial_simulation_file = os.path.join(opts.output_directory, "original_simulation.txt")
+initial_simulation_file = os.path.join(opts.output_directory, "learning00.txt")
 simulate(opts, opts.simulink_model_file, initial_simulation_file, 1)  # start small
 
 trajectories_files = [initial_simulation_file]
 
-for i in range(0, opts.max_nloops):
+for i in range(1, opts.max_nloops + 1):
     # Inference
 
     print("Inferring...")
-    learned_model_file = os.path.join(opts.output_directory, f"learned_HA{i}.json")
-    inference(opts, trajectories_files, learned_model_file)
+    ha = inference(opts, trajectories_files)
+
+    learned_model_file = os.path.join(opts.output_directory, f"learned_HA{i:02d}.json")
+    ha.save(learned_model_file)
 
     # Compile
 
@@ -148,27 +146,35 @@ for i in range(0, opts.max_nloops):
 
     # Find counter examples
 
-    original_trajectories, learned_trajectories = find_counter_examples(
-        opts, output_slx_file
-    )
+    result = find_counter_examples(opts, output_slx_file)
 
-    counter_example_file = os.path.join(
-        opts.output_directory, f"counter_example{i}.txt"
-    )
     header = ['time'] + opts.input_variables + opts.output_variables
-    save_trajectories(counter_example_file, header, original_trajectories)
 
-    learned_trajectories_file = os.path.join(
-        opts.output_directory, f"learned_trajectories{i}.txt"
+    learning_file = os.path.join(opts.output_directory, f"learning{i:02d}.txt")
+    # Add the original trajectories which could not be reproduced well
+    # by the learned model.
+    save_trajectories(learning_file, header, [ot for (ot, _, _) in result])
+
+    # report
+
+    report(
+        opts.output_directory,
+        os.path.basename(opts.simulink_model_file),
+        i,  # iteration
+        ha,
+        result,
+        opts.input_variables,
+        opts.output_variables,
     )
-    save_trajectories(learned_trajectories_file, None, learned_trajectories)
 
-    if len(original_trajectories) == 0:
+    # Loop or not
+
+    if len(result) == 0:
         print("No counter example found")
         exit(0)
     else:
-        print(f"Counter examples: {len(original_trajectories)}")
+        print(f"Counter examples: {len(result)}")
 
-    trajectories_files.append(counter_example_file)
+    trajectories_files.append(learning_file)
 
 print(f"Even after {i+1} inference iterations, we did not see a fixedpoint")
