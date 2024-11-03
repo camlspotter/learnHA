@@ -35,3 +35,6 @@ The same inputs are chosen repeatedly at the falsifications of different learnin
 ### Workaround: fill the set of already tried
 
 `pb.X_log` is a matrix carrying the input parameters already tried.  If we fill it with the `pb.X_log` of the falsification result for the previous generation, they may be skipped in the next falsification.  Nice thing of this method is that `pb` is accessible from the falsification script easily. The problem is that we are not sure this really works or not.
+
+I tried this and found `pb.obj_log` must be also reserved.  The falsifications skip the elements in `pb.X_log` as intended.  It is doubtful that the generated input parameters are reasonable for the later falsification generations.
+
