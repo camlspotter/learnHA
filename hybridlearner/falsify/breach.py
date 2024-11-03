@@ -3,9 +3,10 @@ import os
 import numpy as np
 import textwrap
 from hybridlearner.utils import io as utils_io
+from hybridlearner import matlab
 from hybridlearner.matlab import engine
 from hybridlearner.trajectory import Trajectories, Trajectory
-from hybridlearner.types import Range
+from hybridlearner.types import Range, MATRIX
 from hybridlearner.simulation import simulate_protocol
 from hybridlearner.falsify import find_counter_examples_protocol
 from hybridlearner.simulation.input import SignalType
@@ -13,11 +14,20 @@ from hybridlearner.slx.merger import merge_without_save
 
 
 def find_counter_examples(
-    opts: find_counter_examples_protocol, learned_model_file: str
-) -> list[tuple[Trajectory, Trajectory, float]]:
+    opts: find_counter_examples_protocol,
+    learned_model_file: str,
+    tried_parameters: matlab.double,
+    tried_obj_log: matlab.double,
+) -> tuple[list[tuple[Trajectory, Trajectory, float]], matlab.double, matlab.double]:
     script_fn = os.path.join(opts.output_directory, 'falsify_learned_model.m')
 
-    build_script(opts, script_fn, learned_model_file)
+    engine.eval('bdclose all;', nargout=0)
+    engine.eval('clear;', nargout=0)
+
+    engine.setvar('tried_parameters', tried_parameters)
+    engine.setvar('tried_obj_log', tried_obj_log)
+
+    build_script(opts, script_fn, learned_model_file, tried_parameters)
 
     engine.run(script_fn)
 
@@ -33,12 +43,25 @@ def find_counter_examples(
         map(lambda sig: (time, np.transpose(np.array(sig))), learned_signals)
     )
 
+    tried_parameters = engine.getvar('tried_parameters')
+    tried_obj_log = engine.getvar('tried_obj_log')
+
+    tried_parameters2: MATRIX = np.transpose(np.array(tried_parameters))
+    print('tried_parameters', tried_parameters2)
+
     # XXX No distance for now
-    return [(ot, lt, 0.0) for (ot, lt) in zip(original_trs, learned_trs)]
+    return (
+        [(ot, lt, 0.0) for (ot, lt) in zip(original_trs, learned_trs)],
+        tried_parameters,
+        tried_obj_log,
+    )
 
 
 def build_script(
-    opts: find_counter_examples_protocol, script_fn: str, learned_model_file: str
+    opts: find_counter_examples_protocol,
+    script_fn: str,
+    learned_model_file: str,
+    tried_parameters: matlab.double,
 ) -> None:
     original_model_file = opts.simulink_model_file
 
@@ -150,6 +173,10 @@ def build_script(
             ]
         )
 
+        print('SHAPE:', np.array(tried_parameters).shape)
+        max_obj_eval = opts.nsimulations + np.array(tried_parameters).shape[1]
+        print('Set max_obj_eval:', max_obj_eval)
+
         out.write(
             textwrap.dedent(
                 f"""\
@@ -160,8 +187,10 @@ def build_script(
                 phi = STL_Formula('phi', 'alw (abs(out_a1[t] - out_b1[t]) < 0.1)');
                 R = BreachRequirement(phi);
                 pb = FalsificationProblem(Bsim,R);
+                pb.X_log = tried_parameters;
+                pb.obj_log = tried_obj_log;
                 pb.StopAtFalse=0 % more than 1 counter examples if found
-                pb.max_obj_eval = {opts.nsimulations};
+                pb.max_obj_eval = {max_obj_eval};
                 pb.solve();
                 falses = pb.GetFalse();
 
@@ -198,3 +227,6 @@ def build_script(
                 """
             )
         )
+
+        out.write("tried_parameters = pb.X_log;")
+        out.write("tried_obj_log = pb.obj_log;")

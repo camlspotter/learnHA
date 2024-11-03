@@ -2,6 +2,7 @@ from .breach import *
 from hybridlearner.simulation.input import SignalType
 from hybridlearner.types import Range
 from hybridlearner.falsify import find_counter_examples_options
+from hybridlearner import matlab
 
 opts = find_counter_examples_options(
     time_horizon=20,
@@ -22,8 +23,12 @@ opts = find_counter_examples_options(
     counter_example_threshold=0.1,
 )
 
-build_script(opts, '_out/falsify.m', 'data/models/bball_learned_HA0.slx')
+build_script(
+    opts, '_out/falsify.m', 'data/models/bball_learned_HA0.slx', matlab.double([])
+)
 
-trjs = find_counter_examples(opts, 'data/models/bball_learned_HA0.slx')
+trjs = find_counter_examples(
+    opts, 'data/models/bball_learned_HA0.slx', matlab.double([]), matlab.double([])
+)
 
 print(trjs)

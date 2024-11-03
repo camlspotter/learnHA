@@ -131,6 +131,9 @@ simulate(opts, opts.simulink_model_file, initial_simulation_file, 1)  # start sm
 
 trajectories_files = [initial_simulation_file]
 
+tried_parameters: matlab.double = matlab.double([])
+tried_obj_log: matlab.double = matlab.double([])
+
 for i in range(1, opts.max_nloops + 1):
     # Inference
 
@@ -146,7 +149,11 @@ for i in range(1, opts.max_nloops + 1):
 
     # Find counter examples
 
-    result = find_counter_examples(opts, output_slx_file)
+    result, new_tried_parameters, new_tried_obj_log = find_counter_examples(
+        opts, output_slx_file, tried_parameters, tried_obj_log
+    )
+    tried_parameters = new_tried_parameters
+    tried_obj_log = new_tried_obj_log
 
     header = ['time'] + opts.input_variables + opts.output_variables
 

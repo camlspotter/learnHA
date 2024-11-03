@@ -36,8 +36,8 @@ def merge_system(
     out.write(
         textwrap.dedent(
             f"""\
-        bdclose all;
-        clear;
+        % bdclose all;
+        % clear;
 
         % Load the original model
         load_system('{fn_a}');
