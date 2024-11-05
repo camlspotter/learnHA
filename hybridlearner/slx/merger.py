@@ -132,6 +132,38 @@ def connect_ports(
                 add_line('{merged}', bPorts.Outport(i), bOutPorts.Inport(1));
             end
 
+            % Outport(i) of a -->++--------+    +---+    +---------+     +-----+
+            %                     |Subtract| -> |Abs| -> |Integrate| --> |diffi|  
+            % Outport(i) of b -->-+--------+    +---+    +---------+     +-----+
+
+            for i = 1:length(aPorts.Outport)
+               diff = sprintf('{merged}/diff%d', i);
+               add_block('simulink/Sinks/Out1', diff);
+               diffports = get_param(diff, 'PortHandles');
+           
+               integrator = sprintf('{merged}/integrator%d', i);
+               add_block('simulink/Continuous/Integrator', integrator);
+               integratorports = get_param(integrator, 'PortHandles');
+           
+               add_line('{merged}', integratorports.Outport(1), diffports.Inport(1));
+           
+               abs = sprintf('{merged}/abs%d', i);
+               add_block('simulink/Math Operations/Abs', abs);
+               % Simulation does not terminate if ZeroCross = 'on' (default)
+               set_param(abs, 'ZeroCross', 'off');
+               absports = get_param(abs, 'PortHandles');
+           
+               add_line('{merged}', absports.Outport(1), integratorports.Inport(1));
+           
+               sub = sprintf('{merged}/sub%d', i);
+               add_block('simulink/Math Operations/Subtract', sub);
+               subports = get_param(sub, 'PortHandles');
+           
+               add_line('{merged}', aPorts.Outport(1), subports.Inport(1));
+               add_line('{merged}', bPorts.Outport(1), subports.Inport(2));
+               add_line('{merged}', subports.Outport(1), absports.Inport(1));
+           end
+
             Simulink.BlockDiagram.arrangeSystem('{merged}');
 
             """
