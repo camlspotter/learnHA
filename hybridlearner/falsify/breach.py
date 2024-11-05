@@ -10,7 +10,7 @@ from hybridlearner.types import Range, MATRIX
 from hybridlearner.simulation import simulate_protocol
 from hybridlearner.falsify import find_counter_examples_protocol
 from hybridlearner.simulation.input import SignalType
-from hybridlearner.slx.merger import merge_without_save
+from hybridlearner.slx.merger import merge, merge_without_save
 
 
 def find_counter_examples(
@@ -73,6 +73,10 @@ def build_script(
         merged = merge_without_save(
             out, original_model_file, learned_model_file, 'merged.slx'
         )
+        # If we save, something goes wrong with model 'merged'
+        # merged = merge(
+        #     out, original_model_file, learned_model_file, 'merged.slx'
+        # )
 
         out.write("% MATLABPATH must contain Breach\n")
         out.write("InitBreach;\n\n")
@@ -126,54 +130,46 @@ def build_script(
                             f"Bsim.SetParamRanges({{'in_{idx}_u{i}'}}, [{r.min} {r.max}]);\n"
                         )
 
-        # The output var signals are followed by the input var signals
-        signal_positions = {
-            v: i for (i, v) in enumerate(opts.output_variables + opts.input_variables)
-        }
         original_signal_names = (
             "{"
             + ",".join(
-                [
-                    f'all_signal_names{{{signal_positions[v]+1}}}'
-                    for v in opts.input_variables + opts.output_variables
-                ]
+                [f"{{'in_{i+1}'}}" for (i, _) in enumerate(opts.input_variables)]
+                + [f"{{'out_a{i+1}'}}" for (i, _) in enumerate(opts.output_variables)]
             )
             + "}"
         )
+        original_signal_comments = '%hahaha'
         original_signal_comments = "\n".join(
             [
-                f'% Original input variable {v} at signal #{signal_positions[v]+1}'
-                for v in opts.input_variables
+                f'% Input variable {v} at signal in_{i+1}'
+                for (i, v) in enumerate(opts.input_variables)
             ]
             + [
-                f'% Original output variable {v} at signal #{signal_positions[v]+1}'
-                for v in opts.output_variables
+                f'% Original output variable {v} at signal out_a{i+1}'
+                for (i, v) in enumerate(opts.output_variables)
             ]
         )
 
-        shift = len(opts.input_variables) + len(opts.output_variables)
+        #        shift = len(opts.output_variables) * 2
         learned_signal_names = (
             "{"
             + ",".join(
-                [
-                    f'all_signal_names{{{signal_positions[v]+1+shift}}}'
-                    for v in opts.input_variables + opts.output_variables
-                ]
+                [f"{{'in_{i+1}'}}" for (i, _) in enumerate(opts.input_variables)]
+                + [f"{{'out_b{i+1}'}}" for (i, _) in enumerate(opts.output_variables)]
             )
             + "}"
         )
         learned_signal_comments = "\n".join(
             [
-                f'% Learned input variable {v} at signal #{signal_positions[v]+1+shift}'
-                for v in opts.input_variables
+                f'% Input variable {v} at signal in_{i+1}'
+                for (i, v) in enumerate(opts.input_variables)
             ]
             + [
-                f'% Learned output variable {v} at signal #{signal_positions[v]+1+shift}'
-                for v in opts.output_variables
+                f'% Learned output variable {v} at signal out_b{i+1}'
+                for (i, v) in enumerate(opts.output_variables)
             ]
         )
 
-        print('SHAPE:', np.array(tried_parameters).shape)
         max_obj_eval = opts.nsimulations + np.array(tried_parameters).shape[1]
         print('Set max_obj_eval:', max_obj_eval)
 
@@ -184,7 +180,7 @@ def build_script(
                 Bsim.Sys.tspan = 0:{opts.sampling_time}:{opts.time_horizon};  % See the head comment in Core/Falsify.m
 
                 % Falsification
-                phi = STL_Formula('phi', 'alw (abs(out_a1[t] - out_b1[t]) < 0.1)');
+                phi = STL_Formula('phi', 'alw (diff1[t] < 3)');
                 R = BreachRequirement(phi);
                 pb = FalsificationProblem(Bsim,R);
                 pb.X_log = tried_parameters;
@@ -202,6 +198,7 @@ def build_script(
                 time = falses.P.traj{{1}}.time;
 
                 all_signal_names = falses.GetSignalList();
+
                 """
             )
         )
@@ -228,5 +225,5 @@ def build_script(
             )
         )
 
-        out.write("tried_parameters = pb.X_log;")
-        out.write("tried_obj_log = pb.obj_log;")
+        out.write("tried_parameters = pb.X_log;\n")
+        out.write("tried_obj_log = pb.obj_log;\n")
