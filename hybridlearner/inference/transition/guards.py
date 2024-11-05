@@ -53,6 +53,7 @@ def getGuard_inequality(
 
     """
 
+    print('getGuard_inequality...')
     # This file is also used for SVM scaling
     output_filename = os.path.join(output_dir, "guard_data_scale")
     _x, _y, x_gs = create_data(output_filename, srcData, destData, L_y, Y)
@@ -102,6 +103,7 @@ def getGuard_inequality(
             relative_difference = rel_difference
         if relative_difference <= 0.0001:
             count_small_rel_diff += 1
+
     # **********
     # print("Total data with small relative difference =", count_small_rel_diff)
     # if relative_difference <= 0.0000001:  #increasing the original analysed value 0.0001
@@ -129,8 +131,9 @@ def getGuard_inequality(
         coef_optimal = 1
         # print("Default parameter:- C: 100, gamma:",gamma_value_optimal, ", coef0:", coef_optimal)
     else:
-        # endTime: variable creation and start recording but will not be use
-        endTime = time.time()
+        # Jun: it seems this part has complexity issue. Probably like O(N^x), x >= 2?
+        print(f'grid search...')
+        print(f"x_gs: {len(x_gs), len(x_gs[0])}")
         # variable creation and started recording the current time
         startTime = time.time()
         gamma_value_optimal = float(1 / L_y)
@@ -140,7 +143,6 @@ def getGuard_inequality(
             'coef0': [0, 1, 0.1],
             'kernel': ['poly'],
         }
-        # print("x_gs=", x_gs)
         scaler = preprocessing.StandardScaler().fit(x_gs)
         # https://scikit-learn.org/stable/modules/preprocessing.html#standardization-or-mean-removal-and-variance-scaling
         x_gs_scaled = scaler.transform(x_gs)
@@ -156,6 +158,7 @@ def getGuard_inequality(
         searchTime = endTime - startTime
         # print ("  C=", c_value_optimal, ", Gamma=",gamma_value_optimal, ", coef0=",coef_optimal)
         # print ("Search Time (secs): ", searchTime)
+        print(f'grid search done {len(x_gs), len(x_gs[0]), searchTime}')
     #  ********** End of Grid Search for hyperparameter tuning ************
 
     m = svm_model_training(
@@ -173,6 +176,8 @@ def getGuard_inequality(
     guard_coeff = inverse_scale(guard_coeff, scale_param, L_y, boundary_order)
 
     # print("guard_coeff after inverse_scale is ", guard_coeff)
+    print('getGuard_inequality done')
+
     return guard_coeff
 
 
