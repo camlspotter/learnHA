@@ -19,9 +19,10 @@ def merge_without_save(out: TextIOWrapper, fn_a: str, fn_b: str, fn_merged: str)
     return merged
 
 
-def merge(out: TextIOWrapper, fn_a: str, fn_b: str, fn_merged: str) -> None:
+def merge(out: TextIOWrapper, fn_a: str, fn_b: str, fn_merged: str) -> str:
     merged = merge_without_save(out, fn_a, fn_b, fn_merged)
     save_system(out, fn_merged, merged)
+    return merged
 
 
 def merge_system(
@@ -102,8 +103,8 @@ def connect_ports(
                 % port number is automatically assigned.
                 % set_param(inport, 'Port', num2str(i));
                 set_param(inport, 'SignalType', 'auto');
-                add_line('{merged}', xiInput.Outport(i), aPorts.Inport(i));
-                add_line('{merged}', xiInput.Outport(i), bPorts.Inport(i));
+                add_line('{merged}', xiInput.Outport(1), aPorts.Inport(i));
+                add_line('{merged}', xiInput.Outport(1), bPorts.Inport(i));
             end
 
             %% Out-ports
