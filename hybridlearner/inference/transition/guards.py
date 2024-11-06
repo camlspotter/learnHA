@@ -74,8 +74,6 @@ def getGuard_inequality(
     # # ******* scaling data ************
 
     # ******** Checking Data size and Data similarity ********
-    a1 = []
-    b1 = []
     relative_difference = 1.0  # assuming for data more than 1 we compute option c==100.
     # Todo: found that even for more data we may have close relative_difference
     # if (len(srcData) == 1):
@@ -90,17 +88,13 @@ def getGuard_inequality(
     c_value = 100  # Default value
     c_value_optimal = 100
     count_small_rel_diff = 0
-    # print("srcData=", srcData)
-    for id1, id2 in zip(srcData, destData):  # iterate both at the same time
-        # print("id1 =", id1, "    id2=",id2)
-        a1 = [Y[id1, dim] for dim in range(L_y)]
-        b1 = [Y[id2, dim] for dim in range(L_y)]
-        # print("a1=", a1, "    b1=",b1)
-        rel_difference = rel_diff(np.array(a1), np.array(b1))
-        # print("a1=", a1, "    b1=",b1, "     relative_diff=", relative_difference)
-        if rel_difference < relative_difference:
-            # stores the smallest relative difference
-            relative_difference = rel_difference
+
+    for src_id, dst_id in zip(srcData, destData):
+        src_v = [Y[src_id, dim] for dim in range(L_y)]  # values at src_id
+        dst_v = [Y[dst_id, dim] for dim in range(L_y)]  # values at dst_id
+        rel_difference = rel_diff(np.array(src_v), np.array(dst_v))
+        # stores the smallest relative difference
+        relative_difference = min(relative_difference, rel_difference)
         if relative_difference <= 0.0001:
             count_small_rel_diff += 1
 
