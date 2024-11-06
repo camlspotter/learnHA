@@ -27,8 +27,8 @@ def create_data(
     """
     y = []  # classes
     x = []  # data
-    x_p = []
-    x_n = []
+    # x_p = [] # unused
+    # x_n = [] # unused
 
     with io.open_for_write(output_filename) as f_out:
         x_gs = []  # data for grid search
@@ -38,8 +38,8 @@ def create_data(
             x.append({dim + 1: Y[id0, dim] for dim in range(L_y)})
             xx = [Y[id0, dim] for dim in range(L_y)]
             x_gs.append(xx)
-            x_p.append({dim + 1: Y[id0, dim] for dim in range(L_y)})
-
+            # x_p is unused
+            # x_p.append({dim + 1: Y[id0, dim] for dim in range(L_y)})
             for dim in range(L_y):
                 str1 += str(dim + 1) + ":" + str(Y[id0, dim]) + " "
                 # str1 += str(dim + 1) + ":" + "{0:.3f}".format(Y[id0, dim]) + " "
@@ -51,11 +51,11 @@ def create_data(
             x.append({dim + 1: Y[id1, dim] for dim in range(L_y)})
             xx = [Y[id1, dim] for dim in range(L_y)]
             x_gs.append(xx)
-            x_n.append({dim + 1: Y[id1, dim] for dim in range(L_y)})
+            # x_n is unused
+            # x_n.append({dim + 1: Y[id1, dim] for dim in range(L_y)})
             for dim in range(L_y):
                 str1 += str(dim + 1) + ":" + str(Y[id1, dim]) + " "
                 # str1 += str(dim + 1) + ":" + "{0:.3f}".format(Y[id1, dim]) + " "
-
             str1 += "\n"
             f_out.write(str1)
 
