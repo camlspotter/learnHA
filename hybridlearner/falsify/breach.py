@@ -31,14 +31,20 @@ def find_counter_examples(
 
     engine.run(script_fn)
 
-    time = np.array(engine.getvar('time'))[0]
+    time = np.array(engine.getvar('time'))
+    if time.size == 0:
+        time = matlab.double([])
+        original_signals = matlab.double([])
+        learned_signals = matlab.double([])
+    else:
+        time = np.array(engine.getvar('time'))[0]
+        original_signals = engine.getvar('original_signals')
+        learned_signals = engine.getvar('learned_signals')
 
-    original_signals = engine.getvar('original_signals')
     original_trs = list(
         map(lambda sig: (time, np.transpose(np.array(sig))), original_signals)
     )
 
-    learned_signals = engine.getvar('learned_signals')
     learned_trs = list(
         map(lambda sig: (time, np.transpose(np.array(sig))), learned_signals)
     )
@@ -173,6 +179,12 @@ def build_script(
         max_obj_eval = opts.nsimulations + np.array(tried_parameters).shape[1]
         print('Set max_obj_eval:', max_obj_eval)
 
+        # XXX Jun: threshold is hard coded
+        stl_components = [
+            f'diff{i+1}[t] < 3' for (i, _) in enumerate(opts.output_variables)
+        ]
+        stl_formula = f"alw ({' and '.join(stl_components)})"
+
         out.write(
             textwrap.dedent(
                 f"""\
@@ -180,7 +192,7 @@ def build_script(
                 Bsim.Sys.tspan = 0:{opts.sampling_time}:{opts.time_horizon};  % See the head comment in Core/Falsify.m
 
                 % Falsification
-                phi = STL_Formula('phi', 'alw (diff1[t] < 3)');
+                phi = STL_Formula('phi', '{stl_formula}');
                 R = BreachRequirement(phi);
                 pb = FalsificationProblem(Bsim,R);
                 pb.X_log = tried_parameters;
@@ -189,6 +201,17 @@ def build_script(
                 pb.max_obj_eval = {max_obj_eval};
                 pb.solve();
                 falses = pb.GetFalse();
+
+                % Get values of time, original_signals and learned_signalsfrom Python!
+                tried_parameters = pb.X_log;
+                tried_obj_log = pb.obj_log;
+
+                if isempty(falses)
+                    time = [];
+                    original_signals = [];
+                    learned_signals = [];
+                    return;
+                end
 
                 % Visualize the counter examples
                 % falses.BrSet.PlotSignals();
@@ -220,10 +243,6 @@ def build_script(
                 learned_signal_names = {learned_signal_names};
                 learned_signals = falses.GetSignalValues(learned_signal_names);
 
-                % Get values of time, original_signals and learned_signalsfrom Python!
                 """
             )
         )
-
-        out.write("tried_parameters = pb.X_log;\n")
-        out.write("tried_obj_log = pb.obj_log;\n")
