@@ -94,24 +94,40 @@ def compute_transitions(
         dest_mode = conn.dst_mode
 
         # Now we only use a few connecting-points [pre_end_point and end_point] to find guard using SVM
-        # ******* Step-1: create the source and destination list of positions and Step-2: call getGuardEquation()
+        # XXX Jun ??? Why not src_end and dst_start ???
         srcData = [link.src_end - 1 for link in links]
         destData = [link.src_end for link in links]
 
+        print(
+            'get guard',
+            'src:',
+            conn.src_mode,
+            'dst:',
+            conn.dst_mode,
+            'nlinks:',
+            len(conn.links),
+        )
         guard = getGuard_inequality(
             output_dir, srcData, destData, L_y, boundary_order, Y
         )
 
         # C++ code assumes the first element of guard_coeff is either 0, 1 or -1
+        # But it is not really required.
         # guard = normalize_guard(guard)
 
         '''
-        We will not check any complex condition. We simply apply linear regression to first learn the assignments.
-        Then, we check the condition for annotations and whenever annotation information is available we replace
-         the computed (learned using linear regression) values using our approach of annotations.
+        We will not check any complex condition. We simply apply linear regression to 
+        first learn the assignments.
+
+        Then, we check the condition for annotations and whenever annotation information 
+        is available we replace the computed (learned using linear regression) values 
+        using our approach of annotations.
         '''
         assignment: Assignment = compute_assignment(links, L_y, Y)
+        print('computed assignment', assignment)
         assignment = apply_annotation(Y, annotations, links, assignment)
+        if annotations:  # If not empty
+            print('annotated assignment', assignment)
 
         transitions.append((src_mode, dest_mode, guard, assignment))
 
