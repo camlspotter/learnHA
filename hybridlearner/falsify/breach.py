@@ -46,12 +46,12 @@ def find_counter_examples(
         time = matlab.double([])
         original_signals = matlab.double([])
         learned_signals = matlab.double([])
-        maybe_scores = matlab.double([])
+        maybe_scores = np.array([])
     else:
         time = np.array(engine.getvar('time'))[0]
         original_signals = engine.getvar('original_signals')
         learned_signals = engine.getvar('learned_signals')
-        maybe_scores = engine.getvar('maybe_scores')
+        maybe_scores = np.array(engine.getvar('maybe_scores'))[0]
 
     original_trs = list(
         map(lambda sig: (time, np.transpose(np.array(sig))), original_signals)
@@ -60,8 +60,6 @@ def find_counter_examples(
     learned_trs = list(
         map(lambda sig: (time, np.transpose(np.array(sig))), learned_signals)
     )
-
-    maybe_scores2 = np.array(maybe_scores)[0]
 
     tried_parameters = engine.getvar('tried_parameters')
     tried_obj_log = engine.getvar('tried_obj_log')
@@ -73,7 +71,7 @@ def find_counter_examples(
     return (
         [
             (ot, lt, -score)
-            for (ot, lt, score) in zip(original_trs, learned_trs, maybe_scores2)
+            for (ot, lt, score) in zip(original_trs, learned_trs, maybe_scores)
         ],
         tried_parameters,
         tried_obj_log,
