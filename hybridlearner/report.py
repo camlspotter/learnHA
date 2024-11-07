@@ -43,6 +43,8 @@ def report(
     output_variables: list[str],
 ) -> None:
     """
+    Counter example plot. Show both the original and learned for visual comparison.
+
     - output_directory: where to produce the report and images
     - model_name: used in the title
     - iteration: used in the title
@@ -60,7 +62,10 @@ def report(
         log.write("```\n")
         log.write("\n")
 
-        # Counter example plot. Show both the original and learned for visual comparison
+        # inplace sort by dist
+        counter_examples.sort(key=lambda x: -x[2])
+
+        counter_examples_top_10 = counter_examples[:10]
 
         header = (
             ['time']
@@ -70,8 +75,14 @@ def report(
         )
 
         trs = [
-            (ot[0], np.hstack((ot[1], lt[1][:, -len(output_variables) :])))
-            for (ot, lt, _dist) in counter_examples
+            (
+                f"Trajectory {i} (dist: {dist:.2f})",  # title
+                (
+                    ot[0],  # time
+                    np.hstack((ot[1], lt[1][:, -len(output_variables) :])),  # values
+                ),
+            )
+            for (i, (ot, lt, dist)) in enumerate(counter_examples_top_10)
         ]
 
         if len(trs) != 0:
@@ -85,7 +96,9 @@ def report(
                 trs,
             )
 
-            log.write(f"## Counter examples\n\n")
+            log.write(
+                f"## Counter examples (Top {len(counter_examples_top_10)} of {len(counter_examples)})\n\n"
+            )
             log.write(f"![]({base})\n\n")
         else:
             log.write(f"## Counter examples\n\n")
