@@ -173,9 +173,9 @@ def build_script(
         max_obj_eval = opts.nsimulations + np.array(tried_parameters).shape[1]
         print('Set max_obj_eval:', max_obj_eval)
 
-        # XXX Jun: threshold is hard coded
         stl_components = [
-            f'diff{i+1}[t] < 3' for (i, _) in enumerate(opts.output_variables)
+            f'diff{i+1}[t] < {opts.counter_example_threshold}'
+            for (i, _) in enumerate(opts.output_variables)
         ]
         stl_formula = f"alw ({' and '.join(stl_components)})"
 
