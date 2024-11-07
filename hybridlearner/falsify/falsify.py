@@ -47,7 +47,10 @@ def find_counter_examples(
     opts: find_counter_examples_protocol,
     output_slx_file: str,
     i: int,
-) -> list[tuple[Trajectory, Trajectory, float]]:
+) -> list[tuple[Trajectory, # original
+                Trajectory, # learned
+                float # distance
+                ]]:
     # Simulation of the original model
 
     rng_state = rng.getstate()
