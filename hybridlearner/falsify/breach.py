@@ -19,7 +19,7 @@ def find_counter_examples(
     tried_parameters: matlab.double,
     tried_obj_log: matlab.double,
 ) -> tuple[list[tuple[Trajectory, Trajectory, float]], matlab.double, matlab.double]:
-    script_fn = os.path.join(opts.output_directory, 'falsify_learned_model.m')
+    script_fn = os.path.join(opts.output_directory, 'falsify.m')
 
     engine.eval('bdclose all;', nargout=0)
     engine.eval('clear;', nargout=0)
@@ -36,10 +36,12 @@ def find_counter_examples(
         time = matlab.double([])
         original_signals = matlab.double([])
         learned_signals = matlab.double([])
+        maybe_scores = matlab.double([])
     else:
         time = np.array(engine.getvar('time'))[0]
         original_signals = engine.getvar('original_signals')
         learned_signals = engine.getvar('learned_signals')
+        maybe_scores = engine.getvar('maybe_scores')
 
     original_trs = list(
         map(lambda sig: (time, np.transpose(np.array(sig))), original_signals)
@@ -49,6 +51,8 @@ def find_counter_examples(
         map(lambda sig: (time, np.transpose(np.array(sig))), learned_signals)
     )
 
+    maybe_scores2 = np.array(maybe_scores)[0]
+
     tried_parameters = engine.getvar('tried_parameters')
     tried_obj_log = engine.getvar('tried_obj_log')
 
@@ -57,7 +61,10 @@ def find_counter_examples(
 
     # XXX No distance for now
     return (
-        [(ot, lt, 0.0) for (ot, lt) in zip(original_trs, learned_trs)],
+        [
+            (ot, lt, -score)
+            for (ot, lt, score) in zip(original_trs, learned_trs, maybe_scores2)
+        ],
         tried_parameters,
         tried_obj_log,
     )
@@ -237,6 +244,7 @@ def build_script(
                 learned_signal_names = {learned_signal_names};
                 learned_signals = falses.GetSignalValues(learned_signal_names);
 
+                maybe_scores = pb.obj_false;
                 """
             )
         )
