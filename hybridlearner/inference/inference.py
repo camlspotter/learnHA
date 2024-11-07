@@ -103,18 +103,21 @@ def infer_model(
     # Concatenate all the trajectories.
     t: MATRIX  # times, 1D
     y: MATRIX  # values, 2D
+
     # The positions of the original trajectories in the concatenated one
     traj_spans: list[Span]
     t, y, traj_spans = preprocess_trajectories(list_of_trajectories)
 
-    # plot of preprocessed trajectories
-    tys = [
-        (
-            np.array(t[span.start : span.end + 1]),
-            np.array(y[span.start : span.end + 1][:]),
-        )
-        for span in traj_spans
-    ]
+    assert len(traj_spans) == len(list_of_trajectories)
+
+    # # plot of preprocessed trajectories
+    # tys = [
+    #     (
+    #         np.array(t[span.start : span.end + 1]),
+    #         np.array(y[span.start : span.end + 1][:]),
+    #     )
+    #     for span in traj_spans
+    # ]
 
     # Apply Linear Multistep Method
     # compute forward and backward version of BDF
