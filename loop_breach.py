@@ -137,7 +137,7 @@ tried_obj_log: matlab.double = matlab.double([])
 for i in range(1, opts.max_nloops + 1):
     # Inference
 
-    print("Inferring...")
+    print(f"Inferring {i}...")
     ha = inference(opts, trajectories_files)
 
     learned_model_file = os.path.join(opts.output_directory, f"learned_HA{i:02d}.json")
