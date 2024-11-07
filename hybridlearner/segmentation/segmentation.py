@@ -287,6 +287,14 @@ def segmented_trajectories(
     total_trajectories = len(positions)
     total_segments = len(segmented_traj)  # total segments after segmentation process
 
+    print(
+        'segmented_trajectories',
+        'len(positions):',
+        len(positions),
+        'len(segmented_traj):',
+        len(segmented_traj),
+    )
+
     # found single-segment-per-trajectory or not,
     # meaning each trajectory has a single segment (continuous single mode system), or not.
     found_single_segment_per_trajectory = total_segments == total_trajectories
@@ -339,9 +347,10 @@ def segmented_trajectories(
             traj_id += 1
             traj_span = positions[traj_id]  # starting trajectory=0
             segments_per_traj.append(traj_segs)  # previously created seg
-    filter_out_last_segment(seg_index)
 
+    filter_out_last_segment(seg_index)
     segmentedTrajectories.append(segments_per_traj)  # the last segmented trajectory
+
     # ************************************ End of segmentation ******************************************
     # print("segmentedTrajectories is ", segmentedTrajectories)
     # print("list of position to be delted are ", del_res_indices)
@@ -353,6 +362,11 @@ def segmented_trajectories(
             clfs.pop(
                 pos
             )  # for DTW we do not have clfs at this stage, so skipping this line
+
+    # Jun: they can be different!
+    # assert (
+    #     len(segmentedTrajectories) == len(positions)
+    # ), f'segmentedTrajectoreis: {len(segmentedTrajectories)}, traj_spans:{len(positions)}'
 
     return segmentedTrajectories, segmented_traj, clfs
 

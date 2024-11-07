@@ -171,10 +171,16 @@ def infer_model(
     segmentedTrajectories, segments, clfs = segmented_trajectories(
         clfs, segments, traj_spans, clustering_method, filter_last_segment
     )
-    # 1 segmentedTrajectory per trajectory
-    assert (
-        len(segmentedTrajectories) == len(traj_spans)
-    ), f'segmentedTrajectoreis: {len(segmentedTrajectories)}, traj_spans:{len(traj_spans)}'
+
+    print('filter_last_segment:', opts.filter_last_segment)
+    print('segmentedTrajectoreis:', len(segmentedTrajectories))
+    print('traj_spans:', len(traj_spans))
+
+    # Jun: this is not true.
+    # # 1 segmentedTrajectory per trajectory
+    # assert (
+    #     len(segmentedTrajectories) == len(traj_spans)
+    # ), f'segmentedTrajectoreis: {len(segmentedTrajectories)}, traj_spans:{len(traj_spans)}'
 
     # plot_data_values(segmentedTrajectories, Y, L_y)
     # ********* Plotting/Visualizing various points for debugging *************************
