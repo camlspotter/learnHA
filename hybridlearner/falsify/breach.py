@@ -18,13 +18,17 @@ def find_counter_examples(
     learned_model_file: str,
     tried_parameters: matlab.double,
     tried_obj_log: matlab.double,
-) -> tuple[list[tuple[Trajectory, # original
-                      Trajectory, # learned
-                      float # distance
-                      ]],
-           matlab.double, # new_tried_parameters
-           matlab.double, # new_tried_obj_log
-           ]:
+) -> tuple[
+    list[
+        tuple[
+            Trajectory,  # original
+            Trajectory,  # learned
+            float,  # distance
+        ]
+    ],
+    matlab.double,  # new_tried_parameters
+    matlab.double,  # new_tried_obj_log
+]:
     script_fn = os.path.join(opts.output_directory, 'falsify.m')
 
     engine.eval('bdclose all;', nargout=0)
