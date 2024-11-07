@@ -21,8 +21,11 @@ def plot_timeseries_multi(
     header: list[str],
     tv_list: list[
         tuple[
-            MATRIX,  # 1D times
-            MATRIX,  # 2D values
+            str,  # title
+            tuple[
+                MATRIX,  # 1D times
+                MATRIX,  # 2D values
+            ],
         ]
     ],
 ) -> None:
@@ -44,8 +47,8 @@ def plot_timeseries_multi(
     # subplots is NOT well typed ...
     subs = subs if isinstance(subs, np.ndarray) else np.array([subs])
 
-    for i, (ts, vs) in enumerate(tv_list):
-        subs[i].set_title(f'Trajectory {i+1}')
+    for i, (title, (ts, vs)) in enumerate(tv_list):
+        subs[i].set_title(title)
         for j in range(0, vs.shape[1]):
             style = 'dotted' if re.match('original:', header[j]) else 'solid'
             subs[i].plot(ts, vs[:, j], label=header[j], linewidth=1, linestyle=style)
