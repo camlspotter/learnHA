@@ -76,13 +76,7 @@ def build_script(
     }
 
     with utils_io.open_for_write(script_fn) as out:
-        merged = merge_without_save(
-            out, original_model_file, learned_model_file, 'merged.slx'
-        )
-        # If we save, something goes wrong with model 'merged'
-        # merged = merge(
-        #     out, original_model_file, learned_model_file, 'merged.slx'
-        # )
+        merged = merge(out, original_model_file, learned_model_file, 'merged.slx')
 
         out.write("% MATLABPATH must contain Breach\n")
         out.write("InitBreach;\n\n")
