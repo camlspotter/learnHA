@@ -1,5 +1,6 @@
 # Falsification by Breach
 import os
+import random
 import numpy as np
 import textwrap
 from hybridlearner.utils import io as utils_io
@@ -13,7 +14,32 @@ from hybridlearner.simulation.input import SignalType
 from hybridlearner.slx.merger import merge, merge_without_save
 
 
-def find_counter_examples(
+class Falsifier:
+    tried_parameters: matlab.double = matlab.double([])
+    tried_obj_log: matlab.double = matlab.double([])
+
+    def find_counter_examples(
+        self,
+        _rng: random.Random,
+        opts: find_counter_examples_protocol,
+        learned_model_file: str,
+        _i: int,
+    ) -> list[
+        tuple[
+            Trajectory,  # original
+            Trajectory,  # learned
+            float,  # distance
+        ]
+    ]:
+        (counter_examples, tried_parameters, tried_obj_log) = find_counter_examples_aux(
+            opts, learned_model_file, self.tried_parameters, self.tried_obj_log
+        )
+        self.tried_parameters = tried_parameters
+        self.tried_obj_log = tried_obj_log
+        return counter_examples
+
+
+def find_counter_examples_aux(
     opts: find_counter_examples_protocol,
     learned_model_file: str,
     tried_parameters: matlab.double,

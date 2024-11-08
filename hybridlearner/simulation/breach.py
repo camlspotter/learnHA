@@ -1,5 +1,6 @@
 # Simluation by Breach
 import os
+import random
 import numpy as np
 import textwrap
 from .input import SignalType
@@ -11,6 +12,7 @@ from hybridlearner.simulation import simulate_protocol
 
 
 def simulate(
+    _rng: random.Random,
     opts: simulate_protocol,
     simulink_model_file: str,
     output_file: str,

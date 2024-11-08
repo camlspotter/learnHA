@@ -1,3 +1,4 @@
+import random
 from pydantic.dataclasses import dataclass
 
 from .breach import *
@@ -21,7 +22,10 @@ opts = simulate_options(
     output_directory="_out",
 )
 
+rng = random.Random()
+
 simulate(
+    rng,
     opts,
     '../data/models/ex_sldemo_bounce_Input.slx',  # from _out/ directory
     '_out/breach_simulation.txt',

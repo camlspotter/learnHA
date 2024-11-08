@@ -19,4 +19,7 @@ with io.open_for_write(script) as oc:
         'merged.slx',
     )
 
+engine.eval('bdclose all;', nargout=0)
+engine.eval('clear;', nargout=0)
+
 engine.run(script)

@@ -27,8 +27,12 @@ build_script(
     opts, '_out/falsify.m', 'data/models/bball_learned_HA0.slx', matlab.double([])
 )
 
-trjs = find_counter_examples(
-    opts, 'data/models/bball_learned_HA0.slx', matlab.double([]), matlab.double([])
+falsifier = Falsifier()
+
+rng = random.Random()
+
+trjs = falsifier.find_counter_examples(
+    rng, opts, 'data/models/bball_learned_HA0.slx', 0
 )
 
 print(trjs)

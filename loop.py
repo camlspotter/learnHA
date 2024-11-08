@@ -29,7 +29,7 @@ from hybridlearner import automaton
 from hybridlearner.automaton import HybridAutomaton
 from hybridlearner.slx import compiler
 from hybridlearner import matlab
-from hybridlearner.falsify import find_counter_examples
+from hybridlearner.falsify import Falsifier
 from hybridlearner.report import report
 
 
@@ -134,6 +134,8 @@ simulate(rng, opts, opts.simulink_model_file, initial_simulation_file, 1)  # sta
 
 trajectories_files = [initial_simulation_file]
 
+falsify = Falsifier()
+
 for i in range(1, opts.max_nloops + 1):
     # Inference
 
@@ -149,7 +151,7 @@ for i in range(1, opts.max_nloops + 1):
 
     # Find counter examples
 
-    result = find_counter_examples(rng, opts, output_slx_file, i)
+    result = falsify.find_counter_examples(rng, opts, output_slx_file, i)
 
     header = ['time'] + opts.input_variables + opts.output_variables
 

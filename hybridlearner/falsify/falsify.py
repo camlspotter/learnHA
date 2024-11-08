@@ -42,7 +42,24 @@ class find_counter_examples_options:
     counter_example_threshold: float
 
 
-def find_counter_examples(
+class Falsifier:
+    def find_counter_examples(
+        self,
+        rng: random.Random,
+        opts: find_counter_examples_protocol,
+        learned_model_file: str,
+        i: int,
+    ) -> list[
+        tuple[
+            Trajectory,  # original
+            Trajectory,  # learned
+            float,  # distance
+        ]
+    ]:
+        return find_counter_examples_aux(rng, opts, learned_model_file, i)
+
+
+def find_counter_examples_aux(
     rng: random.Random,
     opts: find_counter_examples_protocol,
     output_slx_file: str,

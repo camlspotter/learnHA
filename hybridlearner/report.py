@@ -29,7 +29,6 @@ from hybridlearner import automaton
 from hybridlearner.automaton import HybridAutomaton
 from hybridlearner.slx import compiler
 from hybridlearner import matlab
-from hybridlearner.falsify import find_counter_examples
 from hybridlearner.plot import plot_timeseries_multi
 
 

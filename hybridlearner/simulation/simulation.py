@@ -10,7 +10,12 @@ from hybridlearner.simulation.script import generate_simulation_script
 import hybridlearner.utils.io as utils_io
 from hybridlearner.types import Invariant, MATRIX
 from hybridlearner.simulation.input import SignalType
-from hybridlearner.trajectory import Trajectory, write_trajectory
+from hybridlearner.trajectory import (
+    Trajectory,
+    write_trajectory,
+    load_trajectories,
+    Trajectories,
+)
 
 
 def simulate1(
@@ -117,7 +122,7 @@ def simulate(
     simulink_model_file: str,
     output_file: str,
     nsimulations: int,
-) -> None:
+) -> Trajectories:
     """
     1 stop simulation function
 
@@ -161,3 +166,6 @@ def simulate(
         output_variables=opts.output_variables,
         inputs=inputs,
     )
+
+    (_, trajs) = load_trajectories(output_file)
+    return trajs
