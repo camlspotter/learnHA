@@ -22,10 +22,6 @@ opts = find_counter_examples_options(
     skip_already_tried_parameters=True,
 )
 
-build_script(
-    opts, '_out/falsify.m', 'data/models/bball_learned_HA0.slx', matlab.double([])
-)
-
 falsifier = Falsifier()
 
 rng = random.Random()
