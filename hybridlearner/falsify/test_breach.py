@@ -1,13 +1,11 @@
 from .breach import *
 from hybridlearner.simulation.input import SignalType
 from hybridlearner.types import Range
-from hybridlearner.falsify import find_counter_examples_options
 from hybridlearner import matlab
 
 opts = find_counter_examples_options(
     time_horizon=20,
     sampling_time=0.01,
-    fixed_interval_data=False,
     invariant={
         'u': Range(min=-11, max=-9),
         'x': Range(min=10, max=20),

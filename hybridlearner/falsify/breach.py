@@ -3,15 +3,48 @@ import os
 import random
 import numpy as np
 import textwrap
+from typing import Protocol
+from pydantic.dataclasses import dataclass
+from hybridlearner.types import Invariant
 from hybridlearner.utils import io as utils_io
 from hybridlearner import matlab
 from hybridlearner.matlab import engine
 from hybridlearner.trajectory import Trajectories, Trajectory
 from hybridlearner.types import Range, MATRIX
 from hybridlearner.simulation import simulate_protocol
-from hybridlearner.falsify import find_counter_examples_protocol
 from hybridlearner.simulation.input import SignalType
 from hybridlearner.slx.merger import merge, merge_without_save
+
+
+# Protocol for subtyping!
+# Unfortunately I cannot inherit dataclasses and have to list all the fields here.
+class find_counter_examples_protocol(Protocol):
+    time_horizon: float  # total time of simulation
+    sampling_time: float  # simulation frame time
+    invariant: Invariant
+    number_of_cps: dict[str, int]
+    signal_types: dict[str, SignalType]
+    input_variables: list[str]
+    output_variables: list[str]
+    output_directory: str
+    simulink_model_file: str
+    nsimulations: int
+    counter_example_threshold: float
+
+
+@dataclass
+class find_counter_examples_options:
+    time_horizon: float  # total time of simulation
+    sampling_time: float  # simulation frame time
+    invariant: Invariant
+    number_of_cps: dict[str, int]
+    signal_types: dict[str, SignalType]
+    input_variables: list[str]
+    output_variables: list[str]
+    output_directory: str
+    simulink_model_file: str
+    nsimulations: int
+    counter_example_threshold: float
 
 
 class Falsifier:
