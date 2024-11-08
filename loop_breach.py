@@ -41,6 +41,7 @@ class Options(
     counter_example_threshold: float
     nsimulations: int
     max_nloops: int
+    skip_already_tried_parameters: bool
 
 
 @typechecked
@@ -71,6 +72,13 @@ def get_options() -> Options:
         help='Max number of inference loops',
         type=int,
         default=10,
+        required=False,
+    )
+    parser.add_argument(
+        '--skip-already-tried-parameters',
+        help='Skip Breach falsification of already tried parameters (default=True)',
+        type=bool,
+        default=True,
         required=False,
     )
     common_options.add_argument_group(parser)

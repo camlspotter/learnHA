@@ -31,11 +31,14 @@ class find_counter_examples_protocol(Protocol):
     nsimulations: int
     counter_example_threshold: float
 
+    # Hack to skip already tried parameters.
+    skip_already_tried_parameters: bool
+
 
 @dataclass
 class find_counter_examples_options:
-    time_horizon: float  # total time of simulation
-    sampling_time: float  # simulation frame time
+    time_horizon: float
+    sampling_time: float
     invariant: Invariant
     number_of_cps: dict[str, int]
     signal_types: dict[str, SignalType]
@@ -45,6 +48,7 @@ class find_counter_examples_options:
     simulink_model_file: str
     nsimulations: int
     counter_example_threshold: float
+    skip_already_tried_parameters: bool
 
 
 class Falsifier:
@@ -67,8 +71,9 @@ class Falsifier:
         (counter_examples, tried_parameters, tried_obj_log) = find_counter_examples_aux(
             opts, learned_model_file, self.tried_parameters, self.tried_obj_log
         )
-        self.tried_parameters = tried_parameters
-        self.tried_obj_log = tried_obj_log
+        if opts.skip_already_tried_parameters:
+            self.tried_parameters = tried_parameters
+            self.tried_obj_log = tried_obj_log
         return counter_examples
 
 

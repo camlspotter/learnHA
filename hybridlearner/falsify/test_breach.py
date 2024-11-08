@@ -19,6 +19,7 @@ opts = find_counter_examples_options(
     simulink_model_file='data/models/ex_sldemo_bounce_Input.slx',
     nsimulations=20,
     counter_example_threshold=0.1,
+    skip_already_tried_parameters=True,
 )
 
 build_script(
