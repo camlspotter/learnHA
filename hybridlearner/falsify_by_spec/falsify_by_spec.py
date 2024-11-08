@@ -63,8 +63,7 @@ class Falsifier:
         _i: int,
     ) -> list[
         tuple[
-            Trajectory,
-            float,  # distance
+            Trajectory, float  # distance
         ]
     ]:
         (counter_examples, tried_parameters, tried_obj_log) = find_counter_examples_aux(
@@ -84,8 +83,7 @@ def find_counter_examples_aux(
 ) -> tuple[
     list[
         tuple[
-            Trajectory,
-            float,  # distance
+            Trajectory, float  # distance
         ]
     ],
     matlab.double,  # new_tried_parameters
@@ -114,9 +112,7 @@ def find_counter_examples_aux(
         signals = engine.getvar('signals')
         scores = np.array(engine.getvar('scores'))[0]
 
-    trs = list(
-        map(lambda sig: (time, np.transpose(np.array(sig))), signals)
-    )
+    trs = list(map(lambda sig: (time, np.transpose(np.array(sig))), signals))
 
     tried_parameters = engine.getvar('tried_parameters')
     tried_obj_log = engine.getvar('tried_obj_log')
@@ -126,10 +122,7 @@ def find_counter_examples_aux(
 
     # XXX No distance for now
     return (
-        [
-            (t, -score)
-            for (t, score) in zip(trs, scores)
-        ],
+        [(t, -score) for (t, score) in zip(trs, scores)],
         tried_parameters,
         tried_obj_log,
     )
@@ -146,8 +139,13 @@ def build_script(
     }
 
     with utils_io.open_for_write(script_fn) as out:
-
-        embeded = embed(out, learned_model_file, 'embeded.slx', opts.input_variables, opts.output_variables)
+        embeded = embed(
+            out,
+            learned_model_file,
+            'embeded.slx',
+            opts.input_variables,
+            opts.output_variables,
+        )
 
         out.write("% MATLABPATH must contain Breach\n")
         out.write("InitBreach;\n\n")
@@ -210,10 +208,7 @@ def build_script(
             + "}"
         )
         signal_comments = "\n".join(
-            [
-                f'% Input variable {iv} at signal in_{iv}'
-                for iv in opts.input_variables
-            ]
+            [f'% Input variable {iv} at signal in_{iv}' for iv in opts.input_variables]
             + [
                 f'% Output variable {ov} at signal out_{ov}'
                 for ov in opts.output_variables

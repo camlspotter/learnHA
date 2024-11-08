@@ -18,7 +18,7 @@ opts = find_counter_examples_options(
     output_directory="_out",
     nsimulations=20,
     skip_already_tried_parameters=True,
-    stl_spec='alw (out_x[t] < 25)', # XXX name
+    stl_spec='alw (out_x[t] < 25)',  # XXX name
 )
 
 falsifier = Falsifier()
