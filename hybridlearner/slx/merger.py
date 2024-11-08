@@ -137,6 +137,7 @@ def connect_ports(
             %                     |Subtract| -> |Abs| -> |Integrate| --> |diffi|  
             % Outport(i) of b -->-+--------+    +---+    +---------+     +-----+
 
+            % XXX No need to get diffs between input ports
             for i = 1:length(aPorts.Outport)
                diff = sprintf('{merged}/diff%d', i);
                add_block('simulink/Sinks/Out1', diff);
@@ -163,7 +164,7 @@ def connect_ports(
                add_line('{merged}', aPorts.Outport(1), subports.Inport(1));
                add_line('{merged}', bPorts.Outport(1), subports.Inport(2));
                add_line('{merged}', subports.Outport(1), absports.Inport(1));
-           end
+            end
 
             Simulink.BlockDiagram.arrangeSystem('{merged}');
 
