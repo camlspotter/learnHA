@@ -110,12 +110,12 @@ def find_counter_examples_aux(
         time = matlab.double([])
         original_signals = matlab.double([])
         learned_signals = matlab.double([])
-        maybe_scores = np.array([])
+        scores = np.array([])
     else:
         time = np.array(engine.getvar('time'))[0]
         original_signals = engine.getvar('original_signals')
         learned_signals = engine.getvar('learned_signals')
-        maybe_scores = np.array(engine.getvar('maybe_scores'))[0]
+        scores = np.array(engine.getvar('scores'))[0]
 
     original_trs = list(
         map(lambda sig: (time, np.transpose(np.array(sig))), original_signals)
@@ -135,7 +135,7 @@ def find_counter_examples_aux(
     return (
         [
             (ot, lt, -score)
-            for (ot, lt, score) in zip(original_trs, learned_trs, maybe_scores)
+            for (ot, lt, score) in zip(original_trs, learned_trs, scores)
         ],
         tried_parameters,
         tried_obj_log,
@@ -217,7 +217,6 @@ def build_script(
             )
             + "}"
         )
-        original_signal_comments = '%hahaha'
         original_signal_comments = "\n".join(
             [
                 f'% Input variable {v} at signal in_{i+1}'
@@ -293,30 +292,15 @@ def build_script(
                 % time = falses.GetTime() % GetTime() seems broken.
                 time = falses.P.traj{{1}}.time;
 
-                all_signal_names = falses.GetSignalList();
-
-                """
-            )
-        )
-        out.write(f"{original_signal_comments}\n")
-        out.write(
-            textwrap.dedent(
-                f"""\
+                {original_signal_comments}
                 original_signal_names = {original_signal_names};
                 original_signals = falses.GetSignalValues(original_signal_names);
 
-                """
-            )
-        )
-
-        out.write(f"{learned_signal_comments}\n")
-        out.write(
-            textwrap.dedent(
-                f"""\
+                {learned_signal_comments}
                 learned_signal_names = {learned_signal_names};
                 learned_signals = falses.GetSignalValues(learned_signal_names);
 
-                maybe_scores = pb.obj_false;
+                scores = pb.obj_false;
                 """
             )
         )
