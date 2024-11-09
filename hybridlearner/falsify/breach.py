@@ -155,7 +155,14 @@ def build_script(
     }
 
     with utils_io.open_for_write(script_fn) as out:
-        merged = merge(out, original_model_file, learned_model_file, 'merged.slx')
+        merged = merge(
+            out,
+            original_model_file,
+            learned_model_file,
+            'merged.slx',
+            opts.input_variables,
+            opts.output_variables,
+        )
 
         out.write("% MATLABPATH must contain Breach\n")
         out.write("InitBreach;\n\n")
@@ -179,17 +186,16 @@ def build_script(
 
         # Generators of the input variables
         for iv in opts.input_variables:
-            idx = variable_index[iv] + 1  # need +1
             ncps = opts.number_of_cps[iv]
             signal_type = opts.signal_types[iv]
             r = opts.invariant[iv]
-            out.write(f"% Input signal in_{idx} for input variable {iv}\n")
+            out.write(f"% Input signal {iv} for input variable {iv}\n")
             match signal_type:
                 case SignalType.FIXED_STEP:
                     out.write(f"Bsim.SetInputGen('UniStep{ncps}');\n")
                     for i in range(0, ncps):
                         out.write(
-                            f"Bsim.SetParamRanges({{'in_{idx}_u{i}'}}, [{r.min} {r.max}]);\n"
+                            f"Bsim.SetParamRanges({{'{iv}_u{i}'}}, [{r.min} {r.max}]);\n"
                         )
                     out.write("\n")
 
@@ -206,25 +212,22 @@ def build_script(
                     )
                     for i in range(0, ncps):
                         out.write(
-                            f"Bsim.SetParamRanges({{'in_{idx}_u{i}'}}, [{r.min} {r.max}]);\n"
+                            f"Bsim.SetParamRanges({{'{iv}_u{i}'}}, [{r.min} {r.max}]);\n"
                         )
 
         original_signal_names = (
             "{"
             + ",".join(
-                [f"{{'in_{i+1}'}}" for (i, _) in enumerate(opts.input_variables)]
-                + [f"{{'out_a{i+1}'}}" for (i, _) in enumerate(opts.output_variables)]
+                [f"{{'{iv}'}}" for iv in opts.input_variables]
+                + [f"{{'a_{ov}'}}" for ov in opts.output_variables]
             )
             + "}"
         )
         original_signal_comments = "\n".join(
-            [
-                f'% Input variable {v} at signal in_{i+1}'
-                for (i, v) in enumerate(opts.input_variables)
-            ]
+            [f'% Input variable {iv} at signal {iv}' for iv in opts.input_variables]
             + [
-                f'% Original output variable {v} at signal out_a{i+1}'
-                for (i, v) in enumerate(opts.output_variables)
+                f'% Original output variable {ov} at signal a_{ov}'
+                for ov in opts.output_variables
             ]
         )
 
@@ -232,19 +235,16 @@ def build_script(
         learned_signal_names = (
             "{"
             + ",".join(
-                [f"{{'in_{i+1}'}}" for (i, _) in enumerate(opts.input_variables)]
-                + [f"{{'out_b{i+1}'}}" for (i, _) in enumerate(opts.output_variables)]
+                [f"{{'{iv}'}}" for iv in opts.input_variables]
+                + [f"{{'b_{ov}'}}" for ov in opts.output_variables]
             )
             + "}"
         )
         learned_signal_comments = "\n".join(
-            [
-                f'% Input variable {v} at signal in_{i+1}'
-                for (i, v) in enumerate(opts.input_variables)
-            ]
+            [f'% Input variable {iv} at signal {iv}' for iv in opts.input_variables]
             + [
-                f'% Learned output variable {v} at signal out_b{i+1}'
-                for (i, v) in enumerate(opts.output_variables)
+                f'% Learned output variable {ov} at signal b_{ov}'
+                for ov in opts.output_variables
             ]
         )
 
@@ -252,8 +252,8 @@ def build_script(
         print('Set max_obj_eval:', max_obj_eval)
 
         stl_components = [
-            f'diff{i+1}[t] < {opts.counter_example_threshold}'
-            for (i, _) in enumerate(opts.output_variables)
+            f'diff_{ov}[t] < {opts.counter_example_threshold}'
+            for ov in opts.output_variables
         ]
         stl_formula = f"alw ({' and '.join(stl_components)})"
 
@@ -292,11 +292,27 @@ def build_script(
                 % time = falses.GetTime() % GetTime() seems broken.
                 time = falses.P.traj{{1}}.time;
 
-                {original_signal_comments}
+                """
+            )
+        )
+
+        out.write(f"{original_signal_comments}\n")
+
+        out.write(
+            textwrap.dedent(
+                f"""\
                 original_signal_names = {original_signal_names};
                 original_signals = falses.GetSignalValues(original_signal_names);
 
-                {learned_signal_comments}
+                """
+            )
+        )
+
+        out.write(f"{learned_signal_comments}\n")
+
+        out.write(
+            textwrap.dedent(
+                f"""\
                 learned_signal_names = {learned_signal_names};
                 learned_signals = falses.GetSignalValues(learned_signal_names);
 
