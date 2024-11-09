@@ -173,13 +173,13 @@ def build_script(
             ncps = opts.number_of_cps[iv]
             signal_type = opts.signal_types[iv]
             r = opts.invariant[iv]
-            out.write(f"% Input signal in_{iv} for input variable {iv}\n")
+            out.write(f"% Input signal {iv} for input variable {iv}\n")
             match signal_type:
                 case SignalType.FIXED_STEP:
                     out.write(f"Bsim.SetInputGen('UniStep{ncps}');\n")
                     for i in range(0, ncps):
                         out.write(
-                            f"Bsim.SetParamRanges({{'in_{iv}_u{i}'}}, [{r.min} {r.max}]);\n"
+                            f"Bsim.SetParamRanges({{'{iv}_u{i}'}}, [{r.min} {r.max}]);\n"
                         )
                     out.write("\n")
 
@@ -196,23 +196,20 @@ def build_script(
                     )
                     for i in range(0, ncps):
                         out.write(
-                            f"Bsim.SetParamRanges({{'in_{iv}_u{i}'}}, [{r.min} {r.max}]);\n"
+                            f"Bsim.SetParamRanges({{'{iv}_u{i}'}}, [{r.min} {r.max}]);\n"
                         )
 
         signal_names = (
             "{"
             + ",".join(
-                [f"{{'in_{iv}'}}" for iv in opts.input_variables]
-                + [f"{{'out_{ov}'}}" for ov in opts.output_variables]
+                [f"{{'{iv}'}}" for iv in opts.input_variables]
+                + [f"{{'{ov}'}}" for ov in opts.output_variables]
             )
             + "}"
         )
         signal_comments = "\n".join(
-            [f'% Input variable {iv} at signal in_{iv}' for iv in opts.input_variables]
-            + [
-                f'% Output variable {ov} at signal out_{ov}'
-                for ov in opts.output_variables
-            ]
+            [f'% Input variable {iv} at signal {iv}' for iv in opts.input_variables]
+            + [f'% Output variable {ov} at signal {ov}' for ov in opts.output_variables]
         )
 
         max_obj_eval = opts.nsimulations + np.array(tried_parameters).shape[1]
@@ -251,8 +248,15 @@ def build_script(
                 % Times
                 % time = falses.GetTime() % GetTime() seems broken.
                 time = falses.P.traj{{1}}.time;
+                """
+            )
+        )
 
-                {signal_comments}
+        out.write(f'{signal_comments}\n')
+
+        out.write(
+            textwrap.dedent(
+                f"""\
                 signal_names = {signal_names};
                 signals = falses.GetSignalValues(signal_names);
 
