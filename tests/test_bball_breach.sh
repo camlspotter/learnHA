@@ -20,6 +20,6 @@ pipenv run python loop_breach.py \
      \
      --ode-solver-type fixed --ode-solver FixedStepAuto --invariant-mode 2 \
      \
-     -n 10 \
+     -n 30 \
      --counter-example-threshold 15.0 \
      --max-nloops 5
