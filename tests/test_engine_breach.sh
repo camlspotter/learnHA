@@ -1,0 +1,38 @@
+#!/bin/bash
+
+set -e
+
+# Engine Timing System
+
+output_directory=_out/engine_breach
+rm -rf $output_directory
+mkdir -p $output_directory || true
+
+# engine_64.slx seems to be built from sldemo_engine*.slx.
+#
+# Simulations of sldemo_engine*.slx produce trajectories with non unique times-steps,
+# which are not supported by the current inference algorithm.
+
+pipenv run python loop_breach.py \
+     \
+     --input-variables 'x0,x1' --output-variables 'x2' \
+     \
+     --simulink-model-file data/models/engine_64.slx \
+     --time-horizon 10 --sampling-time 0.01 \
+     --fixed-interval-data False \
+     --invariant 'x0:(2,9),x1:(24,25),x2:(2000,2000)' \
+     --number-of-cps 'x0:3,x1:3' --signal-types 'x0:fixed-step,x1:fixed-step' \
+     \
+     --output-directory $output_directory \
+     -c dtw -d 1 -m 20 -b 1 \
+     --segmentation-error-tol 0.99 \
+     --threshold-distance 1000 --threshold-correlation 0.9 \
+     --lmm-step-size 5 --is-invariant False --filter-last-segment False \
+     \
+     --ode-solver-type variable --ode-solver ode45 --invariant-mode 2 \
+     --ode-speedup 100 \
+     \
+     -n 5 \
+     --counter-example-threshold 10.0 \
+     --max-nloops 5 \
+     --annotations 'x2:continuous'
