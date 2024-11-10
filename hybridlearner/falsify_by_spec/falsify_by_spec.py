@@ -103,14 +103,52 @@ def find_counter_examples_aux(
     engine.run(script_fn)
 
     time = np.array(engine.getvar('time'))
+
+    # F**king handling of corner cases of a Python library 😡😡😡!!
     if time.size == 0:
+        print('No counter examples found')
         time = matlab.double([])
         signals = matlab.double([])
         scores = np.array([])
     else:
         time = np.array(engine.getvar('time'))[0]
-        signals = engine.getvar('signals')
-        scores = np.array(engine.getvar('scores'))[0]
+        signals = np.array(engine.getvar('signals'))
+        scores = np.array(engine.getvar('scores'))
+        print(
+            'Counter example sizes:',
+            'time:',
+            np.shape(time),
+            'signals:',
+            np.shape(signals),
+            'scores:',
+            np.shape(scores),
+        )
+
+        # Usually, if multiple ncounter examples found, np.shape(signals_matlab) = (n, 3, 1001)
+        # (1001 is the number of the frames)
+        #
+        # However, if only 1 counter example found, np.shape(signals_matlab) = (3, 1001)
+        match np.shape(signals):
+            case (_, _, _):
+                pass
+            case (_, _):
+                print('Fixing the dimension of singals')
+                signals = signals[np.newaxis, :]
+            case _:
+                assert False
+
+        # scores can be empty! when only 1 counter example is found
+        scores = np.array(engine.getvar('scores'))
+        print('scores:', scores)
+        if scores.size == 0:
+            print('Fixing the dimension of scores')
+            scores = np.array([0] * len(time))
+        else:
+            scores = scores[0]
+
+    print(
+        'time', np.shape(time), 'signals', np.shape(signals), 'scores', np.shape(scores)
+    )
 
     trs = list(map(lambda sig: (time, np.transpose(np.array(sig))), signals))
 
@@ -120,7 +158,6 @@ def find_counter_examples_aux(
     tried_parameters2: MATRIX = np.transpose(np.array(tried_parameters))
     print('tried_parameters', tried_parameters2)
 
-    # XXX No distance for now
     return (
         [(t, -score) for (t, score) in zip(trs, scores)],
         tried_parameters,
@@ -239,6 +276,7 @@ def build_script(
                 if isempty(falses)
                     time = [];
                     signals = [];
+                    scores = [];
                     return;
                 end
 

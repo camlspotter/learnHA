@@ -18,7 +18,7 @@ opts = find_counter_examples_options(
     output_directory="_out",
     nsimulations=20,
     skip_already_tried_parameters=True,
-    stl_spec='alw (x[t] < 25)',
+    stl_spec='not (ev (alw_[0,2] (0 <= x[t] and x[t] < 0.01)))',
 )
 
 falsifier = Falsifier()
