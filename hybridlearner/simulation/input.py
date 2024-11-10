@@ -5,6 +5,7 @@ import random
 from hybridlearner.utils.math import epsilon
 from hybridlearner.types import Range
 from hybridlearner.types import Invariant
+from hybridlearner.trajectory import Trajectory
 import json
 
 
@@ -132,6 +133,19 @@ def generate_simulation_input(
     return Simulation_input(
         input_value_ts=input_value_ts, initial_output_values=initial_output_values
     )
+
+
+def input_of_trajectory(
+    tr: Trajectory, input_variables: list[str], output_variables: list[str]
+) -> Simulation_input:
+    varindex = {v: i for (i, v) in enumerate(input_variables + output_variables)}
+    times = tr[0]
+    initial_output_values = {v: tr[1][varindex[v], 0] for v in output_variables}
+    input_value_ts = {
+        v: [(t, x) for (t, x) in zip(times, tr[1][varindex[v], :])]
+        for v in input_variables
+    }
+    return Simulation_input(input_value_ts, initial_output_values)
 
 
 def test() -> None:
