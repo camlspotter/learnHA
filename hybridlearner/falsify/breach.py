@@ -131,7 +131,6 @@ def find_counter_examples_aux(
     tried_parameters2: MATRIX = np.transpose(np.array(tried_parameters))
     print('tried_parameters', tried_parameters2)
 
-    # XXX No distance for now
     return (
         [
             (ot, lt, -score)
@@ -282,6 +281,7 @@ def build_script(
                     time = [];
                     original_signals = [];
                     learned_signals = [];
+                    scores = [];
                     return;
                 end
 
