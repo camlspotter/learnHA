@@ -23,4 +23,4 @@ else:
 header, trajectories = load_trajectories(args['tsv'])
 
 # Drop 'time' header
-plot_timeseries_multi(output, output, header[1:], trajectories)
+plot_timeseries_multi(output, output, header[1:], [('', tr) for tr in trajectories])
