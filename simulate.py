@@ -12,7 +12,7 @@ from typeguard import typechecked
 # from pydantic.dataclasses import dataclass
 from dataclasses import dataclass
 
-from hybridlearner.simulation import simulate_list
+from hybridlearner.simulation import simulate_list_aux
 from hybridlearner.simulation.input import generate_simulation_input
 from hybridlearner.simulation.script import generate_simulation_script
 import hybridlearner.utils.io as utils_io
@@ -91,7 +91,7 @@ inputs = [
     for _ in range(opts.nsimulations)
 ]
 
-simulate_list(
+simulate_list_aux(
     script_file=script_file,
     output_file=opts.output_file,
     input_variables=opts.input_variables,

@@ -7,7 +7,7 @@ import hybridlearner.utils.io as utils_io
 from hybridlearner.types import Range
 from hybridlearner.simulation.input import generate_simulation_input, SignalType
 from hybridlearner.simulation.script import generate_simulation_script
-from hybridlearner.simulation import simulate_list
+from hybridlearner.simulation import simulate_list_aux
 
 
 class Test(unittest.TestCase):
@@ -54,7 +54,7 @@ class Test(unittest.TestCase):
             for _ in range(nsimulations)
         ]
 
-        simulate_list(
+        simulate_list_aux(
             script_file=script_file,
             output_file=output_file,
             input_variables=input_variables,

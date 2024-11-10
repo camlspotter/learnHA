@@ -56,13 +56,13 @@ def simulate1(
     return (times, values)
 
 
-def simulate_list(
+def simulate_list_aux(
     script_file: str,
     output_file: str,
     input_variables: list[str],
     output_variables: list[str],
     inputs: list[Simulation_input],
-) -> None:
+) -> Trajectories:
     """
     Simulations of multiple inputs.
 
@@ -87,6 +87,9 @@ def simulate_list(
                 input=input,
             )
             write_trajectory(oc, tr)
+
+    (_, trajs) = load_trajectories(output_file)
+    return trajs
 
 
 @dataclass
@@ -114,6 +117,35 @@ class simulate_protocol(Protocol):
     input_variables: list[str]
     output_variables: list[str]
     output_directory: str
+
+
+def simulate_list(
+    opts: simulate_protocol,
+    simulink_model_file: str,
+    output_file: str,
+    inputs: list[Simulation_input],
+) -> Trajectories:
+    script_file = os.path.join(opts.output_directory, "simulate_model.m")
+
+    with utils_io.open_for_write(script_file) as out:
+        generate_simulation_script(
+            out=out,
+            title='Title',
+            simulink_model_file=simulink_model_file,
+            time_horizon=opts.time_horizon,
+            sampling_time=opts.sampling_time,
+            fixed_interval_data=opts.fixed_interval_data,
+            input_variables=opts.input_variables,
+            output_variables=opts.output_variables,
+        )
+
+    return simulate_list_aux(
+        script_file=script_file,
+        output_file=output_file,
+        input_variables=opts.input_variables,
+        output_variables=opts.output_variables,
+        inputs=inputs,
+    )
 
 
 def simulate(
@@ -145,27 +177,4 @@ def simulate(
         for _ in range(nsimulations)
     ]
 
-    script_file = os.path.join(opts.output_directory, "simulate_model.m")
-
-    with utils_io.open_for_write(script_file) as out:
-        generate_simulation_script(
-            out=out,
-            title='Title',
-            simulink_model_file=simulink_model_file,
-            time_horizon=opts.time_horizon,
-            sampling_time=opts.sampling_time,
-            fixed_interval_data=opts.fixed_interval_data,
-            input_variables=opts.input_variables,
-            output_variables=opts.output_variables,
-        )
-
-    simulate_list(
-        script_file=script_file,
-        output_file=output_file,
-        input_variables=opts.input_variables,
-        output_variables=opts.output_variables,
-        inputs=inputs,
-    )
-
-    (_, trajs) = load_trajectories(output_file)
-    return trajs
+    return simulate_list(opts, simulink_model_file, output_file, inputs)
