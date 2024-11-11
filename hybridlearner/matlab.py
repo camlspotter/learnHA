@@ -24,9 +24,9 @@ class Matlab:
         _eng.run(fn, nargout=0)  # nargout=0 is required since x.m returns nothing.
         print(f"Executed MATLAB script {fn}")
 
-    def eval(self, s: str, nargout: int) -> None:
+    def eval(self, s: str, nargout: int) -> Any:
         _eng = self.engine()
-        _eng.eval(s, nargout=nargout)
+        return _eng.eval(s, nargout=nargout)
 
     def setvar(self, var: str, val: Any) -> None:
         _eng = self.engine()
