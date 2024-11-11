@@ -24,4 +24,4 @@ pipenv run python loop_by_spec.py \
      -n 30 \
      --max-nloops 5 \
      \
-     --stl-spec 'alw (ev_[0,2] (x[t] > 0.01))'
+     --stl-spec 'not (ev_[0,7.9] (alw_[0,2] (x[t] < 0.01)))'
