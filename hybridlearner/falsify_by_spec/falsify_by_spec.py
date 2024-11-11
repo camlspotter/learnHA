@@ -61,18 +61,31 @@ class Falsifier:
         opts: find_counter_examples_protocol,
         learned_model_file: str,
         _i: int,
-    ) -> list[
-        tuple[
-            Trajectory, float  # distance
-        ]
+    ) -> tuple[
+        # counter examples
+        list[
+            tuple[
+                Trajectory,
+                MATRIX,  # parameters
+                float,  # distance
+            ]
+        ],
+        # all trajectories
+        list[
+            tuple[
+                Trajectory, MATRIX  # parameters
+            ]
+        ],
     ]:
-        (counter_examples, tried_parameters, tried_obj_log) = find_counter_examples_aux(
-            opts, learned_model_file, self.tried_parameters, self.tried_obj_log
+        (counter_examples, all, tried_parameters, tried_obj_log) = (
+            find_counter_examples_aux(
+                opts, learned_model_file, self.tried_parameters, self.tried_obj_log
+            )
         )
         if opts.skip_already_tried_parameters:
             self.tried_parameters = tried_parameters
             self.tried_obj_log = tried_obj_log
-        return counter_examples
+        return (counter_examples, all)
 
 
 def find_counter_examples_aux(
@@ -81,9 +94,18 @@ def find_counter_examples_aux(
     tried_parameters: matlab.double,
     tried_obj_log: matlab.double,
 ) -> tuple[
+    # counter examples
     list[
         tuple[
-            Trajectory, float  # distance
+            Trajectory,
+            MATRIX,  # parameters
+            float,  # distance
+        ]
+    ],
+    # all trajectories
+    list[
+        tuple[
+            Trajectory, MATRIX  # parameters
         ]
     ],
     matlab.double,  # new_tried_parameters
@@ -98,7 +120,8 @@ def find_counter_examples_aux(
     engine.setvar('tried_parameters', tried_parameters)
     engine.setvar('tried_obj_log', tried_obj_log)
 
-    build_script(opts, script_fn, learned_model_file, tried_parameters)
+    parameters = build_script(opts, script_fn, learned_model_file, tried_parameters)
+    parameter_list = "{" + ",".join([f"'{p}'" for p in parameters]) + "}"
 
     engine.run(script_fn)
 
@@ -138,7 +161,7 @@ def find_counter_examples_aux(
                 assert False
 
         # scores can be empty! when only 1 counter example is found
-        scores = np.array(engine.getvar('scores'))
+        scores = np.array(engine.eval('pb.obj_false', 1))
         print('scores:', scores)
         if scores.size == 0:
             print('Fixing the dimension of scores')
@@ -158,8 +181,31 @@ def find_counter_examples_aux(
     tried_parameters2: MATRIX = np.transpose(np.array(tried_parameters))
     print('tried_parameters', tried_parameters2)
 
+    all_signals = np.array(engine.getvar('all_signals'))
+    all_trs = list(map(lambda sig: (time, np.transpose(np.array(sig))), all_signals))
+
+    all_parameters = np.transpose(
+        np.array(engine.eval(f'pb.BrSet_Logged.GetParam({parameter_list})', 1))
+    )
+    print('all_parameters', np.shape(all_parameters))
+    print('all_trs', len(all_trs))
+    assert np.shape(all_parameters)[0] == len(all_trs)
+
+    # pb.X_false can be empty when only 1 counter example is found
+    # buggy: false_parameters = np.transpose(np.array(engine.eval('pb.X_false', 1)))
+    false_parameters = np.transpose(
+        np.array(engine.eval(f'falses.GetParam({parameter_list})', 1))
+    )
+    print("false_parameters", np.shape(false_parameters))
+    print('trs', len(trs))
+    assert np.shape(false_parameters)[0] == len(trs)
+
     return (
-        [(t, -score) for (t, score) in zip(trs, scores)],
+        [
+            (t, params, -score)
+            for (t, score, params) in zip(trs, scores, false_parameters)
+        ],
+        [(t, params) for (t, params) in zip(all_trs, all_parameters)],
         tried_parameters,
         tried_obj_log,
     )
@@ -170,7 +216,7 @@ def build_script(
     script_fn: str,
     learned_model_file: str,
     tried_parameters: matlab.double,
-) -> None:
+) -> list[str]:  # parameters
     variable_index: dict[str, int] = {
         v: i for (i, v) in enumerate(opts.input_variables + opts.output_variables)
     }
@@ -197,12 +243,15 @@ def build_script(
 
         out.write(f"\nBsim = BreachSimulinkSystem('{embeded}');\n\n")
 
+        parameters = []
+
         # Range of the initial output variables
         for ov in opts.output_variables:
             idx = variable_index[ov]
             r: Range = opts.invariant[ov]
             out.write(f"% Range of the initial value of output variable {ov}\n")
             out.write(f"Bsim.SetParamRanges({{'a{idx}'}}, [{r.min} {r.max}]);\n\n")
+            parameters.append(f'a{idx}')
 
         # Generators of the input variables
         for iv in opts.input_variables:
@@ -218,6 +267,7 @@ def build_script(
                         out.write(
                             f"Bsim.SetParamRanges({{'{iv}_u{i}'}}, [{r.min} {r.max}]);\n"
                         )
+                        parameters.append(f'{iv}_u{i}')
                     out.write("\n")
 
                 case SignalType.LINEAR:
@@ -235,6 +285,7 @@ def build_script(
                         out.write(
                             f"Bsim.SetParamRanges({{'{iv}_u{i}'}}, [{r.min} {r.max}]);\n"
                         )
+                        parameters.append(f'{iv}_u{i}')
 
         signal_names = (
             "{"
@@ -298,7 +349,11 @@ def build_script(
                 signal_names = {signal_names};
                 signals = falses.GetSignalValues(signal_names);
 
+                all_signals = pb.BrSet_Logged.GetSignalValues(signal_names);
+
                 scores = pb.obj_false;
                 """
             )
         )
+
+    return parameters

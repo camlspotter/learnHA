@@ -29,7 +29,7 @@ from hybridlearner.slx import compiler
 from hybridlearner import matlab
 from hybridlearner.simulation.breach import simulate
 from hybridlearner.simulation import simulate_list
-from hybridlearner.report import report_no_comparison
+from hybridlearner.report import report_all
 from hybridlearner.falsify_by_spec import Falsifier
 
 
@@ -156,34 +156,36 @@ for i in range(1, opts.max_nloops + 1):
 
     # Find counter examples
 
-    result = falsifier.find_counter_examples(rng, opts, output_slx_file, i)
-
-    header = ['time'] + opts.input_variables + opts.output_variables
+    false_, all_ = falsifier.find_counter_examples(rng, opts, output_slx_file, i)
+    false = [(tr, dist) for (tr, _, dist) in false_]
+    false_param_set = set([tuple(params) for (_, params, _) in false_])
+    passed = [tr for (tr, params) in all_ if tuple(params) not in false_param_set]
 
     # report
 
-    report_no_comparison(
+    report_all(
         opts.output_directory,
         os.path.basename(opts.simulink_model_file),
         i,  # iteration
         ha,
-        result,
+        false,
+        passed,
         opts.input_variables,
         opts.output_variables,
     )
 
     # Loop or not
 
-    if len(result) == 0:
+    if len(false) == 0:
         print("No counter example found")
         exit(0)
     else:
-        print(f"Counter examples: {len(result)}")
+        print(f"Counter examples: {len(false)}")
 
     # New learning set
     simulation_inputs: list[Simulation_input] = [
         input_of_trajectory(trj, opts.input_variables, opts.output_variables)
-        for (trj, _) in result
+        for (trj, _) in false
     ]
     learning_file = os.path.join(opts.output_directory, f"learning{i:02d}.txt")
     trj = simulate_list(
