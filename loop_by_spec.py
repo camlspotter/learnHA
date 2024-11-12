@@ -156,10 +156,9 @@ for i in range(1, opts.max_nloops + 1):
 
     # Find counter examples
 
-    false_, all_ = falsifier.find_counter_examples(rng, opts, output_slx_file, i)
-    false = [(tr, dist) for (tr, _, dist) in false_]
-    false_param_set = set([tuple(params) for (_, params, _) in false_])
-    passed = [tr for (tr, params) in all_ if tuple(params) not in false_param_set]
+    result = falsifier.find_counter_examples(rng, opts, output_slx_file, i)
+    false = [(tr, dist) for (tr, _, dist) in result.counter_examples]
+    passed = [tr for (tr, _) in result.passed_examples]
 
     # report
 
