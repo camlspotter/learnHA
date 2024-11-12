@@ -240,15 +240,23 @@ def report_all(
             )
             for (i, lt) in enumerate(passed_10)
         ]
-        base = f"passedexamples{iteration:02d}.svg"
-        passed_example_file = os.path.join(output_directory, base)
-        plot_timeseries_multi(passed_example_file, 'Passed examples', header, trs)
-        log.write(f"## Passed examples ({len(passed_10)} of {len(passed)})\n\n")
-        log.write(f"![]({base})\n\n")
+
+        if len(trs) != 0:
+            base = f"passedexamples{iteration:02d}.svg"
+            passed_example_file = os.path.join(output_directory, base)
+            plot_timeseries_multi(passed_example_file, 'Passed examples', header, trs)
+            log.write(f"## Passed examples ({len(passed_10)} of {len(passed)})\n\n")
+            log.write(f"![]({base})\n\n")
+        else:
+            log.write(f"## Passed examples\n\n")
+            log.write(f"None!\n\n")
 
     pandoc_html(log_filename)
 
 
 def pandoc_html(log_filename: str) -> None:
+    '''
+    Convert Markdown report to PDF if pandoc is in PATH
+    '''
     if shutil.which('pandoc'):
         subprocess.run(f'pandoc {log_filename} -o {log_filename}.html', shell=True)
