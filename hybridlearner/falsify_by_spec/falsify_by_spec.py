@@ -307,7 +307,7 @@ def build_script(
         pb.solve();
         falses = pb.GetFalse();
 
-        % Get values of time, original_signals and learned_signals for Python!
+        % Falsification cache
         tried_parameters = pb.X_log;
         tried_obj_log = pb.obj_log;
 
