@@ -40,8 +40,8 @@ def plot_timeseries_multi(
 
     plt.clf()
 
-    fig, subs = plt.subplots(len(tv_list), 1, figsize=(6, 3 * len(tv_list)))
-    fig.tight_layout(rect=[0, 0, 1, 0.96], pad=2)  # type: ignore
+    fig, subs = plt.subplots(len(tv_list), 1, figsize=(8, 3 * len(tv_list)))  # 6
+    fig.tight_layout(rect=[0, 0, 0.8, 0.96], pad=2)  # type: ignore
     fig.suptitle(title)
 
     # subplots is NOT well typed ...
@@ -52,6 +52,6 @@ def plot_timeseries_multi(
         for j in range(0, vs.shape[1]):
             style = 'dotted' if re.match('original:', header[j]) else 'solid'
             subs[i].plot(ts, vs[:, j], label=header[j], linewidth=1, linestyle=style)
-        subs[i].legend()
+        subs[i].legend(bbox_to_anchor=(1, 1), loc='upper left')
 
     plt.savefig(fn)
