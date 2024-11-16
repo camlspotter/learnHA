@@ -109,7 +109,9 @@ def find_counter_examples_aux(
     result = []
 
     for ot, lt in zip(original_trajectories, learned_trajectories):
-        assert len(ot[0]) == len(lt[0]), "Non equal number of samples for a trajectory"
+        assert (
+            len(ot[0]) == len(lt[0])
+        ), f"Non equal number of samples for a trajectory: len(ot[0])={len(ot[0])} len(lt[0])={len(lt[0])}"
         ot_ovs = ot[1][:, -len(opts.output_variables) :]
         lt_ovs = lt[1][:, -len(opts.output_variables) :]
         print("Comparing")
