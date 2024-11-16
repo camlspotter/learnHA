@@ -6,29 +6,26 @@ from hybridlearner.utils.math import epsilon
 from hybridlearner.types import Range
 from hybridlearner.types import Invariant
 from hybridlearner.trajectory import Trajectory
+from hybridlearner.astdsl import parse_expr, unparse_expr, Expr
+from hybridlearner.astdsl.parser import *
+
 import json
 
 
 class SignalType(Enum):
-    FIXED_STEP = "fixed-step"
+    FIXED_STEP = "fixed_step"
     # VAR_STEP = "var-step"
     LINEAR = "linear"
     # SPLINE = "spline"
-    # SINE_WAVE = "sine-wave"
+    # SINE_WAVE = "sine_wave"
+
+
+def parse_SignalType(e: Expr) -> SignalType:
+    return SignalType(unparse_expr(e))
 
 
 def parse_signal_types(s: str) -> dict[str, SignalType]:
-    if s == "":
-        return {}
-
-    def parse_vt(s: str) -> tuple[str, SignalType]:
-        match s.split(":"):
-            case (var, vt):
-                return (var, SignalType(vt))
-            case _:
-                assert False, "Invalid number of var type: " + s
-
-    return dict([parse_vt(s) for s in s.split(",")])
+    return parse_dict(parse_variable, parse_SignalType)(parse_expr("{" + s + "}"))
 
 
 Signal = list[tuple[float, float]]  # (time, value)
