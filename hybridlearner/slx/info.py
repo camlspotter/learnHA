@@ -1,6 +1,7 @@
 import os
 import tempfile
 import textwrap
+from typing import Any
 from typeguard import typechecked
 from hybridlearner.matlab import engine
 
@@ -38,3 +39,27 @@ def get_IOports(fn: str) -> tuple[list[str], list[str]]:
         oc.flush()
         engine.run(oc.name)
         return (getvar_list_str('inports'), getvar_list_str('outports'))
+
+
+def get_all_params(fn: str) -> Any:
+    fn = os.path.abspath(fn)
+    with tempfile.NamedTemporaryFile(
+        mode='w', suffix='.m', prefix='get_IOports_'
+    ) as oc:
+        oc.write(
+            textwrap.dedent(
+                f"""\
+                % global inports;
+                % global outports;
+                % inports='dummy';
+                % outports='dummy';
+                modelPath = "{fn}";
+                mdl = load_system(modelPath);
+                params = get_param(mdl, 'ObjectParameters');
+                """
+            )
+        )
+        oc.flush()
+        engine.run(oc.name)
+        res = engine.getvar('params')
+        return res
