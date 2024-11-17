@@ -46,6 +46,28 @@ To start over the preparation:
 
 At the toplevel directory, there are several application scripts:
 
+`loop.py`
+:  Inference loop
+
+`loop_breach.py`
+:  Inference loop using Breach
+
+`loop_by_spec.py`
+:  Inference loop using Breach falsifying an STL formula
+
+`plot_ts.py`
+:  Timeseries plotter to SVG
+
+`slx_ports.py`
+:  List IO ports of a model
+
+`slx_paramters.py`
+:  List the list of model properties
+
+## Other programs
+
+Other smaller tools
+
 `comple_ha.py`
 :  Hybrid Automaton in JSON to MATLAB SLX model compiler
 
@@ -55,17 +77,14 @@ At the toplevel directory, there are several application scripts:
 `inference.py` (or `run.py`)
 :  Hybrid Automaton inference
 
-`loop.py`
-:  Inference loop
-
-`plot_ts.py`
-:  Timeseries plotter to SVG
-
 `generate_simulation_script.py`
 :  Simulation script generator. Deprecated. Now use `simulate.py`.
 
 `generate_simulation_inputs.py`
 :  Simulation input generator.  Deprecated. Now use `simulate.py`.
+
+`distance.py`
+:  DTW distance between 2 trajectories
 
 ## Workflow example
 
