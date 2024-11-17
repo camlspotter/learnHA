@@ -114,8 +114,8 @@ def find_counter_examples_aux(
 ]:
     script_fn = os.path.join(opts.output_directory, 'falsify.m')
 
-    engine.eval('bdclose all;', nargout=0)
-    engine.eval('clear;', nargout=0)
+    engine.eval0('bdclose all;')
+    engine.eval0('clear;')
 
     engine.setvar('tried_parameters', tried_parameters)
     engine.setvar('tried_obj_log', tried_obj_log)
@@ -146,7 +146,7 @@ def find_counter_examples_aux(
     learned_signals = fix_signals(np.array(engine.getvar('learned_signals')))
 
     # scores can be empty! when only 1 counter example is found
-    scores = np.array(engine.eval('pb.obj_false', 1))
+    scores = np.array(engine.eval1('pb.obj_false'))
     if scores.size == 0:
         print('Strange scores:', scores, 'Fixing its dimension')
         scores = np.array([0])

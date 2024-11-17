@@ -28,6 +28,18 @@ class Matlab:
         _eng = self.engine()
         return _eng.eval(s, nargout=nargout)
 
+    def eval0(self, s: str) -> None:
+        """
+        Evaluate MATLAB code returning nothing.
+        """
+        self.eval(s, 0)
+
+    def eval1(self, s: str) -> Any:
+        """
+        Evaluate MATLAB code returning a value.
+        """
+        return self.eval(s, 1)
+
     def setvar(self, var: str, val: Any) -> None:
         _eng = self.engine()
         # print(f"Set MATLAB variable {var}")

@@ -102,8 +102,8 @@ def find_counter_examples_aux(
     script_fn = os.path.join(opts.output_directory, 'falsify_by_spec.m')
     learned_model_file = os.path.abspath(learned_model_file)
 
-    engine.eval('bdclose all;', nargout=0)
-    engine.eval('clear;', nargout=0)
+    engine.eval0('bdclose all;')
+    engine.eval0('clear;')
 
     engine.setvar('tried_parameters', tried_parameters)
     engine.setvar('tried_obj_log', tried_obj_log)
@@ -134,7 +134,7 @@ def find_counter_examples_aux(
     false_signals = fix_signals(np.array(engine.getvar('signals')))
 
     # scores can be empty! when only 1 counter example is found
-    scores = np.array(engine.eval('pb.obj_false', 1))
+    scores = np.array(engine.eval1('pb.obj_false'))
     if scores.size == 0:
         print('Strange scores:', scores, 'Fixing its dimension')
         scores = np.array([0])
@@ -155,7 +155,7 @@ def find_counter_examples_aux(
         map(lambda sig: (time, np.transpose(np.array(sig))), false_signals)
     )
     false_parameters = np.transpose(
-        np.array(engine.eval(f'falses.GetParam({parameter_list})', 1))
+        np.array(engine.eval1(f'falses.GetParam({parameter_list})'))
     )
     assert np.shape(false_parameters)[0] == len(false_trs)
     # Use tuple to put param in a set
@@ -168,7 +168,7 @@ def find_counter_examples_aux(
     all_signals = fix_signals(np.array(engine.getvar('all_signals')))
     all_trs = list(map(lambda sig: (time, np.transpose(np.array(sig))), all_signals))
     all_parameters = np.transpose(
-        np.array(engine.eval(f'pb.BrSet_Logged.GetParam({parameter_list})', 1))
+        np.array(engine.eval1(f'pb.BrSet_Logged.GetParam({parameter_list})'))
     )
     print(
         'all_signals', np.shape(all_signals), 'all_parameters', np.shape(all_parameters)
