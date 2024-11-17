@@ -59,6 +59,7 @@ class Test(unittest.TestCase):
             output_file=output_file,
             input_variables=input_variables,
             output_variables=output_variables,
+            sampling_time=sampling_time,
             inputs=inputs,
         )
 

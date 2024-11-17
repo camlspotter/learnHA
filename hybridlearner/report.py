@@ -23,6 +23,7 @@ from hybridlearner.trajectory import (
     Trajectories,
     Trajectory,
     save_trajectories,
+    is_nan_trajectory,
 )
 from hybridlearner.inference import infer_model
 from hybridlearner import automaton
@@ -74,6 +75,14 @@ def report(
 
         trs = [
             (
+                f"Trajectory {i} (learned model simulation failed)",  # title
+                (
+                    ot[0],  # time
+                    ot[1],  # values
+                ),
+            )
+            if is_nan_trajectory(lt)
+            else (
                 f"Trajectory {i} (dist: {dist:.2f})",  # title
                 (
                     ot[0],  # time

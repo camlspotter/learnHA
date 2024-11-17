@@ -2,6 +2,7 @@ from typing import Optional
 from io import TextIOWrapper
 import csv
 import numpy as np
+import math
 from numpy.typing import NDArray
 from pydantic.dataclasses import dataclass
 from pydantic import ConfigDict
@@ -22,10 +23,9 @@ Trajectory = tuple[
     np.ndarray,  # values part of timeseries 2D array
 ]
 
-# Trajectories
-#
-# Trajectories is a set of Trajectory.  All the trajectories must share
-# the same timestamp gap, here called stepsize.
+
+def write_trajectory(oc: TextIOWrapper, traj: Trajectory) -> None:
+    np.savetxt(oc, np.column_stack(traj), delimiter='\t', fmt='%.16g')
 
 
 def trajectory_stepsize(tr: Trajectory) -> float:
@@ -34,8 +34,14 @@ def trajectory_stepsize(tr: Trajectory) -> float:
     return times[1] - times[0]
 
 
-def write_trajectory(oc: TextIOWrapper, traj: Trajectory) -> None:
-    np.savetxt(oc, np.column_stack(traj), delimiter='\t', fmt='%.16g')
+# Simulation can fail when Simulink engine raises an exception.
+# In that case, its trajectory is a special value
+def is_nan_trajectory(tr: Trajectory) -> bool:
+    return math.isnan(tr[1][0, 0])
+
+
+def make_nan_trajectory(stepsize: float) -> Trajectory:
+    return (np.array([0, stepsize]), np.array([[math.nan], [math.nan]]))
 
 
 Trajectories = list[Trajectory]
@@ -91,7 +97,7 @@ def load_trajectories(path: str) -> tuple[list[str], Trajectories]:
             tvs_list[start:end] for (start, end) in ranges
         ]
 
-        trajectories: list[Trajectory] = [
+        trajectories: Trajectories = [
             (np.array([t for (t, _) in tvs]), np.array([vs for (_, vs) in tvs]))
             for tvs in tvs_group
         ]

@@ -1,11 +1,16 @@
 import os
 import random
+import math
 from typing import Protocol
 from pydantic.dataclasses import dataclass
 from hybridlearner.types import Invariant
 from hybridlearner.simulation.input import SignalType
 from hybridlearner.simulation import simulate
-from hybridlearner.trajectory import Trajectory, load_trajectories_files
+from hybridlearner.trajectory import (
+    Trajectory,
+    load_trajectories_files,
+    is_nan_trajectory,
+)
 from hybridlearner.trajectory.distance import trajectory_dtw_distance
 
 
@@ -109,19 +114,22 @@ def find_counter_examples_aux(
     result = []
 
     for ot, lt in zip(original_trajectories, learned_trajectories):
-        assert (
-            len(ot[0]) == len(lt[0])
-        ), f"Non equal number of samples for a trajectory: len(ot[0])={len(ot[0])} len(lt[0])={len(lt[0])}"
-        ot_ovs = ot[1][:, -len(opts.output_variables) :]
-        lt_ovs = lt[1][:, -len(opts.output_variables) :]
-        print("Comparing")
-        print(ot_ovs)
-        print(lt_ovs)
-        dist = trajectory_dtw_distance(
-            ot, lt, opts.input_variables, opts.output_variables
-        )
-        print(dist)
-        if dist > opts.counter_example_threshold:
-            result.append((ot, lt, dist))
+        if is_nan_trajectory(lt):
+            result.append((ot, lt, math.inf))
+        else:
+            assert (
+                len(ot[0]) == len(lt[0])
+            ), f"Non equal number of samples for a trajectory: len(ot[0])={len(ot[0])} len(lt[0])={len(lt[0])}"
+            ot_ovs = ot[1][:, -len(opts.output_variables) :]
+            lt_ovs = lt[1][:, -len(opts.output_variables) :]
+            print("Comparing")
+            print(ot_ovs)
+            print(lt_ovs)
+            dist = trajectory_dtw_distance(
+                ot, lt, opts.input_variables, opts.output_variables
+            )
+            print(dist)
+            if dist > opts.counter_example_threshold:
+                result.append((ot, lt, dist))
 
     return result

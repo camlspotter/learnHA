@@ -96,5 +96,6 @@ simulate_list_aux(
     output_file=opts.output_file,
     input_variables=opts.input_variables,
     output_variables=opts.output_variables,
+    sampling_time=opts.sampling_time,
     inputs=inputs,
 )

@@ -15,6 +15,7 @@ from hybridlearner.trajectory import (
     write_trajectory,
     load_trajectories,
     Trajectories,
+    make_nan_trajectory,
 )
 
 
@@ -22,6 +23,7 @@ def simulate1(
     script_file: str,
     input_variables: list[str],
     output_variables: list[str],
+    sampling_time: float,
     input: Simulation_input,
 ) -> Trajectory:
     """
@@ -32,6 +34,9 @@ def simulate1(
     - input_variables: list of the input variables
     - output_variables: list of the output variables
     - input: simulation parameters
+
+    Simulation may fail if Simulink engine raises a DerivNotFinite exception.
+    In that case simulate1 returns a nan-trajectory. (See trajectory.make_nan_trajectory for details)
     """
     variable_index: dict[str, int] = {
         v: i for (i, v) in enumerate(input_variables + output_variables)
@@ -49,6 +54,18 @@ def simulate1(
 
     matlab.engine.run(script_file)
 
+    simulation_error: list[str] = matlab.engine.getvar("simulation_error")
+    print('simulation_error', simulation_error)
+
+    match simulation_error:
+        case []:  # no error
+            pass
+        case ['Simulink:Engine:DerivNotFinite', message]:
+            print(f'Simulation failed because of infinite derivative: {message}')
+            return make_nan_trajectory(sampling_time)
+        case _:
+            assert True, f"Simulation failure: {simulation_error}"
+
     result_matrix: MATRIX = np.array(matlab.engine.getvar("result_matrix"))
     times = result_matrix[:, 0]
     values = result_matrix[:, 1:]
@@ -61,6 +78,7 @@ def simulate_list_aux(
     output_file: str,
     input_variables: list[str],
     output_variables: list[str],
+    sampling_time: float,
     inputs: list[Simulation_input],
 ) -> Trajectories:
     """
@@ -84,6 +102,7 @@ def simulate_list_aux(
                 script_file=script_file,
                 input_variables=input_variables,
                 output_variables=output_variables,
+                sampling_time=sampling_time,
                 input=input,
             )
             write_trajectory(oc, tr)
@@ -144,6 +163,7 @@ def simulate_list(
         output_file=output_file,
         input_variables=opts.input_variables,
         output_variables=opts.output_variables,
+        sampling_time=opts.sampling_time,
         inputs=inputs,
     )
 
