@@ -282,7 +282,6 @@ def build_script(
         print('Set max_obj_eval:', max_obj_eval)
 
         wd(f"""\
-        Bsim.SetParam('timeStepMax', {opts.sampling_time}); % Probably the next line is enough.
         Bsim.Sys.tspan = 0:{opts.sampling_time}:{opts.time_horizon};  % See the head comment in Core/Falsify.m
             
         % Falsification
