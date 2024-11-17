@@ -70,6 +70,15 @@ def simulate1(
     times = result_matrix[:, 0]
     values = result_matrix[:, 1:]
 
+    # Check the first values of the output variables are really
+    # those specified in the input.
+    # If different, the model does not follow the assumption of HybridLearner
+    for i, var in enumerate(output_variables):
+        i = i + len(input_variables)
+        assert (
+            values[0, i] == input.initial_output_values[var]
+        ), f"The first output value of {var} {values[i,0]} is different from the specified {input.initial_output_values[var]}"
+
     return (times, values)
 
 
