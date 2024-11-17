@@ -6,12 +6,20 @@ MatlabEngine = Any
 
 
 class Matlab:
+    no_display: bool
+
+    def __init__(self, no_display: bool = True) -> None:
+        self.no_display = no_display
+
     e: Optional[MatlabEngine] = None
 
     def engine(self) -> MatlabEngine:
         if self.e is None:
             print("Starting MATLAB engine")
-            self.e = matlab.engine.start_matlab('-nodisplay')
+            if self.no_display:
+                self.e = matlab.engine.start_matlab('-nodisplay')
+            else:
+                self.e = matlab.engine.start_matlab('')
             print("Started MATLAB engine")
         if self.e is None:
             assert False
@@ -52,3 +60,5 @@ class Matlab:
 
 
 engine = Matlab()
+
+engine_with_display = Matlab(no_display=False)
