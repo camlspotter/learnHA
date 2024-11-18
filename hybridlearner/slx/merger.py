@@ -79,7 +79,7 @@ def merge_system(
             f"""\
             bdclose all;
             % clear;
-    
+            
             % Load the original model
             load_system('{fn_a}');
             load_system('{fn_b}');
@@ -87,32 +87,32 @@ def merge_system(
             % New empty model, which will be saved as {fn_merged}
             h = new_system();
             set_param(h, 'Name', '{merged}')
-    
+            
             % Make a subsystem in the new model at {merged}/{a}
             add_block('built-in/Subsystem', '{merged}/{a}');
-    
+            
             % Copy the contents of the original to {merged}/{a}:
             Simulink.BlockDiagram.copyContentsToSubsystem('{a}', '{merged}/{a}');
-     
+            
             % Make a subsystem in the new model at {merged}/{b}
             add_block('built-in/Subsystem', '{merged}/{b}');
-     
+            
             % Copy the contents of the learned to {merged}/{b}:
             Simulink.BlockDiagram.copyContentsToSubsystem('{b}', '{merged}/{b}');
-     
+            
             % Arrange the subsystem positions automatically
             Simulink.BlockDiagram.arrangeSystem('{merged}');
-    
+            
             %% Connect ports
- 
+            
             aPorts = get_param('{merged}/{a}', 'PortHandles');
             bPorts = get_param('{merged}/{b}', 'PortHandles');
-
+            
             assert(length(aPorts.Inport) == length(bPorts.Inport), 'Models must have the same number of Inports');
             assert(length(aPorts.Outport) == length(bPorts.Outport), 'Models must have the same number of Outports');
-
+            
             %% In-ports
-
+            
             % vi ---+---> Inport(i) of a
             %       |
             %       +---> Inport(i) of b 
@@ -190,25 +190,25 @@ def merge_system(
                 diff = '{merged}/diff_{ov}';
                 add_block('simulink/Sinks/Out1', diff);
                 diffports = get_param(diff, 'PortHandles');
-           
+                
                 integrator = '{merged}/integrator_{ov}';
                 add_block('simulink/Continuous/Integrator', integrator);
                 integratorports = get_param(integrator, 'PortHandles');
-           
+                
                 add_line('{merged}', integratorports.Outport(1), diffports.Inport(1));
-           
+                
                 abs = '{merged}/abs_{ov}';
                 add_block('simulink/Math Operations/Abs', abs);
                 % Simulation does not terminate if ZeroCross = 'on' (default)
                 set_param(abs, 'ZeroCross', 'off');
                 absports = get_param(abs, 'PortHandles');
-           
+                
                 add_line('{merged}', absports.Outport(1), integratorports.Inport(1));
-           
+                
                 sub = '{merged}/sub_{ov}';
                 add_block('simulink/Math Operations/Subtract', sub);
                 subports = get_param(sub, 'PortHandles');
-           
+                
                 add_line('{merged}', aPorts.Outport({i+1}), subports.Inport(1));
                 add_line('{merged}', bPorts.Outport({i+1}), subports.Inport(2));
                 add_line('{merged}', subports.Outport(1), absports.Inport(1));
