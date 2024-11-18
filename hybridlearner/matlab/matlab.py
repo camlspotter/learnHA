@@ -1,6 +1,8 @@
 from typing import Optional, Any
+import numpy as np
 import matlab.engine
 from matlab import double
+from hybridlearner.types import MATRIX
 
 MatlabEngine = Any
 
@@ -57,6 +59,11 @@ class Matlab:
         _eng = self.engine()
         # print(f"Get MATLAB variable {var}")
         return _eng.workspace[var]
+
+    def getvar_matrix(self, var: str) -> MATRIX:
+        _eng = self.engine()
+        # print(f"Get MATLAB variable {var}")
+        return np.array(_eng.workspace[var])
 
 
 engine = Matlab()

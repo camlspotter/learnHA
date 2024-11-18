@@ -9,7 +9,7 @@ from pydantic.dataclasses import dataclass
 from hybridlearner.types import Invariant
 from hybridlearner.utils import io as utils_io
 from hybridlearner import matlab
-from hybridlearner.matlab import engine
+from hybridlearner.matlab import engine, breach
 from hybridlearner.trajectory import Trajectories, Trajectory
 from hybridlearner.types import Range, MATRIX
 from hybridlearner.simulation import simulate_protocol, check_variables
@@ -114,33 +114,13 @@ def find_counter_examples_aux(
 
     engine.run(script_fn)
 
-    time = np.array(engine.getvar('time'))[0]
-
-    # Usually, if multiple ncounter examples found,
-    #   np.shape(signals_matlab) = (n, 3, 1001)
-    # (1001 is the number of the frames)
-    #
-    # However, if only 1 counter example found, np.shape(signals_matlab) = (3, 1001)
-    def fix_signals(signals: MATRIX) -> MATRIX:
-        match np.shape(signals):
-            case (_, _, _):
-                return signals
-            case (_, _):
-                print('Fixing the dimension of singals')
-                return signals[np.newaxis, :]
-            case _:
-                assert False
+    time = breach.get_time('time')
 
     # F**king handling of corner cases of a Python library 😡😡😡!!
-    false_signals = fix_signals(np.array(engine.getvar('signals')))
+    false_signals = breach.get_signals('signals')
 
     # scores can be empty! when only 1 counter example is found
-    scores = np.array(engine.eval1('pb.obj_false'))
-    if scores.size == 0:
-        print('Strange scores:', scores, 'Fixing its dimension')
-        scores = np.array([0])
-    else:
-        scores = scores[0]
+    scores = breach.get_obj_false('pb')
 
     print(
         'time:',
@@ -152,9 +132,7 @@ def find_counter_examples_aux(
     )
     assert np.shape(false_signals)[0] == np.shape(scores)[0]
 
-    false_trs = list(
-        map(lambda sig: (time, np.transpose(np.array(sig))), false_signals)
-    )
+    false_trs = breach.signals_to_trajectories(time, false_signals)
     false_parameters = np.transpose(
         np.array(engine.eval1(f'falses.GetParam({parameter_list})'))
     )
@@ -166,8 +144,8 @@ def find_counter_examples_aux(
         for (t, params, score) in zip(false_trs, false_parameters, scores)
     ]
 
-    all_signals = fix_signals(np.array(engine.getvar('all_signals')))
-    all_trs = list(map(lambda sig: (time, np.transpose(np.array(sig))), all_signals))
+    all_signals = breach.get_signals('all_signals')
+    all_trs = breach.signals_to_trajectories(time, all_signals)
     all_parameters = np.transpose(
         np.array(engine.eval1(f'pb.BrSet_Logged.GetParam({parameter_list})'))
     )

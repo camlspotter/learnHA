@@ -9,7 +9,7 @@ from pydantic.dataclasses import dataclass
 from hybridlearner.types import Invariant
 from hybridlearner.utils import io as utils_io
 from hybridlearner import matlab
-from hybridlearner.matlab import engine
+from hybridlearner.matlab import engine, breach
 from hybridlearner.trajectory import Trajectories, Trajectory
 from hybridlearner.types import Range, MATRIX
 from hybridlearner.simulation import simulate_protocol, check_variables
@@ -125,34 +125,13 @@ def find_counter_examples_aux(
 
     engine.run(script_fn)
 
-    time = np.array(engine.getvar('time'))[0]
+    time = breach.get_time('time')
 
-    # Usually, if multiple ncounter examples found,
-    #   np.shape(signals_matlab) = (n, 3, 1001)
-    # (1001 is the number of the frames)
-    #
-    # However, if only 1 counter example found, np.shape(signals_matlab) = (3, 1001)
-    def fix_signals(signals: MATRIX) -> MATRIX:
-        match np.shape(signals):
-            case (_, _, _):
-                return signals
-            case (_, _):
-                print('Fixing the dimension of singals')
-                return signals[np.newaxis, :]
-            case _:
-                assert False
-
-    # F**king handling of corner cases of a Python library 😡😡😡!!
-    original_signals = fix_signals(np.array(engine.getvar('original_signals')))
-    learned_signals = fix_signals(np.array(engine.getvar('learned_signals')))
+    original_signals = breach.get_signals('original_signals')
+    learned_signals = breach.get_signals('learned_signals')
 
     # scores can be empty! when only 1 counter example is found
-    scores = np.array(engine.eval1('pb.obj_false'))
-    if scores.size == 0:
-        print('Strange scores:', scores, 'Fixing its dimension')
-        scores = np.array([0])
-    else:
-        scores = scores[0]
+    scores = breach.get_obj_false('pb')
 
     print(
         'time:',
@@ -166,12 +145,8 @@ def find_counter_examples_aux(
     )
     assert np.shape(original_signals)[0] == np.shape(scores)[0]
 
-    original_trs = list(
-        map(lambda sig: (time, np.transpose(np.array(sig))), original_signals)
-    )
-    learned_trs = list(
-        map(lambda sig: (time, np.transpose(np.array(sig))), learned_signals)
-    )
+    original_trs = breach.signals_to_trajectories(time, original_signals)
+    learned_trs = breach.signals_to_trajectories(time, learned_signals)
 
     tried_parameters = engine.getvar('tried_parameters')
     tried_obj_log = engine.getvar('tried_obj_log')
