@@ -2,6 +2,7 @@ from enum import Enum
 from io import TextIOWrapper
 import textwrap
 from dataclasses import dataclass
+from typing import Callable
 
 from hybridlearner.automaton import HybridAutomaton
 from hybridlearner.types import Invariant
@@ -71,6 +72,15 @@ def extend_HA(ha_orig: HybridAutomaton) -> HA:
     return ha
 
 
+def writers(out: TextIOWrapper) -> tuple[Callable[[str], int], Callable[[str], None]]:
+    w = out.write
+
+    def wd(s: str) -> None:
+        w(textwrap.dedent(s))
+
+    return (w, wd)
+
+
 def compile(
     out: TextIOWrapper,
     ha_orig: HybridAutomaton,
@@ -82,7 +92,9 @@ def compile(
     # ha : HA = build_HA(ha_orig, ode_solver_type, ode_solver, simulink_model_name, invariant_mode)
     ha: HA = extend_HA(ha_orig)
 
-    out.write("%%% Script file for generating programmatically Simulink Model %%%\n\n")
+    w, wd = writers(out)
+
+    w("%%% Script file for generating programmatically Simulink Model %%%\n\n")
 
     printDefinition(out, simulink_model_name, ode_solver_type, ode_solver)
 
@@ -97,25 +109,22 @@ def compile(
     variableCreation(out, ha)
 
     # IO ports from the Chart to be connected using lines to the IO components
-    out.write(
-        textwrap.dedent(
-            f"""\
+    wd(
+        f"""\
             %%% IO components %%%
 
             % chart ports are accessible via chartOutSignal.{{In,Out}}port(portId)
             chartOutSignal = get_param('{simulink_model_name}/Chart', 'PortHandles');
 
             """
-        )
     )
 
     addInputComponents(out, ha, simulink_model_name)
     addOutputComponents(out, ha, simulink_model_name)
     # addConnectionPointLines(out)
 
-    out.write(
-        textwrap.dedent(
-            f"""\
+    wd(
+        f"""\
             %%% Rearrange object positions automatically %%%
 
             Simulink.BlockDiagram.arrangeSystem('{simulink_model_name}');
@@ -128,7 +137,6 @@ def compile(
             close_system;
             bdclose all;
             """
-        )
     )
 
 
@@ -138,9 +146,10 @@ def printDefinition(
     ode_solver_type: OdeSolverType,
     ode_solver: str,
 ) -> None:
-    out.write(
-        textwrap.dedent(
-            f"""\
+    w, wd = writers(out)
+
+    wd(
+        f"""\
             %%% Opening %%%
 
             bdclose all;
@@ -149,7 +158,6 @@ def printDefinition(
             ch = find(rt,'-isa','Stateflow.Chart');
 
             """
-        )
     )
 
     solver_type: str
@@ -163,9 +171,8 @@ def printDefinition(
             step_parameter_key = 'FixedStep'
         case _:
             assert False
-    out.write(
-        textwrap.dedent(
-            f"""\
+    wd(
+        f"""\
             %%% Set simulation parametors, such as sampling time %%%
 
             set_param(bdroot, ... % `...` for multiline code
@@ -174,27 +181,20 @@ def printDefinition(
                       'SolverName', '{ode_solver}', ...
                       '{step_parameter_key}', 'timeStepMax'); % timeStepMax = sampling_time
 
-            """
-        )
-    )
-
-    out.write(
-        textwrap.dedent(
-            """\
             ch.ActionLanguage = 'C';
             ch.ChartUpdate = 'CONTINUOUS';
             ch.EnableZeroCrossings = 0;
             ch.ExecuteAtInitialization = true;
 
             """
-        )
     )
 
 
 def addMatlabFunction(out: TextIOWrapper) -> None:
-    out.write(
-        textwrap.dedent(
-            """\
+    w, wd = writers(out)
+
+    wd(
+        """\
             %% Adding a Matlab Function that generates random number in the range -2 to +2
         
             function1 = Stateflow.EMFunction(ch);
@@ -216,12 +216,13 @@ def addMatlabFunction(out: TextIOWrapper) -> None:
             function1.Script=str;
 
             """
-        )
     )
 
 
 def addLocations(out: TextIOWrapper, ha: HA) -> None:
-    out.write("%%% Adding Locations %%%\n\n")
+    w, wd = writers(out)
+
+    w("%%% Adding Locations %%%\n\n")
 
     pos_x: int = 30
     pos_y: int = 30
@@ -231,43 +232,41 @@ def addLocations(out: TextIOWrapper, ha: HA) -> None:
 
     for loc in ha.modes:
         loc_id = loc.id + 1
-        out.write(
-            textwrap.dedent(
-                f"""\
+        wd(
+            f"""\
                 % Loc {loc_id}
 
                 loc{loc_id} = Stateflow.State(ch);
                 loc{loc_id}.Position = [{pos_x} {pos_y} {width} {height}];
                 """
-            )
         )
 
         # 10 here is ASCII char indicate newline char
-        out.write(f"str = ['loc{loc_id}', 10, ... % 10 is for a newline char\n")
+        w(f"str = ['loc{loc_id}', 10, ... % 10 is for a newline char\n")
 
         # du: during action block, xi_dot = x0 * w0 + x1 * w1 + ... + 1 * wc
-        out.write(" 'du: ', 10, ... % during action block for ODEs\n")
+        w(" 'du: ', 10, ... % during action block for ODEs\n")
         for var, ode in loc.flow.items():
             var_id = f"x{ha.variable_rev_dict[var]}"
-            out.write(
-                f" '    {var_id}_dot = {ha.string_of_polynomial(ode)};', 10, ...\n"
-            )
+            w(f" '    {var_id}_dot = {ha.string_of_polynomial(ode)};', 10, ...\n")
 
         # exit action block, xi_out = xi
-        out.write("'exit: ', 10, ... % exit action block\n")
+        w("'exit: ', 10, ... % exit action block\n")
         for var, _ode in loc.flow.items():
             var_id = f"x{ha.variable_rev_dict[var]}"
-            out.write(f" '    {var_id}_out = {var_id};', 10, ...\n")
+            w(f" '    {var_id}_out = {var_id};', 10, ...\n")
 
-        out.write(" ];\n")
+        w(" ];\n")
 
-        out.write(f"loc{loc_id}.LabelString = str;\n\n")
+        w(f"loc{loc_id}.LabelString = str;\n\n")
 
         pos_x = pos_x + width + state_gap
 
 
 def addTransitions(out: TextIOWrapper, ha: HA, invariant_mode: InvariantMode) -> None:
-    out.write("%%% Transitions %%%\n\n")
+    w, wd = writers(out)
+
+    w("%%% Transitions %%%\n\n")
 
     pos_x = 30
     width = 90
@@ -283,7 +282,7 @@ def addTransitions(out: TextIOWrapper, ha: HA, invariant_mode: InvariantMode) ->
 
         loc_id = loc.id + 1
         trans = ha.outgoing_transitions(loc.id)
-        out.write(f"% Transitions for Location loc{loc_id}\n")
+        w(f"% Transitions for Location loc{loc_id}\n")
         exec_order: int = 1
         # start value Todo: proper calculation needed
         sourceOClock = 3.1 + different_position
@@ -316,18 +315,16 @@ def addTransitions(out: TextIOWrapper, ha: HA, invariant_mode: InvariantMode) ->
                 number_of_loop_trans += 1
 
             else:  # not a loop transition
-                out.write(f"    t{tr.id} = Stateflow.Transition(ch);\n")
-                out.write(f"    t{tr.id} = Stateflow.Transition(ch);\n")
-                out.write(f"    t{tr.id}.Source = loc{loc_id};\n")
-                out.write(f"    t{tr.id}.Destination = loc{tr.dst+1};\n")
+                w(f"    t{tr.id} = Stateflow.Transition(ch);\n")
+                w(f"    t{tr.id} = Stateflow.Transition(ch);\n")
+                w(f"    t{tr.id}.Source = loc{loc_id};\n")
+                w(f"    t{tr.id}.Destination = loc{tr.dst+1};\n")
                 # XXX It is a constant!!
-                out.write(f"    t{tr.id}.ExecutionOrder = {exec_order};\n")
-                out.write(f"    t{tr.id}.SourceOClock = {sourceOClock}; \n")
-                out.write(
-                    f"    t{tr.id}.LabelPosition = [{x_pos} {y_pos} 31 {next_height}];\n"
-                )
+                w(f"    t{tr.id}.ExecutionOrder = {exec_order};\n")
+                w(f"    t{tr.id}.SourceOClock = {sourceOClock}; \n")
+                w(f"    t{tr.id}.LabelPosition = [{x_pos} {y_pos} 31 {next_height}];\n")
 
-                out.write(
+                w(
                     f"    t{tr.id}.LabelString = '[ {inequality_guard} ]{reset_statement_for_tr}';\n"
                 )
 
@@ -342,9 +339,8 @@ def addTransitions(out: TextIOWrapper, ha: HA, invariant_mode: InvariantMode) ->
 
         # ****** addLoopTransitions(out); #This is the Invariant Loop ******
 
-        out.write(
-            textwrap.dedent(
-                f"""\
+        wd(
+            f"""\
 
                 % Loop Transition for loc{loc_id} to represent Invariant Condition
                 % [loc{loc_id}] -<ca{loc_id}_{number_of_loop_trans}>-> (c{loc_id}_{number_of_loop_trans}) -<cb{loc_id}_{number_of_loop_trans}>-> [loc{loc_id}]
@@ -364,7 +360,6 @@ def addTransitions(out: TextIOWrapper, ha: HA, invariant_mode: InvariantMode) ->
                 cb{loc_id}_{number_of_loop_trans}.LabelPosition = [{pos_x - 20} 10 31 {next_height}];
 
                 """
-            )
         )
 
         # Prints a simple identity reset equations. This is used below, in the invariant-loop-transition
@@ -398,7 +393,7 @@ def addTransitions(out: TextIOWrapper, ha: HA, invariant_mode: InvariantMode) ->
                 case _:
                     assert False, "invalid invariant_mode"
 
-        out.write(
+        w(
             f"cb{loc_id}_{number_of_loop_trans}.LabelString = '{condition_str}{reset_statement_identity}';\n\n"
         )
 
@@ -407,6 +402,8 @@ def addTransitions(out: TextIOWrapper, ha: HA, invariant_mode: InvariantMode) ->
 
 
 def addDefaultTransition(out: TextIOWrapper, ha: HA) -> None:
+    w, wd = writers(out)
+
     init_mode = ha.init_mode
 
     # x1 = a1; x2 = a2; ... for output variables
@@ -425,9 +422,8 @@ def addDefaultTransition(out: TextIOWrapper, ha: HA) -> None:
     )
 
     # Note a0, a1 are the initial values for the variable;
-    out.write(
-        textwrap.dedent(
-            f"""\
+    wd(
+        f"""\
             
             % Initial Transition
             % Set `xi = ai` for all the output variables `xi`
@@ -441,7 +437,6 @@ def addDefaultTransition(out: TextIOWrapper, ha: HA) -> None:
             init{init_mode+1}.Midpoint = init{init_mode+1}.DestinationEndpoint - [0 15];
 
             """
-        )
     )
 
 
@@ -458,7 +453,9 @@ def generateInitialValues(ha: HA) -> str:
 
 
 def variableCreation(out: TextIOWrapper, ha: HA) -> None:
-    out.write("%%% Variable Declarations %%%\n\n")
+    w, wd = writers(out)
+
+    w("%%% Variable Declarations %%%\n\n")
     inputVariableCreation(out, ha)
     outputVariableCreation(out, ha)
     localVariableCreation(out, ha)
@@ -466,7 +463,9 @@ def variableCreation(out: TextIOWrapper, ha: HA) -> None:
 
 
 def addInputComponents(out: TextIOWrapper, ha: HA, simulink_model_name: str) -> None:
-    out.write("%%% Input components %%%\n\n")
+    w, wd = writers(out)
+
+    w("%%% Input components %%%\n\n")
 
     y_pos = 18
     height = 33
@@ -475,9 +474,8 @@ def addInputComponents(out: TextIOWrapper, ha: HA, simulink_model_name: str) -> 
 
     for var in ha.input_variables:
         var_id = f"x{ha.variable_rev_dict[var]}"
-        out.write(
-            textwrap.dedent(
-                f"""\
+        wd(
+            f"""\
                 % Add input port number {portNo} for input variable {var_id}
 
                 add_block('simulink/Sources/In1', '{simulink_model_name}/{var_id}In');
@@ -489,7 +487,6 @@ def addInputComponents(out: TextIOWrapper, ha: HA, simulink_model_name: str) -> 
                 add_line('{simulink_model_name}', {var_id}Input.Outport(1), chartOutSignal.Inport({portNo}));
 
             """
-            )
         )
 
         height += next_height
@@ -498,8 +495,10 @@ def addInputComponents(out: TextIOWrapper, ha: HA, simulink_model_name: str) -> 
 
 
 def addOutputComponents(out: TextIOWrapper, ha: HA, simulink_model_name: str) -> None:
+    w, wd = writers(out)
+
     # The number of output components is equal to the number of variables. Not anymore now they are separate.
-    out.write("%%% Output components %%%\n\n")
+    w("%%% Output components %%%\n\n")
 
     portNo = 1  # Assuming the order is maintained
     y_pos = 18
@@ -511,9 +510,8 @@ def addOutputComponents(out: TextIOWrapper, ha: HA, simulink_model_name: str) ->
         # connecting the output port of the Chart to input port of the Output component
         # Creating an output-component for every variable (both input and output variables)
         var_id = f"x{ha.variable_rev_dict[var]}"
-        out.write(
-            textwrap.dedent(
-                f"""\
+        wd(
+            f"""\
                 % Add output port number {portNo} for output variable {var_id}
 
                 add_block('simulink/Sinks/Out1', '{simulink_model_name}/{var_id}Out');
@@ -526,7 +524,6 @@ def addOutputComponents(out: TextIOWrapper, ha: HA, simulink_model_name: str) ->
                 add_line('{simulink_model_name}', chartOutSignal.Outport({portNo}), {var_id}Output.Inport(1));
 
                 """
-            )
         )
 
         height += next_height
@@ -537,9 +534,8 @@ def addOutputComponents(out: TextIOWrapper, ha: HA, simulink_model_name: str) ->
     # portNo will follow the sequence Output variable followed by Input variables
     for var in ha.input_variables:
         var_id = f"x{ha.variable_rev_dict[var]}"
-        out.write(
-            textwrap.dedent(
-                f"""\
+        wd(
+            f"""\
                 % Add output port number {portNo} for input variable {var_id}
 
                 add_block('simulink/Sinks/Out1', '{simulink_model_name}/{var_id}Out');
@@ -552,7 +548,6 @@ def addOutputComponents(out: TextIOWrapper, ha: HA, simulink_model_name: str) ->
                 add_line('{simulink_model_name}', {var_id}Input.Outport(1), {var_id}Output.Inport(1));
 
                 """
-            )
         )
 
         height += next_height
@@ -569,6 +564,8 @@ def addLoopTransitions(
     condition_str: str,
     reset_str: str,
 ) -> None:
+    w, wd = writers(out)
+
     pos_x += 10
     next_height += 10
 
@@ -580,9 +577,8 @@ def addLoopTransitions(
 
     # exec_order this will be for loop-transtions now
     # Adding blank lines before Invariants handling (using Connectives-Self Loops)
-    out.write(
-        textwrap.dedent(
-            f"""\
+    wd(
+        f"""\
             % Loop Transition for loc{loc_id} to represent Invariant Condition
             % [loc{loc_id}] -<{trans_loc_to_junction}>-> ({junction_object_name}) -<{trans_junction_to_loc}>-> [loc{loc_id}]
             % {trans_junction_to_loc} has an invariant condition and an assignment
@@ -601,7 +597,6 @@ def addLoopTransitions(
             {trans_junction_to_loc}.LabelPosition = [{pos_x - 20} 10 31 {next_height}];
             {trans_junction_to_loc}.LabelString = '[{condition_str}]{reset_str}';
             """
-        )
     )
 
     # createConnectiveJunction(out);
@@ -609,13 +604,14 @@ def addLoopTransitions(
 
 
 def inputVariableCreation(out: TextIOWrapper, ha: HA) -> None:
-    out.write("%%% Input Variable Declaration %%%\n\n")
+    w, wd = writers(out)
+
+    w("%%% Input Variable Declaration %%%\n\n")
     portNo = 1
     for var in ha.input_variables:
         var_id = f"x{ha.variable_rev_dict[var]}"
-        out.write(
-            textwrap.dedent(
-                f"""\
+        wd(
+            f"""\
                 % Input variable {var_id}_in in Chart connected at port {portNo} for input variable {var}
 
                 {var_id}_in  = Stateflow.Data(ch);
@@ -627,20 +623,20 @@ def inputVariableCreation(out: TextIOWrapper, ha: HA) -> None:
                 {var_id}_in.UpdateMethod = 'Discrete';
 
                 """
-            )
         )
         portNo += 1
 
 
 def outputVariableCreation(out: TextIOWrapper, ha: HA) -> None:
-    out.write("%%% Output Variable Declaration %%%\n\n")
+    w, wd = writers(out)
+
+    w("%%% Output Variable Declaration %%%\n\n")
 
     portNo = 1  # Assuming the order is maintained
     for var in ha.output_variables:
         var_id = f"x{ha.variable_rev_dict[var]}"
-        out.write(
-            textwrap.dedent(
-                f"""\
+        wd(
+            f"""\
                 % Output variable {var_id}_out in Chart connected at port {portNo} for output variable {var}
 
                 {var_id}_out = Stateflow.Data(ch);
@@ -652,19 +648,19 @@ def outputVariableCreation(out: TextIOWrapper, ha: HA) -> None:
                 {var_id}_out.UpdateMethod = 'Discrete';
 
                 """
-            )
         )
         portNo += 1
 
 
 def localVariableCreation(out: TextIOWrapper, ha: HA) -> None:
-    out.write("%%% Local Variable Declaration %%%\n\n")
+    w, wd = writers(out)
+
+    w("%%% Local Variable Declaration %%%\n\n")
 
     for var in ha.output_variables:
         var_id = f"x{ha.variable_rev_dict[var]}"
-        out.write(
-            textwrap.dedent(
-                f"""\
+        wd(
+            f"""\
                 % Local variable {var_id} in Chart for output variable {var}
                 
                 {var_id} = Stateflow.Data(ch);
@@ -673,19 +669,19 @@ def localVariableCreation(out: TextIOWrapper, ha: HA) -> None:
                 {var_id}.UpdateMethod = 'Continuous';
 
                 """
-            )
         )
 
 
 def parameterVariableCreation(out: TextIOWrapper, ha: HA) -> None:
-    out.write("%%% Parameter Variable Declaration %%%\n\n")
+    w, wd = writers(out)
+
+    w("%%% Parameter Variable Declaration %%%\n\n")
 
     # print only for output variables and not for input variables
     for var in ha.output_variables:
         index = ha.variable_rev_dict[var]
-        out.write(
-            textwrap.dedent(
-                f"""\
+        wd(
+            f"""\
                 % Parameter a{index}: the initial value of output variable {var}
                 % It must be set by the host program.
 
@@ -697,7 +693,6 @@ def parameterVariableCreation(out: TextIOWrapper, ha: HA) -> None:
                 a{index}.DataType = 'Inherit: Same as Simulink';
                 
                 """
-            )
         )
 
 
