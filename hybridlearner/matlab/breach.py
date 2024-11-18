@@ -88,3 +88,8 @@ def get_port_dicts(
         print(f'Output variable {ov} has port {op}')
 
     return (inport_dict, outport_dict)
+
+
+def get_parameters(obj: str, parameters: list[str]) -> MATRIX:
+    parameter_list = "{" + ",".join([f"'{p}'" for p in parameters]) + "}"
+    return np.transpose(np.array(engine.eval1(f'{obj}.GetParam({parameter_list})')))

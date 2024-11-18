@@ -110,7 +110,6 @@ def find_counter_examples_aux(
     engine.setvar('tried_obj_log', tried_obj_log)
 
     parameters = build_script(opts, script_fn, learned_model_file, tried_parameters)
-    parameter_list = "{" + ",".join([f"'{p}'" for p in parameters]) + "}"
 
     engine.run(script_fn)
 
@@ -130,9 +129,7 @@ def find_counter_examples_aux(
     assert np.shape(false_signals)[0] == np.shape(scores)[0]
 
     false_trs = breach.signals_to_trajectories(time, false_signals)
-    false_parameters = np.transpose(
-        np.array(engine.eval1(f'falses.GetParam({parameter_list})'))
-    )
+    false_parameters = breach.get_parameters('falses', parameters)
     assert np.shape(false_parameters)[0] == len(false_trs)
     # Use tuple to put param in a set
     false_parameter_set = set([tuple(param) for param in false_parameters])
@@ -143,9 +140,8 @@ def find_counter_examples_aux(
 
     all_signals = breach.get_signals('all_signals')
     all_trs = breach.signals_to_trajectories(time, all_signals)
-    all_parameters = np.transpose(
-        np.array(engine.eval1(f'pb.BrSet_Logged.GetParam({parameter_list})'))
-    )
+    all_parameters = breach.get_parameters('pb.BrSet_Logged', parameters)
+
     print(
         'all_signals', np.shape(all_signals), 'all_parameters', np.shape(all_parameters)
     )
