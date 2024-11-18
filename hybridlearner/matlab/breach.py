@@ -18,8 +18,11 @@ def fix_signals(signals: MATRIX) -> MATRIX:
     match np.shape(signals):
         case (_, _, _):
             return signals
+        case (0, 0):  # empty
+            return np.array([])
         case (_, _):
-            print('Fixing the dimension of singals')
+            # Only 1 trajectory
+            print(f'Fixing the dimension of singals of {np.shape(signals)}')
             return signals[np.newaxis, :]
         case _:
             assert False
@@ -44,14 +47,22 @@ def signals_to_trajectories(time: MATRIX, signals: MATRIX) -> Trajectories:
     return list(map(lambda sig: (time, np.transpose(np.array(sig))), signals))
 
 
-def get_obj_false(pb: str) -> MATRIX:
-    # scores can be empty! when only 1 counter example is found
+# Breach's pb.obj_false is somewhat broken:
+#
+# - If there is no counter examples, pb.obj_false is empty.
+# - If there is only 1 counter example, pb.obj_false is EMPTY !!!😡
+# - If there is more than 1 counter examples, pb.obj_false is not empty.
+#
+# To workaround this issue, get_obj_false takes an argument of falsified signals.
+def get_obj_false(pb: str, signals: MATRIX) -> MATRIX:
     scores = np.array(engine.eval1(pb + '.obj_false'))
-    if scores.size == 0:
-        print('Strange obj_false:', scores, 'Fixing its dimension')
-        scores = np.array([0])
-    else:
-        scores = scores[0]
+    match np.shape(scores), np.shape(signals):
+        case (0, 0), (0,):  # empty!
+            scores = np.array([])
+        case (0, 0), (1, _, _):  # only 1 counter example
+            scores = np.array([0])  # robustness is unknown.
+        case _:
+            scores = scores[0]
     return scores
 
 

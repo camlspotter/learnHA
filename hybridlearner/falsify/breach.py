@@ -129,9 +129,7 @@ def find_counter_examples_aux(
 
     original_signals = breach.get_signals('original_signals')
     learned_signals = breach.get_signals('learned_signals')
-
-    # scores can be empty! when only 1 counter example is found
-    scores = breach.get_obj_false('pb')
+    scores = breach.get_obj_false('pb', original_signals)
 
     print(
         'time:',
@@ -316,35 +314,28 @@ def build_script(
         % time = falses.GetTime() % GetTime() seems broken.
         time = pb.BrSet_Logged.GetTime();
 
+        """)
+
+        w(f"{original_signal_comments}\n")
+        w(f"{learned_signal_comments}\n")
+
+        wd(f"""\
+        original_signal_names = {original_signal_names};
+        learned_signal_names = {learned_signal_names};
+
+        all_original_signals = pb.BrSet_Logged.GetSignalValues(original_signal_names);
+        all_learned_signals = pb.BrSet_Logged.GetSignalValues(learned_signal_names);
+
         if isempty(falses)
             disp('No counter example found!');
             original_signals = [];
             learned_signals = [];
             scores = [];
-            return;
+        else
+            original_signals = falses.GetSignalValues(original_signal_names);
+            learned_signals = falses.GetSignalValues(learned_signal_names);
+            scores = pb.obj_false;
+            % Visualize the counter examples
+            % falses.BrSet.PlotSignals();
         end
-
-        % Visualize the counter examples
-        % falses.BrSet.PlotSignals();
-
-        """)
-
-        w(f"{original_signal_comments}\n")
-
-        wd(f"""\
-        original_signal_names = {original_signal_names};
-        original_signals = falses.GetSignalValues(original_signal_names);
-
-        all_original_signals = pb.BrSet_Logged.GetSignalValues(original_signal_names);
-        """)
-
-        w(f"{learned_signal_comments}\n")
-
-        wd(f"""\
-        learned_signal_names = {learned_signal_names};
-        learned_signals = falses.GetSignalValues(learned_signal_names);
-
-        all_learned_signals = pb.BrSet_Logged.GetSignalValues(learned_signal_names);
-
-        scores = pb.obj_false;
         """)

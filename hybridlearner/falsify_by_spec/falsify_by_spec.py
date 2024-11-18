@@ -116,11 +116,8 @@ def find_counter_examples_aux(
 
     time = breach.get_time('time')
 
-    # F**king handling of corner cases of a Python library 😡😡😡!!
     false_signals = breach.get_signals('signals')
-
-    # scores can be empty! when only 1 counter example is found
-    scores = breach.get_obj_false('pb')
+    scores = breach.get_obj_false('pb', false_signals)
 
     print(
         'time:',
