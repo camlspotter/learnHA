@@ -158,13 +158,6 @@ for i in range(1, opts.max_nloops + 1):
 
     result = falsifier.find_counter_examples(rng, opts, output_slx_file, i)
 
-    header = ['time'] + opts.input_variables + opts.output_variables
-
-    learning_file = os.path.join(opts.output_directory, f"learning{i:02d}.txt")
-    # Add the original trajectories which could not be reproduced well
-    # by the learned model.
-    save_trajectories(learning_file, header, [ot for (ot, _, _) in result])
-
     # report
 
     report(
@@ -184,6 +177,13 @@ for i in range(1, opts.max_nloops + 1):
         exit(0)
     else:
         print(f"Counter examples: {len(result)}")
+
+    header = ['time'] + opts.input_variables + opts.output_variables
+
+    learning_file = os.path.join(opts.output_directory, f"learning{i:02d}.txt")
+    # Add the original trajectories which could not be reproduced well
+    # by the learned model.
+    save_trajectories(learning_file, header, [ot for (ot, _, _) in result])
 
     trajectories_files.append(learning_file)
 
