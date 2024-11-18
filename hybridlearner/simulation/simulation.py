@@ -59,7 +59,6 @@ def simulate1(
     matlab.engine.run(script_file)
 
     simulation_error: list[str] = matlab.engine.getvar("simulation_error")
-    print('simulation_error', simulation_error)
 
     match simulation_error:
         case []:  # no error

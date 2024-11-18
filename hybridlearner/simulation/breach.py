@@ -66,7 +66,7 @@ def build_script(
         )
         for ov in opts.output_variables:
             idx = variable_index[ov]
-            out.write(f"a{idx} = 42; % for output variable {ov}\n")
+            w(f"a{idx} = 42; % for output variable {ov}\n")
 
         wd(f"""\
         timeStepMax = 42; % time horizon
@@ -159,7 +159,9 @@ def build_script(
         % Bulid signals for Trajectories:
         all_signal_names = Bsim.GetSignalList();
         """)
+
         w(f"{signal_comments}\n")
+
         wd(f"""\
         signal_names = {signal_names};
         signals = Bsim.GetSignalValues(signal_names);
