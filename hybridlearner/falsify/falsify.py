@@ -5,7 +5,7 @@ from typing import Protocol
 from pydantic.dataclasses import dataclass
 from hybridlearner.types import Invariant
 from hybridlearner.simulation.input import SignalType
-from hybridlearner.simulation import simulate
+from hybridlearner.simulation import simulate, check_variables
 from hybridlearner.trajectory import (
     Trajectory,
     load_trajectories_files,
@@ -61,6 +61,7 @@ class Falsifier:
             float,  # distance
         ]
     ]:
+        check_variables(opts)
         return find_counter_examples_aux(rng, opts, learned_model_file, i)
 
 

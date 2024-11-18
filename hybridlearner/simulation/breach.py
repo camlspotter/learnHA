@@ -8,7 +8,7 @@ from hybridlearner.utils import io as utils_io
 from hybridlearner.matlab import engine
 from hybridlearner.trajectory import Trajectories, save_trajectories
 from hybridlearner.types import Range
-from hybridlearner.simulation import simulate_protocol
+from hybridlearner.simulation import simulate_protocol, check_variables
 
 
 def simulate(
@@ -18,6 +18,7 @@ def simulate(
     output_file: str,
     nsimulations: int,
 ) -> Trajectories:
+    check_variables(opts)
     script_fn = os.path.join(opts.output_directory, "simulate_model.m")
 
     build_script(opts, script_fn, simulink_model_file, nsimulations)

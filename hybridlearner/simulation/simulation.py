@@ -147,12 +147,48 @@ class simulate_protocol(Protocol):
     output_directory: str
 
 
+class variables_protocol(Protocol):
+    invariant: Invariant
+    number_of_cps: dict[str, int]
+    signal_types: dict[str, SignalType]
+    input_variables: list[str]
+    output_variables: list[str]
+
+
+def check_variables(opts: variables_protocol) -> None:
+    for k in opts.input_variables + opts.output_variables:
+        assert (
+            k in opts.invariant.keys()
+        ), f"Error: variable {k} must be declared in invariants"
+    for k in opts.invariant.keys():
+        assert (
+            k in opts.input_variables + opts.output_variables
+        ), f"Error: {k} in invariant is neither an input nor output variables"
+    for k in opts.number_of_cps.keys():
+        assert (
+            k in opts.input_variables
+        ), f"Error: {k} in number_of_cps is not an input variable"
+    for k in opts.input_variables:
+        assert (
+            k in opts.number_of_cps
+        ), f"Error: input variable {k} must be declared in number_of_cps"
+    for k in opts.signal_types.keys():
+        assert (
+            k in opts.input_variables
+        ), f"Error: {k} in signal_types is not an input variable"
+    for k in opts.input_variables:
+        assert (
+            k in opts.signal_types
+        ), f"Error: input variable {k} must be declared in signal_types"
+
+
 def simulate_list(
     opts: simulate_protocol,
     simulink_model_file: str,
     output_file: str,
     inputs: list[Simulation_input],
 ) -> Trajectories:
+    check_variables(opts)
     script_file = os.path.join(opts.output_directory, "simulate_model.m")
 
     with utils_io.open_for_write(script_file) as out:

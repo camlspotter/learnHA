@@ -12,7 +12,7 @@ from hybridlearner import matlab
 from hybridlearner.matlab import engine
 from hybridlearner.trajectory import Trajectories, Trajectory
 from hybridlearner.types import Range, MATRIX
-from hybridlearner.simulation import simulate_protocol
+from hybridlearner.simulation import simulate_protocol, check_variables
 from hybridlearner.simulation.input import SignalType
 from hybridlearner.slx.merger import merge, merge_without_save
 
@@ -87,6 +87,7 @@ class Falsifier:
             float,  # distance
         ]
     ]:
+        check_variables(opts)
         (counter_examples, tried_parameters, tried_obj_log) = find_counter_examples_aux(
             opts, learned_model_file, self.tried_parameters, self.tried_obj_log
         )
