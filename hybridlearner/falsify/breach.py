@@ -299,8 +299,8 @@ def build_script(
             tried_parameters = []
         end
         if ~exist('tried_obj_log', 'var')
-            disp('tried_parameters is not defined. Use the default []')
-            tried_parameters = []
+            disp('tried_obj_log is not defined. Use the default []')
+            tried_obj_log = []
         end
         pb.X_log = tried_parameters;
         pb.obj_log = tried_obj_log;
