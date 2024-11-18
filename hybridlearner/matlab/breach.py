@@ -60,8 +60,9 @@ def get_obj_false(pb: str, signals: MATRIX) -> MATRIX:
         case (0, 0), (0,):  # empty!
             scores = np.array([])
         case (0, 0), (1, _, _):  # only 1 counter example
-            scores = np.array([0])  # robustness is unknown.
+            scores = np.array([scores])  # scores is 1 double
         case _:
+            print('scores:', np.shape(scores), scores)
             scores = scores[0]
     return scores
 
