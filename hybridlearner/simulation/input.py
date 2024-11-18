@@ -137,9 +137,9 @@ def input_of_trajectory(
 ) -> Simulation_input:
     varindex = {v: i for (i, v) in enumerate(input_variables + output_variables)}
     times = tr[0]
-    initial_output_values = {v: tr[1][varindex[v], 0] for v in output_variables}
+    initial_output_values = {v: tr[1][0, varindex[v]] for v in output_variables}
     input_value_ts = {
-        v: [(t, x) for (t, x) in zip(times, tr[1][varindex[v], :])]
+        v: [(t, x) for (t, x) in zip(times, tr[1][:, varindex[v]])]
         for v in input_variables
     }
     return Simulation_input(input_value_ts, initial_output_values)

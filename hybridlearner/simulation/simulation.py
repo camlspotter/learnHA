@@ -42,7 +42,11 @@ def simulate1(
         v: i for (i, v) in enumerate(input_variables + output_variables)
     }
 
+    matlab.engine.eval0('clear;')
+    matlab.engine.eval0('bdclose all;')
+
     for var, v in input.initial_output_values.items():
+        print(f'initial {var} : a{variable_index[var]} = {v}')
         matlab.engine.setvar(f"a{variable_index[var]}", v)
 
     for var, ts in input.input_value_ts.items():
@@ -77,7 +81,7 @@ def simulate1(
         i = i + len(input_variables)
         assert (
             values[0, i] == input.initial_output_values[var]
-        ), f"The first output value of {var} {values[i,0]} is different from the specified {input.initial_output_values[var]}"
+        ), f"The first output value of {var} {values[0,i]} is different from the specified {input.initial_output_values[var]}"
 
     return (times, values)
 
@@ -102,7 +106,7 @@ def simulate_list_aux(
     with utils_io.open_for_write(output_file) as oc:
         oc.write('\t'.join(['time'] + input_variables + output_variables) + '\n')
         for i, input in enumerate(inputs):
-            print("Simulating", i, input)
+            print("Simulating", i)
             # XXX Currently we need a dirty tempfile tech to prevent the Matlab script
             # from overwriting the output_file.
             # XXX We need ".txt" at the end of tmp_output_file since:
