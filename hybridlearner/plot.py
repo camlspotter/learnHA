@@ -10,6 +10,9 @@ def plot_timeseries(
     ts: MATRIX,  # 1D times
     vs: MATRIX,  # 2D values
 ) -> None:
+    """
+    Plot one timeseries
+    """
     plt.plot(ts, vs)
     plt.grid()
     plt.savefig(fn)
@@ -30,8 +33,11 @@ def plot_timeseries_multi(
     ],
 ) -> None:
     """
-    Plot multiple timeseries side by side, by shifting them horizontally
-    to avoid overwraps.
+    Plot multiple timeseries in one figure.
+    Each timeseries is drawn in a subfigure.
+
+    Hack: If the title of a timeseries contains 'original', it is drawn
+          in a dotted line.
     """
 
     assert len(tv_list) > 0

@@ -97,5 +97,14 @@ def get_port_dicts(
 
 
 def get_parameters(obj: str, parameters: list[str]) -> MATRIX:
+    """
+    Get the parameters used for falsification
+
+    To get the parameters for the counter examples:
+      get_parameters('falses', parameters)
+
+    To get all the parameters including the passed ones:
+      get_parameters('pb.BrSet_Logged', parameters)
+    """
     parameter_list = "{" + ",".join([f"'{p}'" for p in parameters]) + "}"
     return np.transpose(np.array(engine.eval1(f'{obj}.GetParam({parameter_list})')))

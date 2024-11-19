@@ -13,7 +13,7 @@ from hybridlearner.utils import io as utils_io
 # Timeseries.
 #
 # The first element of the tuple is a 1D array of timestamps. The timestamps
-# are assumed to be an arithmetic sequence starts from 0.
+# are assumed to be a strictly increasing sequence starts from 0.
 #
 # The second element of the tuple is a 2D matrix of values.  Its number of
 # the columns must be equal to the length of the timestamp array.
@@ -25,11 +25,16 @@ Trajectory = tuple[
 
 
 def write_trajectory(oc: TextIOWrapper, traj: Trajectory) -> None:
+    """
+    Write a trajectory in TSV to a channel/file.
+    """
     np.savetxt(oc, np.column_stack(traj), delimiter='\t', fmt='%.16g')
 
 
 def trajectory_stepsize(tr: Trajectory) -> float:
-    # diff of the first 2 times in the first tvs
+    """
+    Time difference of the first 2 samples of the trajectory.
+    """
     times = tr[0]
     return times[1] - times[0]
 
@@ -63,7 +68,7 @@ def save_trajectories(
 
 def load_trajectories(path: str) -> tuple[list[str], Trajectories]:
     """
-    Load trajectories from a tsv file.
+    Load trajectories from a TSV file.
 
     - No check of stepsize uniqueness
     """
@@ -158,7 +163,6 @@ def preprocess_trajectories(
         last_position = position[i - 1].end if i > 0 else -1
         position.append(Span(last_position + 1, last_position + size))
 
-    # XXX Why does this returns singleton lists?
     t = np.concatenate([traj[0] for traj in list_of_trajectories])
     y = np.vstack([traj[1] for traj in list_of_trajectories])
 
