@@ -160,11 +160,24 @@ def hum_str_polynomial(p: Polynomial) -> str:
     Inaccurate but human friendly printer
     """
     va = polynomial_to_variable_annotated(p)
-    return " + ".join(
-        [
-            f"{coeff:.2f}"
-            if key == {}
-            else unparse_expr(key_to_expr(key)) + f" * {coeff:.2f}"
-            for (key, coeff) in va
-        ]
-    )
+
+    def aux(key: dict[str, int], coeff: float) -> str | None:
+        hum_coeff = f"{coeff:.2f}"
+        if hum_coeff == "0.00" or hum_coeff == "-0.00":
+            return None
+        else:
+            if key == {}:
+                return hum_coeff
+            else:
+                str_key = unparse_expr(key_to_expr(key))
+                if hum_coeff == "1.00":
+                    return str_key
+                else:
+                    return str_key + " * " + hum_coeff
+
+    hum_va = [x for x in [aux(key, coeff) for (key, coeff) in va] if x is not None]
+
+    if hum_va == []:
+        return "0.00"
+    else:
+        return " + ".join(hum_va)
