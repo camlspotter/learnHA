@@ -78,9 +78,11 @@ def simulate1(
     # If different, the model does not follow the assumption of HybridLearner
     for i, var in enumerate(output_variables):
         i = i + len(input_variables)
-        assert (
-            values[0, i] == input.initial_output_values[var]
-        ), f"The first output value of {var} {values[0,i]} is different from the specified {input.initial_output_values[var]}"
+        if values[0, i] != input.initial_output_values[var]:  # xxx should use epsilon?
+            print(
+                f"Error: The first output of {var} {values[0,i]} is different from the one specified {input.initial_output_values[var]}.\n       The initial value variable a{i} might not be used properly."
+            )
+            assert False
 
     return (times, values)
 
