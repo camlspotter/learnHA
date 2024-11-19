@@ -2,6 +2,7 @@
 
 import re
 import numpy as np
+import math
 from hybridlearner.types import MATRIX
 from hybridlearner.matlab import engine
 from hybridlearner.trajectory import Trajectories
@@ -58,9 +59,14 @@ def get_obj_false(pb: str, signals: MATRIX) -> MATRIX:
     scores = np.array(engine.eval1(pb + '.obj_false'))
     match np.shape(scores), np.shape(signals):
         case (0, 0), (0,):  # empty!
+            print('scores: empty:', scores)
             scores = np.array([])
-        case (0, 0), (1, _, _):  # only 1 counter example
-            scores = np.array([scores])  # scores is 1 double
+        case (0, 0), (1, _, _):  # only 1 counter example, no score
+            print('scores: empty though with 1 counter example:', scores)
+            scores = np.array([math.nan])
+        case (), (1, _, _):  # only 1 counter example, score : float
+            print('scores: 1 float with 1 counter example:', scores)
+            scores = np.array([scores])
         case _:
             print('scores:', np.shape(scores), scores)
             scores = scores[0]
