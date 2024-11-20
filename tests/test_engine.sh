@@ -21,7 +21,7 @@ pipenv run python loop.py \
      --time-horizon 10 --sampling-time 0.01 \
      --fixed-interval-data False \
      --invariant 'throttle:(2,9),torque:(24,25),engineSpeed:(2000,2000)' \
-     --number-of-cps 'throttle:3,torque:3' --signal-types 'throttle:fixed-step,torque:fixed-step' \
+     --number-of-cps 'throttle:3,torque:3' --signal-types 'throttle:fixed_step,torque:fixed_step' \
      \
      --output-directory $output_directory \
      -c dtw -d 1 -m 20 -b 1 \

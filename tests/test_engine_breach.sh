@@ -21,7 +21,7 @@ pipenv run python loop_breach.py \
      --time-horizon 10 --sampling-time 0.01 \
      --fixed-interval-data False \
      --invariant 'x0:(2,9),x1:(24,25),x2:(2000,2000)' \
-     --number-of-cps 'x0:3,x1:3' --signal-types 'x0:fixed-step,x1:fixed-step' \
+     --number-of-cps 'x0:3,x1:3' --signal-types 'x0:fixed_step,x1:fixed_step' \
      \
      --output-directory $output_directory \
      -c dtw -d 1 -m 20 -b 1 \
