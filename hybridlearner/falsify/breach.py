@@ -58,6 +58,7 @@ class Falsification_result:
         tuple[
             Trajectory,  # original
             Trajectory,  # learned
+            MATRIX,  # parameters
             float,  # distance
         ]
     ]
@@ -66,6 +67,7 @@ class Falsification_result:
         tuple[
             Trajectory,  # original
             Trajectory,  # learned
+            MATRIX,  # parameters
         ]
     ]
 
@@ -80,21 +82,16 @@ class Falsifier:
         opts: find_counter_examples_protocol,
         learned_model_file: str,
         _i: int,
-    ) -> list[
-        tuple[
-            Trajectory,  # original
-            Trajectory,  # learned
-            float,  # distance
-        ]
-    ]:
+    ) -> Falsification_result:
         check_variables(opts)
-        (counter_examples, tried_parameters, tried_obj_log) = find_counter_examples_aux(
+        (result, tried_parameters, tried_obj_log) = find_counter_examples_aux(
             opts, learned_model_file, self.tried_parameters, self.tried_obj_log
         )
         if opts.skip_already_tried_parameters:
             self.tried_parameters = tried_parameters
             self.tried_obj_log = tried_obj_log
-        return counter_examples
+
+        return result
 
 
 def find_counter_examples_aux(
@@ -103,13 +100,7 @@ def find_counter_examples_aux(
     tried_parameters: matlab.double,
     tried_obj_log: matlab.double,
 ) -> tuple[
-    list[
-        tuple[
-            Trajectory,  # original
-            Trajectory,  # learned
-            float,  # distance
-        ]
-    ],
+    Falsification_result,
     matlab.double,  # new_tried_parameters
     matlab.double,  # new_tried_obj_log
 ]:
@@ -121,39 +112,67 @@ def find_counter_examples_aux(
     engine.setvar('tried_parameters', tried_parameters)
     engine.setvar('tried_obj_log', tried_obj_log)
 
-    build_script(opts, script_fn, learned_model_file, tried_parameters)
+    parameters = build_script(opts, script_fn, learned_model_file, tried_parameters)
 
     engine.run(script_fn)
 
     time = breach.get_time('time')
 
-    original_signals = breach.get_signals('original_signals')
-    learned_signals = breach.get_signals('learned_signals')
-    scores = breach.get_obj_false('pb', original_signals)
+    false_original_signals = breach.get_signals('original_signals')
+    false_learned_signals = breach.get_signals('learned_signals')
+    false_original_trs = breach.signals_to_trajectories(time, false_original_signals)
+    false_learned_trs = breach.signals_to_trajectories(time, false_learned_signals)
+    scores = breach.get_obj_false('pb', false_original_signals)
+    false_parameters = breach.get_parameters('falses', parameters)
+    false_parameter_set = set([tuple(param) for param in false_parameters])
+
+    falses = [
+        (ot, lt, params, -score)
+        for (ot, lt, params, score) in zip(
+            false_original_trs, false_learned_trs, false_parameters, scores
+        )
+    ]
 
     print(
         'time:',
         np.shape(time),
-        'original_signals:',
-        np.shape(original_signals),
-        'learned_signals:',
-        np.shape(learned_signals),
+        'false_original_signals:',
+        np.shape(false_original_signals),
+        'false_learned_signals:',
+        np.shape(false_learned_signals),
         'scores:',
         np.shape(scores),
     )
-    assert np.shape(original_signals)[0] == np.shape(scores)[0]
+    assert np.shape(false_original_signals)[0] == np.shape(scores)[0]
 
-    original_trs = breach.signals_to_trajectories(time, original_signals)
-    learned_trs = breach.signals_to_trajectories(time, learned_signals)
+    all_original_signals = breach.get_signals('all_original_signals')
+    all_learned_signals = breach.get_signals('all_learned_signals')
+    all_parameters = breach.get_parameters('pb.BrSet_Logged', parameters)
+    all_original_trs = breach.signals_to_trajectories(time, all_original_signals)
+    all_learned_trs = breach.signals_to_trajectories(time, all_learned_signals)
+
+    print(
+        'all_original_signals',
+        np.shape(all_original_signals),
+        'all_parameters',
+        np.shape(all_parameters),
+    )
+    assert np.shape(all_parameters)[0] == len(
+        all_original_trs
+    ), f"Oops {np.shape(all_parameters)[0]} {len(all_original_trs)}"
+
+    passed = [
+        (ot, lt, params)
+        for (ot, lt, params) in zip(all_original_trs, all_learned_trs, all_parameters)
+        if tuple(params) not in false_parameter_set
+    ]
+    print('falses', len(falses), 'passed', len(passed))
 
     tried_parameters = engine.getvar('tried_parameters')
     tried_obj_log = engine.getvar('tried_obj_log')
 
     return (
-        [
-            (ot, lt, -score)
-            for (ot, lt, score) in zip(original_trs, learned_trs, scores)
-        ],
+        Falsification_result(counter_examples=falses, passed_examples=passed),
         tried_parameters,
         tried_obj_log,
     )
@@ -164,7 +183,7 @@ def build_script(
     script_fn: str,
     learned_model_file: str,
     tried_parameters: matlab.double,
-) -> None:
+) -> list[str]:  # parameters
     original_model_file = opts.simulink_model_file
 
     variable_index: dict[str, int] = {
@@ -339,3 +358,5 @@ def build_script(
             % falses.BrSet.PlotSignals();
         end
         """)
+
+    return parameters

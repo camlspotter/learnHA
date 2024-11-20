@@ -165,25 +165,28 @@ for i in range(1, opts.max_nloops + 1):
         os.path.basename(opts.simulink_model_file),
         i,  # iteration
         ha,
-        result,
+        [(ot, lt, dist) for (ot, lt, _, dist) in result.counter_examples],
+        [(ot, lt) for (ot, lt, _) in result.passed_examples],
         opts.input_variables,
         opts.output_variables,
     )
 
     # Loop or not
 
-    if len(result) == 0:
+    if len(result.counter_examples) == 0:
         print("No counter example found")
         exit(0)
     else:
-        print(f"Counter examples: {len(result)}")
+        print(f"Counter examples: {len(result.counter_examples)}")
 
     header = ['time'] + opts.input_variables + opts.output_variables
 
     learning_file = os.path.join(opts.output_directory, f"learning{i:02d}.txt")
     # Add the original trajectories which could not be reproduced well
     # by the learned model.
-    save_trajectories(learning_file, header, [ot for (ot, _, _) in result])
+    save_trajectories(
+        learning_file, header, [ot for (ot, _, _, _) in result.counter_examples]
+    )
 
     trajectories_files.append(learning_file)
 

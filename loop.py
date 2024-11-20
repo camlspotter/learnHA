@@ -168,6 +168,7 @@ for i in range(1, opts.max_nloops + 1):
         i,  # iteration
         ha,
         result,
+        None,
         opts.input_variables,
         opts.output_variables,
     )

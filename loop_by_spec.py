@@ -29,7 +29,7 @@ from hybridlearner.slx import compiler
 from hybridlearner import matlab
 from hybridlearner.simulation.breach import simulate
 from hybridlearner.simulation import simulate_list
-from hybridlearner.report import report_all
+from hybridlearner.report import report
 from hybridlearner.falsify_by_spec import Falsifier
 
 
@@ -157,39 +157,58 @@ for i in range(1, opts.max_nloops + 1):
     # Find counter examples
 
     result = falsifier.find_counter_examples(rng, opts, output_slx_file, i)
-    false = [(tr, dist) for (tr, _, dist) in result.counter_examples]
-    passed = [tr for (tr, _) in result.passed_examples]
+
+    # false = result.counter_examples
+    # passed = result.passed_examples
+
+    # Add original trajectories
+
+    false_inputs = [
+        input_of_trajectory(lt, opts.input_variables, opts.output_variables)
+        for (lt, _, _) in result.counter_examples
+    ]
+    learning_file = os.path.join(opts.output_directory, f"learning{i:02d}.txt")
+    false_otrjs = simulate_list(
+        opts, opts.simulink_model_file, learning_file, false_inputs
+    )
+    trajectories_files.append(learning_file)
+    falses = [
+        (ot, lt, params, dist)
+        for (ot, (lt, params, dist)) in zip(false_otrjs, result.counter_examples)
+    ]
+
+    passed_inputs = [
+        input_of_trajectory(lt, opts.input_variables, opts.output_variables)
+        for (lt, _) in result.passed_examples
+    ]
+    passed_file = os.path.join(opts.output_directory, f"passed{i:02d}.txt")
+    passed_otrjs = simulate_list(
+        opts, opts.simulink_model_file, passed_file, passed_inputs
+    )
+    passed = [
+        (ot, lt, params)
+        for (ot, (lt, params)) in zip(passed_otrjs, result.passed_examples)
+    ]
 
     # report
 
-    report_all(
+    report(
         opts.output_directory,
         os.path.basename(opts.simulink_model_file),
         i,  # iteration
         ha,
-        false,
-        passed,
+        [(ot, lt, dist) for (ot, lt, _, dist) in falses],
+        [(ot, lt) for (ot, lt, _) in passed],
         opts.input_variables,
         opts.output_variables,
     )
 
     # Loop or not
 
-    if len(false) == 0:
+    if len(falses) == 0:
         print("No counter example found")
         exit(0)
     else:
-        print(f"Counter examples: {len(false)}")
-
-    # New learning set
-    simulation_inputs: list[Simulation_input] = [
-        input_of_trajectory(trj, opts.input_variables, opts.output_variables)
-        for (trj, _) in false
-    ]
-    learning_file = os.path.join(opts.output_directory, f"learning{i:02d}.txt")
-    trj = simulate_list(
-        opts, opts.simulink_model_file, learning_file, simulation_inputs
-    )
-    trajectories_files.append(learning_file)
+        print(f"Counter examples: {len(falses)}")
 
 print(f"Even after {i+1} inference iterations, we did not see a fixedpoint")
