@@ -233,7 +233,7 @@ def get_coeffs(
             for term_index, each_var_power in enumerate(term):
                 term_index_for_sv = term_index + 1  # in sv it is shifted
                 if term_index == len(term) - 1:  # The last is constant
-                    aa = 1
+                    aa = 1.0
                 else:
                     aa = sv[i][term_index_for_sv] if term_index_for_sv in sv[i] else 0.0
                     g_power += each_var_power
