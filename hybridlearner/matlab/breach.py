@@ -62,7 +62,7 @@ def get_obj_false(pb: str, signals: MATRIX) -> MATRIX:
             print('scores: empty:', scores)
             scores = np.array([])
         case (0, 0), (1, _, _):  # only 1 counter example, no score
-            print('scores: empty though with 1 counter example:', scores)
+            print(f'scores: {scores}: empty though with 1 counter example')
             scores = np.array([math.nan])
         case (), (1, _, _):  # only 1 counter example, score : float
             print('scores: 1 float with 1 counter example:', scores)
