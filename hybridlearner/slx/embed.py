@@ -117,7 +117,13 @@ def embed_system(
             )
         )
 
-    out.write(f"Simulink.BlockDiagram.arrangeSystem('{embeded}');\n")
+    out.write(f"""\
+    % arrangeSystem fails if nothing is modified in R2024b
+    try
+        Simulink.BlockDiagram.arrangeSystem('{embeded}');
+    catch
+    end
+    """)
 
 
 def save_system(out: TextIOWrapper, fn_embeded: str, embeded: str) -> None:

@@ -125,18 +125,26 @@ def compile(
 
     wd(
         f"""\
-            %%% Rearrange object positions automatically %%%
+        %%% Rearrange object positions automatically %%%
 
+        % arrangeSystem fails if nothing is modified in R2024b
+        try
             Simulink.BlockDiagram.arrangeSystem('{simulink_model_name}');
+        catch
+        end
+        try
             Simulink.BlockDiagram.arrangeSystem('{simulink_model_name}/Chart');
+        catch
+        end
 
-            %%% Closing %%%
+        %%% Closing %%%
 
-            sfsave;
-            sfclose;
-            close_system;
-            bdclose all;
-            """
+        sfsave;
+        sfclose;
+        close_system;
+        bdclose all;
+    
+        """
     )
 
 
