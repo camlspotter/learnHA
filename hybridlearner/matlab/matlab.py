@@ -75,3 +75,8 @@ class Matlab:
 engine = Matlab()
 
 engine_with_display = Matlab(no_display=False)
+
+
+def expr_matlab_double(a: double) -> str:
+    na = np.array(a)
+    return "[ " + "; ".join([", ".join([str(f) for f in row]) for row in na]) + " ]"

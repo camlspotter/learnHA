@@ -4,6 +4,7 @@ import re
 import numpy as np
 import math
 from hybridlearner.types import MATRIX
+from hybridlearner import matlab
 from hybridlearner.matlab import engine
 from hybridlearner.trajectory import Trajectories
 from hybridlearner.slx.info import get_IOports
@@ -107,4 +108,18 @@ def get_parameters(obj: str, parameters: list[str]) -> MATRIX:
       get_parameters('pb.BrSet_Logged', parameters)
     """
     parameter_list = "{" + ",".join([f"'{p}'" for p in parameters]) + "}"
-    return np.transpose(np.array(engine.eval1(f'{obj}.GetParam({parameter_list})')))
+    md = engine.eval1(f'{obj}.GetParam({parameter_list})')
+    a = np.array(md)
+
+    res: MATRIX
+    match np.shape(a):
+        case ():
+            res = np.array([[a]])
+        case (_,):
+            res = np.transpose(np.array(a))
+        case (_, _):
+            res = np.transpose(a)
+        case _:
+            assert False
+
+    return res
