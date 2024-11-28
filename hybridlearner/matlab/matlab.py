@@ -36,7 +36,13 @@ class Matlab:
 
     def eval(self, s: str, nargout: int) -> Any:
         _eng = self.engine()
-        return _eng.eval(s, nargout=nargout)
+        try:
+            res = _eng.eval(s, nargout=nargout)
+            return res
+        except Exception as err:
+            print(f'Error executing {s} :')
+            print(err)
+            raise
 
     def eval0(self, s: str) -> None:
         """
