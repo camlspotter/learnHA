@@ -100,7 +100,9 @@ sis = [
     for _ in range(0, opts.num_inputs)
 ]
 
-with sys.stdout if opts.output_file is None else utils_io.open_for_write(
-    opts.output_file
-) as out:
+with (
+    sys.stdout
+    if opts.output_file is None
+    else utils_io.open_for_write(opts.output_file) as out
+):
     json.dump([asdict(si) for si in sis], out)
