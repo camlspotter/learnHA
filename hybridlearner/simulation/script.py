@@ -223,9 +223,11 @@ def generate_simulation_script(
     )
 
 
+# XXX This is NOT an adequate interploation at all, and must be retired.
 def addFilteringCode(out: TextIOWrapper) -> None:
     """
-     Addon code called from create_runScript_for_simu_engine() to perform Data Filtering
+     Addon code to perform Data Filtering
+
      Filtering: Extract simulation data based on fixed timestep values and discard the data obtained due to variable Solver used in the Simulink model.
 
      Assumption:
@@ -266,11 +268,15 @@ def addFilteringCode(out: TextIOWrapper) -> None:
     out.write(
         textwrap.dedent(
             """\
+    [rsize, csize] = size(y); 
     tstep = 0;
     seq_index = 1;
+
+    % filtered samples comes to t_temp1 and y_temp1
     totalSamples = timeFinal / timeStepMax + 1;
     t_temp1 = zeros(totalSamples, 1);
     y_temp1 = zeros(totalSamples, csize);
+
     firstFound = 1;
     for i = 1:rsize     %rsize is the total rows of y or y_temp
        diffVal = t(i) - tstep;     %initially time-step will be >= 0
