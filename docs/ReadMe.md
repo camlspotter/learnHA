@@ -8,7 +8,7 @@ python run.py --help
 
 ### Examples
 
-Command to lean an HA model for switched oscillator model using two trajectories stored in the file named "data/simu_oscillator_2.txt"
+Command to learn an HA model for switched oscillator model using two trajectories stored in the file named "data/simu_oscillator_2.txt"
     
 (1) without Type Annotation
 ```sh
