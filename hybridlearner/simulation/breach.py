@@ -28,7 +28,11 @@ def simulate(
     engine.run(script_fn)
 
     time = breach.get_time('time')
-    signals = breach.get_signals('signals')
+
+    ntimes = np.shape(time)[0]
+    nvars = len(opts.input_variables + opts.output_variables)
+
+    signals = breach.get_signals(ntimes, nvars, 'signals')
     trajectories = breach.signals_to_trajectories(time, signals)
 
     header = ['time'] + opts.input_variables + opts.output_variables

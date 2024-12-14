@@ -115,7 +115,10 @@ def find_counter_examples_aux(
 
     time = breach.get_time('time')
 
-    false_signals = breach.get_signals('signals')
+    ntimes = np.shape(time)[0]
+    nvars = len(opts.input_variables + opts.output_variables)
+
+    false_signals = breach.get_signals(ntimes, nvars, 'signals')
     scores = breach.get_obj_false('pb', false_signals)
 
     print(
@@ -138,7 +141,7 @@ def find_counter_examples_aux(
         for (t, params, score) in zip(false_trs, false_parameters, scores)
     ]
 
-    all_signals = breach.get_signals('all_signals')
+    all_signals = breach.get_signals(ntimes, nvars, 'all_signals')
     all_trs = breach.signals_to_trajectories(time, all_signals)
     all_parameters = breach.get_parameters('pb.BrSet_Logged', parameters)
 

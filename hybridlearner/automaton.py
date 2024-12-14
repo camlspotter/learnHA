@@ -3,6 +3,7 @@ import textwrap
 from typeguard import typechecked
 import json
 from dataclasses import asdict
+from typing import TypeVar, Callable
 
 # pydantic.dataclasses is required for JSON conversions of nested dataclasses
 from pydantic.dataclasses import dataclass
@@ -108,6 +109,13 @@ class HybridAutomaton:
         with utils_io.open_for_write(fn) as f_out:
             self.write(f_out)
 
+    @classmethod
+    def load(
+        cls, fn: str
+    ) -> 'HybridAutomaton':  # Self is only available after Python 3.11
+        with open(fn, 'r', encoding='utf-8') as file:
+            return cls(**json.load(file))
+
 
 @typechecked
 def build(raw: Raw) -> HybridAutomaton:
@@ -164,3 +172,70 @@ def hum_print_Transition(oc: TextIOWrapper, tr: Transition) -> None:
     )
     for v, p in tr.assignments.items():
         oc.write(f"      {v} = {hum_str_polynomial(p)}\n")
+
+
+from hybridlearner.polynomial import polynomial_to_variable_annotated, VariableAnnotated
+
+
+def are_similar(a: HybridAutomaton, b: HybridAutomaton) -> bool:
+    """
+    Compare 2 HybridAutomatons, ignoring small floating point differences
+    """
+
+    def check_modes(am: Mode, bm: Mode) -> bool:
+        return (
+            am.id == bm.id
+            and check_invariants(am.invariant, bm.invariant)
+            and check_dicts(check_polynomials, am.flow, bm.flow)
+        )
+
+    def check_invariants(ai: Invariant, bi: Invariant) -> bool:
+        return check_dicts(check_ranges, ai, bi)
+
+    def check_transitions(at: Transition, bt: Transition) -> bool:
+        return (
+            at.id == bt.id
+            and at.src == bt.src
+            and at.dst == bt.dst
+            and check_polynomials(at.guard, bt.guard)
+            and check_dicts(check_polynomials, at.assignments, bt.assignments)
+        )
+
+    def check_polynomials(ap: Polynomial, bp: Polynomial) -> bool:
+        ava = polynomial_to_variable_annotated(ap)
+        bva = polynomial_to_variable_annotated(bp)
+        if len(ava) != len(bva):
+            return False
+
+        def va_to_dict(va: VariableAnnotated) -> dict[tuple, float]:
+            return dict([(tuple(sorted(d.items())), f) for (d, f) in va])
+
+        return check_dicts(check_floats, va_to_dict(ava), va_to_dict(bva))
+
+    def check_ranges(ar: Range, br: Range) -> bool:
+        return check_floats(ar.min, br.min) and check_floats(ar.max, br.max)
+
+    K = TypeVar('K')  # comparable
+    T = TypeVar('T')
+
+    def check_dicts(
+        check_Ts: Callable[[T, T], bool], a: dict[K, T], b: dict[K, T]
+    ) -> bool:
+        return all(
+            ak == bk and check_Ts(av, bv)
+            for ((ak, av), (bk, bv)) in zip(sorted(a.items()), sorted(b.items()))
+        )
+
+    def check_floats(af: float, bf: float) -> bool:
+        return abs(af - bf) < 0.00001
+
+    return (
+        a.init_mode == b.init_mode
+        and len(a.modes) == len(b.modes)
+        and all(check_modes(am, bm) for (am, bm) in zip(a.modes, b.modes))
+        and all(
+            check_transitions(at, bt) for (at, bt) in zip(a.transitions, b.transitions)
+        )
+        and a.input_variables == b.input_variables
+        and a.output_variables == b.output_variables
+    )

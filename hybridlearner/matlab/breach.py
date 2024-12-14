@@ -16,12 +16,12 @@ from hybridlearner.slx.info import get_IOports
 # (1001 is the number of the frames)
 #
 # However, if only 1 counter example found, np.shape(signals_matlab) = (3, 1001)
-def fix_signals(signals: MATRIX) -> MATRIX:
+def fix_signals(ntimes: int, nvars: int, signals: MATRIX) -> MATRIX:
     match np.shape(signals):
         case (_, _, _):
             return signals
         case (0, 0):  # empty
-            return np.array([])
+            return np.zeros((0, nvars, ntimes))
         case (_, _):
             # Only 1 trajectory
             print(f'Fixing the dimension of singals of {np.shape(signals)}')
@@ -37,12 +37,12 @@ def get_time(var: str) -> MATRIX:
     return engine.getvar_matrix(var)[0]
 
 
-def get_signals(var: str) -> MATRIX:
+def get_signals(ntimes: int, nvars: int, var: str) -> MATRIX:
     """
     Get n*1 cell of nports*frames doubles when more than 1 sets of signals
     or nports*frame doubles when only 1 set of signals
     """
-    return fix_signals(engine.getvar_matrix(var))
+    return fix_signals(ntimes, nvars, engine.getvar_matrix(var))
 
 
 def signals_to_trajectories(time: MATRIX, signals: MATRIX) -> Trajectories:
@@ -58,8 +58,9 @@ def signals_to_trajectories(time: MATRIX, signals: MATRIX) -> Trajectories:
 # To workaround this issue, get_obj_false takes an argument of falsified signals.
 def get_obj_false(pb: str, signals: MATRIX) -> MATRIX:
     scores = np.array(engine.eval1(pb + '.obj_false'))
+    print(f'scores: {np.shape(scores)}  signals: {np.shape(signals)}')
     match np.shape(scores), np.shape(signals):
-        case (0, 0), (0,):  # empty!
+        case (0, 0), (0, _, _):  # empty!
             print('scores: empty:', scores)
             scores = np.array([])
         case (0, 0), (1, _, _):  # only 1 counter example, no score
@@ -110,6 +111,8 @@ def get_parameters(obj: str, parameters: list[str]) -> MATRIX:
     parameter_list = "{" + ",".join([f"'{p}'" for p in parameters]) + "}"
     md = engine.eval1(f'{obj}.GetParam({parameter_list})')
     a = np.array(md)
+
+    print(f'parameters {np.shape(a)}')
 
     res: MATRIX
     match np.shape(a):

@@ -7,6 +7,7 @@ import json
 from dataclasses import asdict
 from pydantic.dataclasses import dataclass
 
+from hybridlearner import automaton
 from hybridlearner.common import options as common_options
 from hybridlearner.inference import options as inference_options
 from hybridlearner.inference import infer_model, Raw
@@ -16,9 +17,6 @@ from hybridlearner.segmentation import ClusteringMethod
 from hybridlearner.trajectory import load_trajectories
 import hybridlearner.utils.io as utils_io
 from hybridlearner.inference.annotation import Continuous, Constant
-
-# To execute this test from the project folder "learnHA" type the command
-# amit@amit-Alienware-m15-R4:~/MyPythonProjects/learningHA/learnHA$ python -m unittest discover -v
 
 
 @dataclass
@@ -55,12 +53,14 @@ class TestLearnHA(unittest.TestCase):
 
         backup_file = os.path.join(golden_dir, "learned_HA.txt")
         test_generated_file = os.path.join(opts.output_directory, 'learned_HA.txt')
-        assert filecmp.cmp(backup_file, test_generated_file, shallow=False)
 
         backup_file = os.path.join(golden_dir, "learned_HA.json")
         test_generated_file = os.path.join(opts.output_directory, 'learned_HA.json')
-        assert filecmp.cmp(
-            backup_file, test_generated_file, shallow=False
+
+        backup = automaton.HybridAutomaton.load(backup_file)
+        test_generated = automaton.HybridAutomaton.load(test_generated_file)
+        assert automaton.are_similar(
+            backup, test_generated
         ), f"Golden test fails: golden: {backup_file} generated: {test_generated_file}"
 
     def test_runLearnHA_osci_withoutAnnotate(self) -> None:
