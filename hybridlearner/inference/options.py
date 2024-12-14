@@ -11,8 +11,6 @@ class Options(clustering_options.Options):
     output_directory: str
     ode_degree: int  # default=1
     guard_degree: int  # default=1
-    segmentation_error_tol: float  # default=0.01
-    segmentation_fine_error_tol: float  # default=0.01
     annotations: AnnotationDict
     is_invariant: bool  # default=True
     filter_last_segment: bool  # default=False
