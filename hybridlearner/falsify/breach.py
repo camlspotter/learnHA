@@ -127,8 +127,10 @@ def find_counter_examples_aux(
 
     time = breach.get_time('time')
 
-    false_original_signals = breach.get_signals('original_signals')
-    false_learned_signals = breach.get_signals('learned_signals')
+    ntimes = np.shape(time)[0]
+    nvars = len(opts.input_variables + opts.output_variables)
+    false_original_signals = breach.get_signals(ntimes, nvars, 'original_signals')
+    false_learned_signals = breach.get_signals(ntimes, nvars, 'learned_signals')
     false_original_trs = breach.signals_to_trajectories(time, false_original_signals)
     false_learned_trs = breach.signals_to_trajectories(time, false_learned_signals)
     scores = breach.get_obj_false('pb', false_original_signals)
@@ -136,7 +138,7 @@ def find_counter_examples_aux(
     false_parameters: MATRIX
 
     if false_original_trs == []:
-        false_parameters = np.array([])
+        false_parameters = np.zeros((0, len(parameters)))
         false_parameter_set = set([])
     else:
         # Matlab R2404b fails if falses is empty
@@ -171,8 +173,8 @@ def find_counter_examples_aux(
     assert np.shape(scores)[0] == np.shape(false_parameters)[0]
     assert len(parameters) == np.shape(false_parameters)[1]
 
-    all_original_signals = breach.get_signals('all_original_signals')
-    all_learned_signals = breach.get_signals('all_learned_signals')
+    all_original_signals = breach.get_signals(ntimes, nvars, 'all_original_signals')
+    all_learned_signals = breach.get_signals(ntimes, nvars, 'all_learned_signals')
     all_parameters = breach.get_parameters('pb.BrSet_Logged', parameters)
     all_original_trs = breach.signals_to_trajectories(time, all_original_signals)
     all_learned_trs = breach.signals_to_trajectories(time, all_learned_signals)
