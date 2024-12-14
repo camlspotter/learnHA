@@ -17,9 +17,7 @@ def add_argument_group(parser: argparse.ArgumentParser) -> None:
     group.add_argument(
         '--ode-solver-type', help='ODE solver type', type=OdeSolverType, required=True
     )
-    group.add_argument(
-        '--ode-solver', help='ODE solver (variable, fixed)', type=str, required=True
-    )
+    group.add_argument('--ode-solver', help='ODE solver', type=str, required=True)
     group.add_argument(
         '--invariant-mode',
         help='Invariant mode: (0: Both, 1: Output, 2: None)',
