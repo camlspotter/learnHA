@@ -118,11 +118,7 @@ def embed_system(
         )
 
     out.write(f"""\
-    % arrangeSystem fails if nothing is modified in R2024b
-    try
-        Simulink.BlockDiagram.arrangeSystem('{embeded}');
-    catch
-    end
+    Simulink.BlockDiagram.arrangeSystem('{embeded}', FullLayout='true');
     """)
 
 

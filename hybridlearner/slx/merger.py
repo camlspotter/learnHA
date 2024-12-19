@@ -101,11 +101,7 @@ def merge_system(
             Simulink.BlockDiagram.copyContentsToSubsystem('{b}', '{merged}/{b}');
             
             % Arrange the subsystem positions automatically
-            % arrangeSystem fails if nothing is modified in R2024b
-            try
-                Simulink.BlockDiagram.arrangeSystem('{merged}');
-            catch
-            end
+            Simulink.BlockDiagram.arrangeSystem('{merged}', FullLayout='true');
             
             %% Connect ports
             
@@ -221,11 +217,7 @@ def merge_system(
         )
 
     out.write(f"""\
-    % arrangeSystem fails if nothing is modified in R2024b
-    try
-        Simulink.BlockDiagram.arrangeSystem('{merged}');
-    catch
-    end
+    Simulink.BlockDiagram.arrangeSystem('{merged}', FullLayout='true');
     """)
 
 

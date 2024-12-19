@@ -126,16 +126,8 @@ def compile(
     wd(
         f"""\
         %%% Rearrange object positions automatically %%%
-
-        % arrangeSystem fails if nothing is modified in R2024b
-        try
-            Simulink.BlockDiagram.arrangeSystem('{simulink_model_name}');
-        catch
-        end
-        try
-            Simulink.BlockDiagram.arrangeSystem('{simulink_model_name}/Chart');
-        catch
-        end
+        Simulink.BlockDiagram.arrangeSystem('{simulink_model_name}', FullLayout='true');
+        Simulink.BlockDiagram.arrangeSystem('{simulink_model_name}/Chart', FullLayout='true');
 
         %%% Closing %%%
 
@@ -574,7 +566,7 @@ def addLoopTransitions(
 ) -> None:
     w, wd = writers(out)
 
-    pos_x += 10
+    pos_x += 50
     next_height += 10
 
     loc_id = sourceLoc + 1
