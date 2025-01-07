@@ -1,50 +1,78 @@
-## ./tests/test_bball_breach.sh
+# Old tests
 
-Working.
+## Bball
 
-## ./tests/test_cell_breach.sh
+- test_bball.sh: working
+- test_bball_breach.sh: working
+- test_bball_by_spec.sh: working
 
-Working.
+## Cell
 
-## ./tests/test_engine_breach.sh
+- test_cell.sh: working
+- test_cell_breach.sh: working
 
-Working.
+## Engine
 
-## ./tests/test_oscillator_breach.sh
+- test_engine.sh: working
+- test_engine_breach.sh: working
 
-Working.
+## Oscillator
 
-## ./tests/test_twotank_breach.sh 
+- test_oscillator.sh: working
+- test_oscillator_breach.sh: working
+
+## Two tanks
+
+- test_twotank.sh: working
+- test_twotank_breach.sh: working
+
+## Vandel
+
+Not a hybrid model. A test of higher dimension ODEs.
+
+- vandel/vandel.sh: working
+- vandel/vandel_loop.sh: working
+
+## Session
+
+Testing smaller tools
+
+- test_session.sh: working
+
+# Newer tests
+
+## Cars
+
+Car racing with 4, 1, 2 cars
+
+- test_car.sh: working but the result is not good
+- test_cars1.sh: working but the result is not good
+- test_cars1_breach.sh: working but the result is not good
+- test_cars1_with_v.sh: working but the result is not good
+- test_cars2.sh: working but the result is not good
+- test_cars2_with_v.sh: working but the result is not good
+
+## Chopper
+
+Using ME's model not included in this repository
+
+- test_chopper0_1.sh: fails at simulation
 
 ```
-Error in falsify_learned_model (line 150)
-pb.solve();
-
-Error in run (line 91)
-evalin('caller', strcat(script, ';'));
-Suggested Actions:
-      You can suppress the diagnostics and continue simulation without bracketing these zero crossings by switching the  zero crossing detection algorithm to 'Adaptive' and setting the Ignored Zero Crossings diagnostic to 'none'. - Fix
-      Disable zero-crossing detection on the blocks listed above that caused the most events.
- - Show complete stack trace
-
-Traceback (most recent call last):
-  File "/home/jun/hal/HybridLearner/src/learnHA/loop_breach.py", line 152, in <module>
-    result, new_tried_parameters, new_tried_obj_log = find_counter_examples(
-  File "/home/jun/hal/HybridLearner/src/learnHA/hybridlearner/falsify/breach.py", line 32, in find_counter_examples
-    engine.run(script_fn)
-  File "/home/jun/hal/HybridLearner/src/learnHA/hybridlearner/matlab.py", line 24, in run
-    _eng.run(fn, nargout=0)  # nargout=0 is required since x.m returns nothing.
-  File "/home/jun/.local/share/virtualenvs/learnHA-q5-VROtl/lib/python3.10/site-packages/matlab/engine/matlabengine.py", line 71, in __call__
-    _stderr, feval=True).result()
-  File "/home/jun/.local/share/virtualenvs/learnHA-q5-VROtl/lib/python3.10/site-packages/matlab/engine/futureresult.py", line 67, in result
-    return self.__future.result(timeout)
-  File "/home/jun/.local/share/virtualenvs/learnHA-q5-VROtl/lib/python3.10/site-packages/matlab/engine/fevalfuture.py", line 82, in result
     self._result = pythonengine.getFEvalResult(self._future,self._nargout, None, out=self._out, err=self._err)
-matlab.engine.MatlabExecutionError: Simulink will stop the simulation of model 'merged_breach' because the 1 zero crossing signal(s) identified below caused 1000 consecutive zero crossing events in time interval between 3.1554436208840472e-30 and 3.1585990645049313e-27.
- --------------------------------------------------------------------------------
-Number of consecutive zero-crossings : 1000
-           Zero-crossing signal name : Sf0
-                          Block type : S-Function
-                          Block path : 'merged_breach/twoTank/Chart'
---------------------------------------------------------------------------------
+matlab.engine.MatlabExecutionError: ['chopper0_1/Solver Configuration']: 整合的な状態とモードについて求解する、時間 0.0026 での過渡的な初期化が収束しませんでした。
 ```
+
+We may fix it with other solvers than auto.
+
+## Transport delay
+
+- test_transport_delay.sh: fails because the model does not follow the requirements for HybridLearner.
+
+```
+Error: The first output of Ti 100.0 is different from the one specified 0.0.
+       The initial value variable a1 might not be used properly.
+```
+
+
+
